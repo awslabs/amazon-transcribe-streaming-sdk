@@ -5,17 +5,15 @@ from transcribe import model
 
 @pytest.fixture
 def audio_stream():
-    audio_chunk = model.AudioChunk(b"test")
-    audio_event = model.AudioEvent(audio_chunk, True, True)
-    return model.AudioStream(audio_event, True)
+    audio_event = model.AudioEvent(audio_chunk=b"test",
+            event_payload=True, event=True)
+    return model.AudioStream(audio_event, eventstream=True)
 
 
 def test_StartStreamTranscriptionRequest_serialization(audio_stream):
-    lang_code = model.LanguageCode("en-US")
-    sample_rate = model.MediaSampleRateHertz(9000)
-    encoding = model.MediaEncoding("pcm")
     req = model.StartStreamTranscriptionRequest(
-        lang_code, sample_rate, encoding, audio_stream
+            language_code="en-US", media_sample_rate_hz=9000,
+            media_encoding="pcm", audio_stream=audio_stream
     )
     headers, body = req.serialize()
 
