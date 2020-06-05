@@ -1,3 +1,4 @@
 pytest<6.0
+pytest-asyncio
 mypy
 black

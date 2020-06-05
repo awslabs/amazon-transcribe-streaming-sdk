@@ -23,12 +23,12 @@ def find_version(*file_paths):
 
 
 requires = [
-        # TODO
+    'awscrt'
 ]
 
 setup(
-    name='amazon-transcribe-streaming-sdk',
-    version=find_version("amazon-transcribe-streaming", "__init__.py"),
+    name='transcribe',
+    version=find_version("transcribe", "__init__.py"),
     description='Async Python SDK for Amazon Transcribe Streaming',
     long_description=open('README.rst').read(),
     author='Amazon Web Services',

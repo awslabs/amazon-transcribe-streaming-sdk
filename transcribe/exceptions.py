@@ -16,6 +16,10 @@ class SDKError(Exception):
     """Base Error for Amazon Transcribe Streaming SDK"""
 
 
+class HTTPException(SDKError):
+    """Base error for HTTP related exceptions"""
+
+
 class ModeledException(SDKError):
     """Error defined in provided service model"""
 
