@@ -4,7 +4,6 @@ from transcribe.model import Item, ItemList
 
 
 class TestModel:
-
     def test_custom_list_class(self):
         item_one = Item(50.1, 50.5, "pronunciation", "hi", False)
         item_two = Item(1000, 1001, "punctuation", "!", False)
