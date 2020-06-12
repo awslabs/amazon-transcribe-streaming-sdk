@@ -1,4 +1,4 @@
-from collections import MutableMapping
+from collections.abc import MutableMapping
 from io import BufferedIOBase, BytesIO
 from typing import Dict, List, Optional, Tuple, Union
 import json

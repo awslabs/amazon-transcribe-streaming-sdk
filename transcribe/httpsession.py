@@ -12,7 +12,7 @@ from transcribe.exceptions import HTTPException
 HeadersList = List[Tuple[str, str]]
 
 
-class HTTPResponse(object):
+class AwsCrtHttpResponse(object):
     def __init__(self):
         self._stream = None
         self._status_code_future: Future[int] = Future()
@@ -23,7 +23,7 @@ class HTTPResponse(object):
 
     def _set_stream(self, stream: http.HttpClientStream):
         if self._stream is not None:
-            raise HTTPException("Stream already set on HTTPResponse object")
+            raise HTTPException("Stream already set on AwsCrtHttpResponse object")
         self._stream = stream
         self._stream.completion_future.add_done_callback(self._on_complete)
         self._stream.activate()
@@ -149,7 +149,7 @@ class AwsCrtHttpSessionManager(object):
         method: str = "GET",
         headers: Optional[HeadersList] = None,
         body: Union[bytes, BytesIO, None] = None,
-    ) -> HTTPResponse:
+    ) -> AwsCrtHttpResponse:
         if isinstance(headers, list):
             headers = http.HttpHeaders(headers)
         if isinstance(body, bytes):
@@ -164,7 +164,7 @@ class AwsCrtHttpSessionManager(object):
         )
 
         connection = await self._get_connection(parsed_url)
-        response = HTTPResponse()
+        response = AwsCrtHttpResponse()
         stream = connection.request(
             request, response._on_headers, response._on_body,
         )
