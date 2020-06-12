@@ -16,9 +16,13 @@ class TestRequest:
 
     def test_request_with_basic_args(self):
         req = Request(
-            endpoint="https://aws.amazon.com", path="/transcribe",
-            method="HEAD", headers={"User-Agent": "test-transcribe-0.0.1"},
-            body="Test body", params={"test": "value"})
+            endpoint="https://aws.amazon.com",
+            path="/transcribe",
+            method="HEAD",
+            headers={"User-Agent": "test-transcribe-0.0.1"},
+            body="Test body",
+            params={"test": "value"},
+        )
         assert req.endpoint == "https://aws.amazon.com"
         assert req.path == "/transcribe"
         assert req.method == "HEAD"
@@ -28,29 +32,53 @@ class TestRequest:
 
     def test_request_preparation(self):
         req = Request(
-              endpoint="https://aws.amazon.com", path="/transcribe",
-              method="hEaD", headers={"User-Agent": "test-transcribe-0.0.1"},
-              body="Test body", params={"test": "value"})
+            endpoint="https://aws.amazon.com",
+            path="/transcribe",
+            method="hEaD",
+            headers={"User-Agent": "test-transcribe-0.0.1"},
+            body="Test body",
+            params={"test": "value"},
+        )
         prep = req.prepare()
         assert prep.endpoint == "https://aws.amazon.com"
         assert prep.path == "/transcribe"
         assert prep.uri == "https://aws.amazon.com/transcribe?test=value"
         assert prep.method == "HEAD"
-        assert prep.headers == HeadersDict({"User-Agent":
-            "test-transcribe-0.0.1"})
+        assert prep.headers == HeadersDict(
+            {"User-Agent": "test-transcribe-0.0.1"}
+        )
         assert prep.body.read() == BytesIO(b"Test body").read()
         assert prep.query == "test=value"
-
 
     @pytest.mark.parametrize(
         "endpoint,path,params,expected",
         [
-            ("https://example.com", "/", {"test":"test"}, "https://example.com/?test=test"),
-            ("https://example.com/", "/transcribe", None, "https://example.com/transcribe"),
-            ("https://example.com", "transcribe", None, "https://example.com/transcribe"),
-            ("https://example.com", "/", {"a":"b","c":"d"}, "https://example.com/?a=b&c=d"),
-            ("https://example.com", "", None, "https://example.com/")
-        ]
+            (
+                "https://example.com",
+                "/",
+                {"test": "test"},
+                "https://example.com/?test=test",
+            ),
+            (
+                "https://example.com/",
+                "/transcribe",
+                None,
+                "https://example.com/transcribe",
+            ),
+            (
+                "https://example.com",
+                "transcribe",
+                None,
+                "https://example.com/transcribe",
+            ),
+            (
+                "https://example.com",
+                "/",
+                {"a": "b", "c": "d"},
+                "https://example.com/?a=b&c=d",
+            ),
+            ("https://example.com", "", None, "https://example.com/"),
+        ],
     )
     def test_prepared_request_uri(self, endpoint, path, params, expected):
         if params is None:
@@ -74,7 +102,7 @@ class TestHeadersDict:
         headers = {
             "user-agent": "test-0.0.1",
             "content-type": "application/json",
-            "notAReal": "heaDer"
+            "notAReal": "heaDer",
         }
         hdict = HeadersDict()
         hdict.update(headers)
@@ -87,11 +115,12 @@ class TestHeadersDict:
             ("header", "test", "header", "test"),
             (" header", "test", "header", "test"),
             ("header", " test ", "header", "test"),
-            ("header\r\n", "\ntest\r", "header", "test")
-        ]
+            ("header\r\n", "\ntest\r", "header", "test"),
+        ],
     )
-    def test_headers_dict_validation(self, key, value, expected_key,
-            expected_value):
+    def test_headers_dict_validation(
+        self, key, value, expected_key, expected_value
+    ):
         hdict = HeadersDict()
         hdict[key] = value
         assert hdict[expected_key] == expected_value

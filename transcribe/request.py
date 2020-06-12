@@ -10,7 +10,13 @@ class Request:
     BODY_TYPE = Union[BytesIO, BufferedIOBase]
 
     def __init__(
-        self, endpoint, path="/", method="GET", headers=None, body=None, params=None
+        self,
+        endpoint,
+        path="/",
+        method="GET",
+        headers=None,
+        body=None,
+        params=None,
     ):
         self.endpoint: str = endpoint
         self.path: str = path
@@ -156,7 +162,9 @@ class HeadersDict(MutableMapping):
         self, key: str, value: HEADER_VALUE_TYPE
     ) -> Tuple[str, HEADER_VALUE_TYPE]:
         if key is None:
-            raise ValidationException("Unexpected key (None) was provided in headers")
+            raise ValidationException(
+                "Unexpected key (None) was provided in headers"
+            )
         if isinstance(value, (tuple, list)):
             return self._validate_header_list(key, value)
         return self._validate_str(key), self._validate_str(value)

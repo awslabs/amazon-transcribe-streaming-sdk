@@ -20,35 +20,42 @@ class HTTPException(SDKError):
     """Base error for HTTP related exceptions"""
 
 
-class ModeledException(SDKError):
-    """Error defined in provided service model"""
+class ServiceException(SDKError):
+    """Errors returned by the service"""
 
 
-class BadRequestException(ModeledException):
+class UnknownServiceException(ServiceException):
+    def __init__(self, status_code, error_code, message):
+        self.status_code: int = status_code
+        self.error_code: int = error_code
+        self.message: str = message
+
+
+class BadRequestException(ServiceException):
     def __init__(self, message):
         self.message: str = message
         self.status_code: int = 400
 
 
-class ConflictException(ModeledException):
+class ConflictException(ServiceException):
     def __init__(self, message):
         self.message: str = message
         self.status_code = 409
 
 
-class InternalFailureException(ModeledException):
+class InternalFailureException(ServiceException):
     def __init__(self, message):
         self.message: str = message
         self.status_code: int = 500
 
 
-class LimitExceededException(ModeledException):
+class LimitExceededException(ServiceException):
     def __init__(self, message):
         self.message: str = message
         self.error: int = 429
 
 
-class ServiceUnavailableException(ModeledException):
+class ServiceUnavailableException(ServiceException):
     def __init__(self, message):
         self.message: str = message
         self.status_code: int = 503

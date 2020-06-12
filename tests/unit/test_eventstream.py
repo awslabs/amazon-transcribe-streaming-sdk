@@ -33,7 +33,9 @@ from transcribe.eventstream import (
 EMPTY_MESSAGE = (
     b"\x00\x00\x00\x10\x00\x00\x00\x00\x05\xc2H\xeb}\x98\xc8\xff",
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x10, headers_length=0, crc=0x05C248EB,),
+        prelude=MessagePrelude(
+            total_length=0x10, headers_length=0, crc=0x05C248EB,
+        ),
         headers={},
         payload=b"",
         crc=0x7D98C8FF,
@@ -46,7 +48,9 @@ INT32_HEADER = (
         b"{'foo':'bar'}\xd3\x89\x02\x85"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x2B, headers_length=0x0E, crc=0x348BEC7B,),
+        prelude=MessagePrelude(
+            total_length=0x2B, headers_length=0x0E, crc=0x348BEC7B,
+        ),
         headers={"event-id": 0x0000A00C},
         payload=b"{'foo':'bar'}",
         crc=0xD3890285,
@@ -56,7 +60,9 @@ INT32_HEADER = (
 PAYLOAD_NO_HEADERS = (
     b"\x00\x00\x00\x1d\x00\x00\x00\x00\xfdR\x8cZ{'foo':'bar'}\xc3e96",
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x1D, headers_length=0, crc=0xFD528C5A,),
+        prelude=MessagePrelude(
+            total_length=0x1D, headers_length=0, crc=0xFD528C5A,
+        ),
         headers={},
         payload=b"{'foo':'bar'}",
         crc=0xC3653936,
@@ -69,7 +75,9 @@ PAYLOAD_ONE_STR_HEADER = (
         b"application/json{'foo':'bar'}\x8d\x9c\x08\xb1"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x3D, headers_length=0x20, crc=0x07FD8396,),
+        prelude=MessagePrelude(
+            total_length=0x3D, headers_length=0x20, crc=0x07FD8396,
+        ),
         headers={"content-type": "application/json"},
         payload=b"{'foo':'bar'}",
         crc=0x8D9C08B1,
@@ -86,7 +94,9 @@ ALL_HEADERS_TYPES = (
         b"\x63\x35\x36\x71"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x62, headers_length=0x52, crc=0x03B5CB9C,),
+        prelude=MessagePrelude(
+            total_length=0x62, headers_length=0x52, crc=0x03B5CB9C,
+        ),
         headers={
             "0": True,
             "1": False,
@@ -113,7 +123,9 @@ ERROR_EVENT_MESSAGE = (
         b"\x6b\x6c\xea\x3d"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x52, headers_length=0x42, crc=0xBF23637E,),
+        prelude=MessagePrelude(
+            total_length=0x52, headers_length=0x42, crc=0xBF23637E,
+        ),
         headers={
             ":message-type": "error",
             ":error-code": "code",

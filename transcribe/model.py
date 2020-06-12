@@ -132,7 +132,7 @@ class StartStreamTranscriptionResponse:
         media_encoding=None,
         vocabulary_name=None,
         session_id=None,
-        trascript_result_stream=None,
+        transcript_result_stream=None,
         vocab_filter_name=None,
         vocab_filter_method=None,
     ):
@@ -147,18 +147,6 @@ class StartStreamTranscriptionResponse:
         ] = transcript_result_stream
         self.vocab_filter_name: Optional[str] = vocab_filter_name
         self.vocab_filter_method: Optional[str] = vocab_filter_method
-
-    def deserialize(self, Response):
-        """
-        x-amzn-transcribe-language-code -> language_code
-        x-amzn-transcribe-sample-rate -> media_sample_rate_hz
-        x-amzn-transcribe-media-encoding -> media_encoding
-        x-amzn-transcribe-vocabulary-name -> vocabulary_name
-        x-amzn-transcribe-session-id -> session_id
-        x-amzn-transcribe-vocabulary-filter-name -> vocab_filter_name
-        x-amzn-transcribe-vocabulary-filter-method -> vocab_filter_method
-        """
-        raise NotImplemented
 
 
 class Transcript:
