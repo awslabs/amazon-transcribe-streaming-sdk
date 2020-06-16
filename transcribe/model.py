@@ -110,18 +110,6 @@ class StartStreamTranscriptionRequest:
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method
 
-    def serialize(self) -> Tuple[Dict, AudioStream]:
-        headers = {
-            "x-amzn-transcribe-language-code": self.language_code,
-            "x-amzn-transcribe-sample-rate": self.media_sample_rate_hz,
-            "x-amzn-transcribe-media-encoding": self.media_encoding,
-            "x-amzn-transcribe-vocabulary-name": self.vocabulary_name,
-            "x-amzn-transcribe-session-id": self.session_id,
-            "x-amzn-transcribe-vocabulary-filter-method": self.vocab_filter_method,
-        }
-        body = self.audio_stream
-        return headers, body
-
 
 class StartStreamTranscriptionResponse:
     def __init__(

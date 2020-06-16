@@ -68,8 +68,8 @@ class Request:
         elif not isinstance(body, BufferedIOBase):
             type_ = type(body)
             raise ValidationException(
-                "Body provided is an unexpected type ({type_}). Request was "
-                "expecting bytes, str, or file-like body."
+                f"Body provided is an unexpected type ({type_}). Request was "
+                f"expecting bytes, str, or file-like body."
             )
 
         return body
@@ -167,4 +167,6 @@ class HeadersDict(MutableMapping):
             )
         if isinstance(value, (tuple, list)):
             return self._validate_header_list(key, value)
+        elif not isinstance(value, str) and value is not None:
+            value = str(value)
         return self._validate_str(key), self._validate_str(value)
