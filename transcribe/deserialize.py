@@ -26,7 +26,7 @@ from transcribe.exceptions import (
 )
 
 
-class TranscribeStreamingResponseParser(object):
+class TranscribeStreamingResponseParser:
     """Converts raw HTTP responses into modeled objects and exceptions.
 
     This class is not public and must not be consumed outside of this project.

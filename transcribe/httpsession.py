@@ -12,7 +12,7 @@ from transcribe.exceptions import HTTPException
 HeadersList = List[Tuple[str, str]]
 
 
-class AwsCrtHttpResponse(object):
+class AwsCrtHttpResponse:
     def __init__(self):
         self._stream = None
         self._status_code_future: Future[int] = Future()
@@ -75,7 +75,7 @@ class AwsCrtHttpResponse(object):
                 future.set_result(b"")
 
 
-class AwsCrtHttpSessionManager(object):
+class AwsCrtHttpSessionManager:
     _HTTP_PORT = 80
     _HTTPS_PORT = 443
     HTTP_CONNECTION_CLS = http.HttpClientConnection
