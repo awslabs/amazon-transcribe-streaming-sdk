@@ -6,17 +6,90 @@ import json
 from transcribe.exceptions import ValidationException
 
 
+class _HeaderKey:
+    def __init__(self, key: str):
+        self._key = key
+        self._lower = key.lower()
+
+    def __hash__(self):
+        return hash(self._lower)
+
+    def __eq__(self, other):
+        return isinstance(other, _HeaderKey) and self._lower == other._lower
+
+    def __str__(self):
+        return self._key
+
+    def __repr__(self):
+        return repr(self._key)
+
+
+class HeadersDict(MutableMapping):
+    """A case-insenseitive dictionary to represent HTTP headers."""
+
+    LIST_TYPE = Union[Tuple[str, ...], List[str]]
+    HEADER_VALUE_TYPE = Union[str, LIST_TYPE]
+
+    def __init__(self, *args, **kwargs):
+        self._dict: Dict = {}
+        self.update(*args, **kwargs)
+
+    def __setitem__(self, key: str, value: HEADER_VALUE_TYPE):
+        key, value = self._validate_header(key, value)
+        self._dict[_HeaderKey(key)] = value
+
+    def __getitem__(self, key: str):
+        return self._dict[_HeaderKey(key)]
+
+    def __delitem__(self, key: str):
+        del self._dict[_HeaderKey(key)]
+
+    def __iter__(self):
+        return (str(key) for key in self._dict)
+
+    def __len__(self):
+        return len(self._dict)
+
+    def __repr__(self):
+        return repr(self._dict)
+
+    def copy(self) -> "HeadersDict":
+        return HeadersDict(self.items())
+
+    def as_list(self) -> List[Tuple[str, str]]:
+        return [(str(k), v) for k, v in self._dict.items() if v is not None]
+
+    def _validate_str(self, string: str) -> str:
+        if string is None:
+            return string
+        # newline characters are prohibited in headers
+        for seq in ("\r\n", "\r", "\n"):
+            string = string.replace(seq, "")
+        return string.strip(" ")
+
+    def _validate_header_list(
+        self, key: str, values: LIST_TYPE
+    ) -> Tuple[str, HEADER_VALUE_TYPE]:
+        value_list = [self._validate_str(v) for v in values if v is not None]
+        return self._validate_str(key), ";".join(value_list)
+
+    def _validate_header(
+        self, key: str, value: HEADER_VALUE_TYPE
+    ) -> Tuple[str, HEADER_VALUE_TYPE]:
+        if key is None:
+            raise ValidationException("Unexpected key (None) was provided in headers")
+        if isinstance(value, (tuple, list)):
+            return self._validate_header_list(key, value)
+        elif not isinstance(value, str) and value is not None:
+            value = str(value)
+        return self._validate_str(key), self._validate_str(value)
+
+
 class Request:
     BODY_TYPE = Union[BytesIO, BufferedIOBase]
 
     def __init__(
-        self,
-        endpoint,
-        path="/",
-        method="GET",
-        headers=None,
-        body=None,
-        params=None,
+        self, endpoint, path="/", method="GET", headers=None, body=None, params=None,
     ):
         self.endpoint: str = endpoint
         self.path: str = path
@@ -49,7 +122,7 @@ class Request:
                 query_list.append(f"{k}={v}")
         return "&".join(query_list)
 
-    def prepare_headers(self) -> "HeadersDict":
+    def prepare_headers(self) -> HeadersDict:
         prepared_headers = HeadersDict()
         prepared_headers.update(self.headers)
         return prepared_headers
@@ -80,7 +153,7 @@ class PreparedRequest:
         self.endpoint: str = endpoint
         self.path: str = path
         self.method: str = method
-        self.headers: Dict = headers
+        self.headers: HeadersDict = headers
         self.body: BytesIO = body
         self.query: str = query_str
 
@@ -92,81 +165,3 @@ class PreparedRequest:
         if self.query:
             output_uri = "?".join([output_uri, self.query])
         return output_uri
-
-
-class _HeaderKey:
-    def __init__(self, key: str):
-        self._key = key
-        self._lower = key.lower()
-
-    def __hash__(self):
-        return hash(self._lower)
-
-    def __eq__(self, other):
-        return isinstance(other, _HeaderKey) and self._lower == other._lower
-
-    def __str__(self):
-        return self._key
-
-    def __repr__(self):
-        return repr(self._key)
-
-
-class HeadersDict(MutableMapping):
-    """A case-insenseitive dictionary to represent HTTP headers. """
-
-    LIST_TYPE = Union[Tuple[str, ...], List[str]]
-    HEADER_VALUE_TYPE = Union[str, LIST_TYPE]
-
-    def __init__(self, *args, **kwargs):
-        self._dict: Dict = {}
-        self.update(*args, **kwargs)
-
-    def __setitem__(self, key: str, value: HEADER_VALUE_TYPE):
-        key, value = self._validate_header(key, value)
-        self._dict[_HeaderKey(key)] = value
-
-    def __getitem__(self, key: str):
-        return self._dict[_HeaderKey(key)]
-
-    def __delitem__(self, key: str):
-        del self._dict[_HeaderKey(key)]
-
-    def __iter__(self):
-        return (str(key) for key in self._dict)
-
-    def __len__(self):
-        return len(self._dict)
-
-    def __repr__(self):
-        return repr(self._dict)
-
-    def copy(self) -> "HeadersDict":
-        return HeadersDict(self.items())
-
-    def _validate_str(self, string: str) -> str:
-        if string is None:
-            return string
-        # newline characters are prohibited in headers
-        for seq in ("\r\n", "\r", "\n"):
-            string = string.replace(seq, "")
-        return string.strip(" ")
-
-    def _validate_header_list(
-        self, key: str, values: LIST_TYPE
-    ) -> Tuple[str, HEADER_VALUE_TYPE]:
-        value_list = [self._validate_str(v) for v in values if v is not None]
-        return self._validate_str(key), ";".join(value_list)
-
-    def _validate_header(
-        self, key: str, value: HEADER_VALUE_TYPE
-    ) -> Tuple[str, HEADER_VALUE_TYPE]:
-        if key is None:
-            raise ValidationException(
-                "Unexpected key (None) was provided in headers"
-            )
-        if isinstance(value, (tuple, list)):
-            return self._validate_header_list(key, value)
-        elif not isinstance(value, str) and value is not None:
-            value = str(value)
-        return self._validate_str(key), self._validate_str(value)

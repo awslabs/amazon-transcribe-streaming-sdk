@@ -1,7 +1,10 @@
 from io import BytesIO
-from typing import List, Union
+from typing import Dict, List, Union
+from urllib.parse import urlsplit
 
+from transcribe import __version__ as version
 from transcribe.model import StartStreamTranscriptionRequest
+from transcribe.exceptions import ValidationException
 from transcribe.request import PreparedRequest, Request
 
 REQUEST_TYPE = Union[Request, PreparedRequest]
@@ -17,6 +20,19 @@ class Serializer:
     def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
         """Serialize parameters into an HTTP request."""
         raise NotImplementedError("serialize_to_request")
+
+    def _add_required_headers(self, headers: Dict[str, str]):
+        urlparts = urlsplit(self.endpoint)
+        if not urlparts.hostname:
+            raise ValidationException(
+                "Unexpected endpoint ({self.endpoint}) provided to serializer"
+            )
+        headers.update(
+            {
+                "user-agent": f"transcribe-streaming-sdk-{version}",
+                "host": urlparts.hostname,
+            }
+        )
 
 
 class TranscribeStreamingRequestSerializer(Serializer):
@@ -39,6 +55,8 @@ class TranscribeStreamingRequestSerializer(Serializer):
             "x-amzn-transcribe-session-id": self.request_shape.session_id,
             "x-amzn-transcribe-vocabulary-filter-method": self.request_shape.vocab_filter_method,
         }
+        self._add_required_headers(headers)
+
         # TODO: We need to resolve how the model goes from AudioStream ->
         # EventStream -> Bytes
         body = BytesIO(self.request_shape.audio_stream.audio_event.audio_chunk)
