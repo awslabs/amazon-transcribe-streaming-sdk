@@ -14,6 +14,8 @@
 
 from mock import Mock
 import pytest
+import uuid
+import datetime
 
 from transcribe.eventstream import (
     EventStreamMessage,
@@ -28,6 +30,11 @@ from transcribe.eventstream import (
     EventStream,
     NoInitialResponseError,
     EventStreamError,
+    EventStreamMessageSerializer,
+    Int8HeaderValue,
+    Int16HeaderValue,
+    Int32HeaderValue,
+    Int64HeaderValue,
 )
 
 EMPTY_MESSAGE = (
@@ -42,19 +49,72 @@ EMPTY_MESSAGE = (
     ),
 )
 
-INT32_HEADER = (
+INT8_HEADER = (
     (
-        b"\x00\x00\x00+\x00\x00\x00\x0e4\x8b\xec{\x08event-id\x04\x00\x00\xa0\x0c"
-        b"{'foo':'bar'}\xd3\x89\x02\x85"
+        b"\x00\x00\x00\x17\x00\x00\x00\x07)\x86\x01X\x04"
+        b"byte\x02\xff\xc2\xf8i\xdc"
     ),
     EventStreamMessage(
         prelude=MessagePrelude(
-            total_length=0x2B, headers_length=0x0E, crc=0x348BEC7B,
+            total_length=0x17,
+            headers_length=0x7,
+            crc=0x29860158,
         ),
-        headers={"event-id": 0x0000A00C},
-        payload=b"{'foo':'bar'}",
-        crc=0xD3890285,
+        headers={'byte': -1},
+        payload=b'',
+        crc=0xc2f869dc,
+    )
+)
+
+INT16_HEADER = (
+    (
+        b"\x00\x00\x00\x19\x00\x00\x00\tq\x0e\x92>\x05"
+        b"short\x03\xff\xff\xb2|\xb6\xcc"
     ),
+    EventStreamMessage(
+        prelude=MessagePrelude(
+            total_length=0x19,
+            headers_length=0x9,
+            crc=0x710e923e,
+        ),
+        headers={'short': -1},
+        payload=b'',
+        crc=0xb27cb6cc,
+    )
+)
+
+INT32_HEADER = (
+    (
+        b"\x00\x00\x00\x1d\x00\x00\x00\r\x83\xe3\xf0\xe7\x07"
+        b"integer\x04\xff\xff\xff\xff\x8b\x8e\x12\xeb"
+    ),
+    EventStreamMessage(
+        prelude=MessagePrelude(
+            total_length=0x1D,
+            headers_length=0xD,
+            crc=0x83e3f0e7,
+        ),
+        headers={'integer': -1},
+        payload=b'',
+        crc=0x8b8e12eb,
+    )
+)
+
+INT64_HEADER = (
+    (
+        b"\x00\x00\x00\x1e\x00\x00\x00\x0e]J\xdb\x8d\x04"
+        b"long\x05\xff\xff\xff\xff\xff\xff\xff\xffK\xc22\xda"
+    ),
+    EventStreamMessage(
+        prelude=MessagePrelude(
+            total_length=0x1E,
+            headers_length=0xE,
+            crc=0x5d4adb8d,
+        ),
+        headers={'long': -1},
+        payload=b'',
+        crc=0x4bc232da,
+    )
 )
 
 PAYLOAD_NO_HEADERS = (
@@ -139,7 +199,10 @@ ERROR_EVENT_MESSAGE = (
 # Tuples of encoded messages and their expected decoded output
 POSITIVE_CASES = [
     EMPTY_MESSAGE,
+    INT8_HEADER,
+    INT16_HEADER,
     INT32_HEADER,
+    INT64_HEADER,
     PAYLOAD_NO_HEADERS,
     PAYLOAD_ONE_STR_HEADER,
     ALL_HEADERS_TYPES,
@@ -296,10 +359,11 @@ def test_message_prelude_properties():
 
 
 def test_message_to_response_dict():
-    response_dict = INT32_HEADER[1].to_response_dict()
-    assert response_dict["status_code"] == 200
-    assert response_dict["headers"] == {"event-id": 0x0000A00C}
-    assert response_dict["body"] == b"{'foo':'bar'}"
+    response_dict = PAYLOAD_ONE_STR_HEADER[1].to_response_dict()
+    assert response_dict['status_code'] == 200
+    expected_headers = {'content-type': 'application/json'}
+    assert response_dict['headers'] == expected_headers
+    assert response_dict['body'] == b"{'foo':'bar'}"
 
 
 def test_message_to_response_dict_error():
@@ -324,6 +388,12 @@ def test_unpack_uint32():
     (value, bytes_consumed) = DecodeUtils.unpack_uint32(b"\xDE\xAD\xBE\xEF")
     assert bytes_consumed == 4
     assert value == 0xDEADBEEF
+
+
+def test_unpack_int8():
+    (value, bytes_consumed) = DecodeUtils.unpack_int8(b'\xFE')
+    assert bytes_consumed == 1
+    assert value == -2
 
 
 def test_unpack_int16():
@@ -452,3 +522,102 @@ def test_event_stream_initial_response_no_event():
     with pytest.raises(NoInitialResponseError):
         event_stream = EventStream(raw_stream, DummyParser())
         event_stream.get_initial_response()
+
+
+SERIALIZATION_CASES = [
+    # Empty headers and empty payload
+    (b"\x00\x00\x00\x10\x00\x00\x00\x00\x05\xc2H\xeb}\x98\xc8\xff", {}, b""),
+    # Empty headers with payload
+    (
+        b"\x00\x00\x00\x1c\x00\x00\x00\x00\xc02\xa5\xeatest payload\x076E\xf9",
+        {},
+        b"test payload",
+    ),
+    # Header true value, type 0
+    (
+        b"\x00\x00\x00\x16\x00\x00\x00\x06c\xe1\x18~\x04true\x00\xf1\xe7\xbc\xd7",
+        {"true": True},
+        b"",
+    ),
+    # Header false value, type 1
+    (
+        b"\x00\x00\x00\x17\x00\x00\x00\x07)\x86\x01X\x05false\x01R1~\xf4",
+        {"false": False},
+        b"",
+    ),
+    # Header byte, type 2
+    (
+        b"\x00\x00\x00\x17\x00\x00\x00\x07)\x86\x01X\x04byte\x02\xff\xc2\xf8i\xdc",
+        {"byte": Int8HeaderValue(-1)},
+        b"",
+    ),
+    # Header short, type 3
+    (
+        b"\x00\x00\x00\x19\x00\x00\x00\tq\x0e\x92>\x05short\x03\xff\xff\xb2|\xb6\xcc",
+        {"short": Int16HeaderValue(-1)},
+        b"",
+    ),
+    # Header integer, type 4
+    (
+        b"\x00\x00\x00\x1d\x00\x00\x00\r\x83\xe3\xf0\xe7\x07integer\x04\xff\xff\xff\xff\x8b\x8e\x12\xeb",
+        {"integer": Int32HeaderValue(-1)},
+        b"",
+    ),
+    # Header integer, by default integers will be serialized as 32bits
+    (
+        b"\x00\x00\x00\x1d\x00\x00\x00\r\x83\xe3\xf0\xe7\x07integer\x04\xff\xff\xff\xff\x8b\x8e\x12\xeb",
+        {"integer": -1},
+        b"",
+    ),
+    # Header long, type 5
+    (
+        b"\x00\x00\x00\x1e\x00\x00\x00\x0e]J\xdb\x8d\x04long\x05\xff\xff\xff\xff\xff\xff\xff\xffK\xc22\xda",
+        {"long": Int64HeaderValue(-1)},
+        b"",
+    ),
+    # Header bytes, type 6
+    (
+        b"\x00\x00\x00\x1d\x00\x00\x00\r\x83\xe3\xf0\xe7\x05bytes\x06\x00\x04\xde\xad\xbe\xef\x9a\xabK ",
+        {"bytes": b"\xde\xad\xbe\xef"},
+        b"",
+    ),
+    # Header string, type 7
+    (
+        b"\x00\x00\x00 \x00\x00\x00\x10\xb9T\xe0\t\x06string\x07\x00\x06foobarL\xc53(",
+        {"string": "foobar"},
+        b"",
+    ),
+    # Header timestamp, type 8
+    (
+        b"\x00\x00\x00#\x00\x00\x00\x13g\xfd\xcbc\ttimestamp\x08\x00\x00\x01r\xee\xbc'\xa6\xd4D^\x11",
+        {
+            "timestamp": datetime.datetime(
+                2020,
+                6,
+                26,
+                hour=3,
+                minute=46,
+                second=47,
+                microsecond=846000,
+                tzinfo=datetime.timezone.utc,
+            )
+        },
+        b"",
+    ),
+    # Header UUID, type 9
+    (
+        b"\x00\x00\x00&\x00\x00\x00\x16\xdfw\xb0\x9c\x04uuid\t\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xde\xad\xbe\xef\xb1g\xd4{",
+        {"uuid": uuid.UUID("deadbeef-dead-beef-dead-beefdeadbeef")},
+        b"",
+    ),
+]
+
+class TestEventStreamMessageSerializer:
+    @pytest.fixture
+    def serializer(self):
+        return EventStreamMessageSerializer()
+
+    @pytest.mark.parametrize("expected, headers, payload", SERIALIZATION_CASES)
+    def test_serialized_message(self, serializer, expected, headers, payload):
+        serialized = serializer.serialize(headers, payload)
+        assert expected == serialized
