@@ -3,6 +3,7 @@ import pytest
 from transcribe.client import TranscribeStreamingClient, create_client
 from transcribe.endpoints import StaticEndpointResolver
 from transcribe.exceptions import ValidationException
+from transcribe.model import AudioStream
 
 
 class TestClient:
@@ -16,3 +17,8 @@ class TestClient:
                 media_encoding="pcm",
                 audio_stream=None,
             )
+
+    def test_create_audio_stream(self):
+        client = TranscribeStreamingClient("us-west-2")
+        stream = client.create_audio_stream()
+        assert isinstance(stream, AudioStream)

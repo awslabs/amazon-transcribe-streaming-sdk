@@ -4,10 +4,16 @@ from transcribe.endpoints import (
     BaseEndpointResolver,
     _TranscribeRegionEndpointResolver,
 )
+from transcribe.eventstream import EventStreamMessageSerializer
 from transcribe.exceptions import ValidationException
 from transcribe.httpsession import AwsCrtHttpSessionManager
-from transcribe.model import AudioEvent, StartStreamTranscriptionRequest
+from transcribe.model import (
+    AudioEvent,
+    AudioStream,
+    StartStreamTranscriptionRequest,
+)
 from transcribe.serialize import (
+    AudioEventSerializer,
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
@@ -95,3 +101,9 @@ class TranscribeStreamingClient:
             body=signed_request.body,
         )
         return response
+
+    def create_audio_stream(self):
+        return AudioStream(
+            event_serializer=AudioEventSerializer(),
+            eventstream_serializer=EventStreamMessageSerializer(),
+        )

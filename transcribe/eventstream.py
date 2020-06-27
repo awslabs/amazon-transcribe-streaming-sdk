@@ -252,6 +252,35 @@ class EventStreamMessageSerializer:
         return crc32(data, crc) & 0xFFFFFFFF
 
 
+class BaseEvent:
+    def __init__(self, payload, event_payload=None, event=None):
+        self.payload: bytes = payload
+        self.event_payload: Optional[bool] = event_payload
+        self.event: Optional[bool] = event
+
+
+class BaseStream:
+    def __init__(
+        self,
+        input_stream=None,
+        event_serializer=None,
+        eventstream_serializer=None,
+    ):
+        if input_stream is None:
+            input_stream = BytesIO()
+        self.input_stream: BytesIO = input_stream
+        self._event_serializer: Serializer = event_serializer
+        if eventstream_serializer is None:
+            eventstream_serializer = EventStreamMessageSerializer()
+        self._eventstream_serializer = eventstream_serializer
+
+    def send_event(self, event: BaseEvent):
+        headers, payload = self._event_serializer.serialize(event)
+        event_bytes = self._eventstream_serializer.serialize(headers, payload)
+        self.input_stream.write(event_bytes)
+        self.input_stream.seek(0)
+
+
 class DecodeUtils:
     """Unpacking utility functions used in the decoder.
 

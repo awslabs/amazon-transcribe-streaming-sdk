@@ -1,38 +1,26 @@
 from io import BytesIO
-from typing import Dict, List, Union
-from urllib.parse import urlsplit
+from typing import Dict, List, Tuple, Union
 
-from transcribe import __version__ as version
-from transcribe.model import StartStreamTranscriptionRequest
+from transcribe.model import AudioEvent, StartStreamTranscriptionRequest
 from transcribe.exceptions import ValidationException
 from transcribe.request import PreparedRequest, Request
+from transcribe.utils import _add_required_headers
 
 REQUEST_TYPE = Union[Request, PreparedRequest]
+HEADER_VALUE = Union[int, None, str]
 
 
 class Serializer:
-    def __init__(self, endpoint, method, request_uri, request_shape):
-        self.endpoint: str = endpoint
-        self.method: str = method
-        self.request_uri: str = request_uri
-        self.request_shape: RequestShape = request_shape
+    def __init__(self):
+        raise NotImplementedError("Serializer")
+
+    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BytesIO]:
+        """Serialize out to payload and headers."""
+        raise NotImplementedError("serialize")
 
     def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
         """Serialize parameters into an HTTP request."""
         raise NotImplementedError("serialize_to_request")
-
-    def _add_required_headers(self, headers: Dict[str, str]):
-        urlparts = urlsplit(self.endpoint)
-        if not urlparts.hostname:
-            raise ValidationException(
-                "Unexpected endpoint ({self.endpoint}) provided to serializer"
-            )
-        headers.update(
-            {
-                "user-agent": f"transcribe-streaming-sdk-{version}",
-                "host": urlparts.hostname,
-            }
-        )
 
 
 class TranscribeStreamingRequestSerializer(Serializer):
@@ -46,7 +34,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
         self.request_uri: str = "/stream-transcription"
         self.request_shape: StartStreamTranscriptionRequest = transcribe_request
 
-    def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
+    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BytesIO]:
         headers = {
             "x-amzn-transcribe-language-code": self.request_shape.language_code,
             "x-amzn-transcribe-sample-rate": self.request_shape.media_sample_rate_hz,
@@ -55,12 +43,13 @@ class TranscribeStreamingRequestSerializer(Serializer):
             "x-amzn-transcribe-session-id": self.request_shape.session_id,
             "x-amzn-transcribe-vocabulary-filter-method": self.request_shape.vocab_filter_method,
         }
-        self._add_required_headers(headers)
+        _add_required_headers(self.endpoint, headers)
 
-        # TODO: We need to resolve how the model goes from AudioStream ->
-        # EventStream -> Bytes
-        body = BytesIO(self.request_shape.audio_stream.audio_event.audio_chunk)
+        body = self.request_shape.audio_stream.input_stream
+        return headers, body
 
+    def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
+        headers, body = self.serialize()
         request = Request(
             endpoint=self.endpoint,
             path=self.request_uri,
@@ -71,3 +60,17 @@ class TranscribeStreamingRequestSerializer(Serializer):
         if prepare:
             return request.prepare()
         return request
+
+
+class AudioEventSerializer:
+    """Convert AudioEvent objects into payload and header outputs for eventstreams"""
+
+    def serialize(
+        self, audio_event: AudioEvent
+    ) -> Tuple[Dict[str, str], bytes]:
+        headers = {
+            ":message_type": "event",
+            ":event_type": "blob",
+            ":content-type": "application/octet-stream",
+        }
+        return headers, audio_event.payload

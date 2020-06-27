@@ -10,6 +10,7 @@ from transcribe.model import (
     StartStreamTranscriptionRequest,
 )
 from transcribe.serialize import (
+    AudioEventSerializer,
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
@@ -17,10 +18,9 @@ from transcribe.serialize import (
 
 @pytest.fixture
 def audio_stream():
-    audio_event = AudioEvent(
-        audio_chunk=b"test", event_payload=True, event=True
-    )
-    return AudioStream(audio_event, eventstream=True)
+    stream = AudioStream(event_serializer=AudioEventSerializer())
+    stream.send_audio_event(b"test")
+    return stream
 
 
 @pytest.fixture
@@ -37,25 +37,6 @@ def request_serializer(audio_stream):
     )
 
 
-@pytest.fixture
-def default_serializer():
-    request_shape = Mock()
-    endpoint = "https://transcribe.aws.com"
-    return Serializer(endpoint, "POST", "/", request_shape)
-
-
-class TestSerializer:
-    def test_serializer(self, default_serializer):
-        assert default_serializer.endpoint == "https://transcribe.aws.com"
-        assert default_serializer.method == "POST"
-        assert default_serializer.request_uri == "/"
-        assert default_serializer.request_shape is not None
-
-    def test_serialize_to_request(self, default_serializer):
-        with pytest.raises(NotImplementedError):
-            default_serializer.serialize_to_request()
-
-
 class TestStartStreamTransactionRequest:
     def test_serialization(self, request_serializer):
         request = request_serializer.serialize_to_request()
@@ -67,7 +48,11 @@ class TestStartStreamTransactionRequest:
         assert request.headers["host"] == "transcribe.aws.com"
         assert "user-agent" in request.headers
         assert isinstance(request.body, BytesIO)
-        assert request.body.read() == b"test"
+        assert request.body.read() == (
+            b"\x00\x00\x00f\x00\x00\x00R\xf65m\\\r:message_type\x07\x00\x05event\x0b:even"
+            b"t_type\x07\x00\x04blob\r:content-type\x07\x00\x18application/octet-streamte"
+            b"st\x8a\x9c\xb4Z"
+        )
 
     def test_unprepared_serialization(self, request_serializer):
         request = request_serializer.serialize_to_request(prepare=False)
@@ -79,7 +64,11 @@ class TestStartStreamTransactionRequest:
         assert request.headers["host"] == "transcribe.aws.com"
         assert "user-agent" in request.headers
         assert isinstance(request.body, BytesIO)
-        assert request.body.read() == b"test"
+        assert request.body.read() == (
+            b"\x00\x00\x00f\x00\x00\x00R\xf65m\\\r:message_type\x07\x00\x05event\x0b:even"
+            b"t_type\x07\x00\x04blob\r:content-type\x07\x00\x18application/octet-streamte"
+            b"st\x8a\x9c\xb4Z"
+        )
 
     def test_serialization_with_missing_endpoint(self, request_serializer):
         request_serializer.endpoint = None

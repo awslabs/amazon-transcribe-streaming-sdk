@@ -12,10 +12,12 @@
 # language governing permissions and limitations under the License.
 
 from collections import UserList
-from typing import Dict, Tuple
+from io import BytesIO
+from typing import Dict, Optional, Tuple, Union
 import re
 
 from transcribe.exceptions import ValidationException
+from transcribe.eventstream import BaseEvent, BaseStream
 
 
 class Alternative:
@@ -32,17 +34,28 @@ class AlternativeList(UserList):
         return self._alternative_list[item]
 
 
-class AudioEvent:
-    def __init__(self, audio_chunk, event_payload=None, event=None):
-        self.audio_chunk: bytes = audio_chunk
-        self.event_payload: Optional[bool] = event_payload
-        self.event: Optional[bool] = event
+class AudioEvent(BaseEvent):
+    def __init__(
+        self,
+        audio_chunk: Optional[bytes]
+    ):
+        super().__init__(payload=audio_chunk)
+
+    @property
+    def audio_chunk(self):
+        return self.payload
 
 
-class AudioStream:
-    def __init__(self, audio_event, eventstream=None):
-        self.audio_event: AudioEvent = audio_event
-        self.eventstream: Optional[bool] = eventstream
+class AudioStream(BaseStream):
+    def __init__(self, event_serializer, eventstream_serializer=None):
+        super().__init__(
+            event_serializer=event_serializer,
+            eventstream_serializer=eventstream_serializer,
+        )
+
+    def send_audio_event(self, audio_chunk: Optional[bytes]):
+        audio_event = AudioEvent(audio_chunk)
+        super().send_event(audio_event)
 
 
 class Item:
@@ -105,7 +118,7 @@ class StartStreamTranscriptionRequest:
         self.language_code: Optional[str] = language_code
         self.media_sample_rate_hz: Optional[int] = media_sample_rate_hz
         self.media_encoding: Optional[str] = media_encoding
-        self.audio_stream: Optional[AudioStream] = audio_stream
+        self.audio_stream: AudioStream = audio_stream
         self.vocabulary_name: Optional[str] = vocabulary_name
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method

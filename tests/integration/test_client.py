@@ -3,6 +3,7 @@ import pytest
 
 from transcribe.client import TranscribeStreamingClient
 from transcribe.model import AudioEvent, AudioStream
+from transcribe.serialize import AudioEventSerializer
 
 
 async def json_from_body(response):
@@ -22,10 +23,8 @@ class TestClientStreaming:
     async def test_client_start_transcribe_stream(self):
         client = TranscribeStreamingClient("us-west-2")
 
-        audio_event = AudioEvent(
-            audio_chunk=b"test", event_payload=True, event=True
-        )
-        audio_stream = AudioStream(audio_event, eventstream=True)
+        audio_stream = AudioStream(AudioEventSerializer())
+        audio_stream.send_audio_event(b"test")
 
         response = await client.start_transcribe_stream(
             language_code="en-US",
@@ -46,5 +45,6 @@ class TestClientStreaming:
         # This will validate we're actually reaching the service
         # with proper H2.
         assert (
-            b"signal was sent without the preceding empty frame" in body.read()
+            b"Message must contain a :date and :chunk-signature event header"
+            in body.read()
         )
