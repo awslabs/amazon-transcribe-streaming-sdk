@@ -35,6 +35,7 @@ from transcribe.eventstream import (
     Int16HeaderValue,
     Int32HeaderValue,
     Int64HeaderValue,
+    InvalidHeaderValue,
     HeaderBytesExceedMaxLength,
     PaylodBytesExceedMaxLength,
     HeaderValueBytesExceedMaxLength,
@@ -59,14 +60,12 @@ INT8_HEADER = (
     ),
     EventStreamMessage(
         prelude=MessagePrelude(
-            total_length=0x17,
-            headers_length=0x7,
-            crc=0x29860158,
+            total_length=0x17, headers_length=0x7, crc=0x29860158,
         ),
-        headers={'byte': -1},
-        payload=b'',
-        crc=0xc2f869dc,
-    )
+        headers={"byte": -1},
+        payload=b"",
+        crc=0xC2F869DC,
+    ),
 )
 
 INT16_HEADER = (
@@ -76,14 +75,12 @@ INT16_HEADER = (
     ),
     EventStreamMessage(
         prelude=MessagePrelude(
-            total_length=0x19,
-            headers_length=0x9,
-            crc=0x710e923e,
+            total_length=0x19, headers_length=0x9, crc=0x710E923E,
         ),
-        headers={'short': -1},
-        payload=b'',
-        crc=0xb27cb6cc,
-    )
+        headers={"short": -1},
+        payload=b"",
+        crc=0xB27CB6CC,
+    ),
 )
 
 INT32_HEADER = (
@@ -93,14 +90,12 @@ INT32_HEADER = (
     ),
     EventStreamMessage(
         prelude=MessagePrelude(
-            total_length=0x1D,
-            headers_length=0xD,
-            crc=0x83e3f0e7,
+            total_length=0x1D, headers_length=0xD, crc=0x83E3F0E7,
         ),
-        headers={'integer': -1},
-        payload=b'',
-        crc=0x8b8e12eb,
-    )
+        headers={"integer": -1},
+        payload=b"",
+        crc=0x8B8E12EB,
+    ),
 )
 
 INT64_HEADER = (
@@ -110,14 +105,12 @@ INT64_HEADER = (
     ),
     EventStreamMessage(
         prelude=MessagePrelude(
-            total_length=0x1E,
-            headers_length=0xE,
-            crc=0x5d4adb8d,
+            total_length=0x1E, headers_length=0xE, crc=0x5D4ADB8D,
         ),
-        headers={'long': -1},
-        payload=b'',
-        crc=0x4bc232da,
-    )
+        headers={"long": -1},
+        payload=b"",
+        crc=0x4BC232DA,
+    ),
 )
 
 PAYLOAD_NO_HEADERS = (
@@ -363,10 +356,10 @@ def test_message_prelude_properties():
 
 def test_message_to_response_dict():
     response_dict = PAYLOAD_ONE_STR_HEADER[1].to_response_dict()
-    assert response_dict['status_code'] == 200
-    expected_headers = {'content-type': 'application/json'}
-    assert response_dict['headers'] == expected_headers
-    assert response_dict['body'] == b"{'foo':'bar'}"
+    assert response_dict["status_code"] == 200
+    expected_headers = {"content-type": "application/json"}
+    assert response_dict["headers"] == expected_headers
+    assert response_dict["body"] == b"{'foo':'bar'}"
 
 
 def test_message_to_response_dict_error():
@@ -394,7 +387,7 @@ def test_unpack_uint32():
 
 
 def test_unpack_int8():
-    (value, bytes_consumed) = DecodeUtils.unpack_int8(b'\xFE')
+    (value, bytes_consumed) = DecodeUtils.unpack_int8(b"\xFE")
     assert bytes_consumed == 1
     assert value == -2
 
@@ -615,6 +608,7 @@ SERIALIZATION_CASES = [
     ),
 ]
 
+
 class TestEventStreamMessageSerializer:
     @pytest.fixture
     def serializer(self):
@@ -624,6 +618,15 @@ class TestEventStreamMessageSerializer:
     def test_serialized_message(self, serializer, expected, headers, payload):
         serialized = serializer.serialize(headers, payload)
         assert expected == serialized
+
+    def test_invalid_header_value(self, serializer):
+        # Str header value len are stored in a uint16 but cannot be larger
+        # than 2 ** 15 - 1
+        headers = {
+            "foo": 2.0,
+        }
+        with pytest.raises(InvalidHeaderValue):
+            serializer.serialize(headers, b"")
 
     def test_header_str_too_long(self, serializer):
         # Str header value len are stored in a uint16 but cannot be larger
@@ -645,7 +648,7 @@ class TestEventStreamMessageSerializer:
 
     def test_headers_too_long(self, serializer):
         # These headers are rougly 150k bytes, more than 128 KiB max
-        long_header_value = b'a' * 30000
+        long_header_value = b"a" * 30000
         headers = {
             "a": long_header_value,
             "b": long_header_value,

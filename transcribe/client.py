@@ -1,10 +1,16 @@
 import os
 
-from transcribe.endpoints import BaseEndpointResolver, _TranscribeRegionEndpointResolver
+from transcribe.endpoints import (
+    BaseEndpointResolver,
+    _TranscribeRegionEndpointResolver,
+)
 from transcribe.exceptions import ValidationException
 from transcribe.httpsession import AwsCrtHttpSessionManager
 from transcribe.model import AudioEvent, StartStreamTranscriptionRequest
-from transcribe.serialize import Serializer, TranscribeStreamingRequestSerializer
+from transcribe.serialize import (
+    Serializer,
+    TranscribeStreamingRequestSerializer,
+)
 from transcribe.signer import CredentialsProvider, SigV4RequestSigner
 
 
@@ -69,7 +75,8 @@ class TranscribeStreamingClient:
         endpoint = await self._endpoint_resolver.resolve(self.region)
         if self._serializer is None:
             self._serializer = TranscribeStreamingRequestSerializer(
-                endpoint=endpoint, transcribe_request=transcribe_streaming_request
+                endpoint=endpoint,
+                transcribe_request=transcribe_streaming_request,
             )
 
         request = self._serializer.serialize_to_request()

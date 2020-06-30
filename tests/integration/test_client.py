@@ -22,7 +22,9 @@ class TestClientStreaming:
     async def test_client_start_transcribe_stream(self):
         client = TranscribeStreamingClient("us-west-2")
 
-        audio_event = AudioEvent(audio_chunk=b"test", event_payload=True, event=True)
+        audio_event = AudioEvent(
+            audio_chunk=b"test", event_payload=True, event=True
+        )
         audio_stream = AudioStream(audio_event, eventstream=True)
 
         response = await client.start_transcribe_stream(
@@ -35,9 +37,14 @@ class TestClientStreaming:
         headers = await response.headers
         status = await response.status_code
         assert status == 200
-        assert ("content-type", "application/vnd.amazon.eventstream") in headers
+        assert (
+            "content-type",
+            "application/vnd.amazon.eventstream",
+        ) in headers
 
         # TODO: Remove this once EventStreaming is in place.
         # This will validate we're actually reaching the service
         # with proper H2.
-        assert b"signal was sent without the preceding empty frame" in body.read()
+        assert (
+            b"signal was sent without the preceding empty frame" in body.read()
+        )

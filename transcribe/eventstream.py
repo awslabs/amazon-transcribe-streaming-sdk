@@ -95,7 +95,7 @@ class SerializationError(Exception):
 
 class InvalidHeaderValue(SerializationError):
     def __init__(self, value):
-        message = f'Invalid header value type: {type(value)}'
+        message = f"Invalid header value type: {type(value)}"
         super(InvalidHeaderValue, self).__init__(message)
         self.value = value
 
@@ -103,8 +103,8 @@ class InvalidHeaderValue(SerializationError):
 class HeaderBytesExceedMaxLength(SerializationError):
     def __init__(self, length):
         message = (
-            f'Headers exceeded max serialization '
-            f'length of 128 KiB at {length} bytes'
+            f"Headers exceeded max serialization "
+            f"length of 128 KiB at {length} bytes"
         )
         super(HeaderBytesExceedMaxLength, self).__init__(message)
 
@@ -112,8 +112,8 @@ class HeaderBytesExceedMaxLength(SerializationError):
 class HeaderValueBytesExceedMaxLength(SerializationError):
     def __init__(self, length):
         message = (
-            f'Header bytes value exceeds max serialization '
-            f'length of (32 KiB - 1) at {length} bytes'
+            f"Header bytes value exceeds max serialization "
+            f"length of (32 KiB - 1) at {length} bytes"
         )
         super(HeaderValueBytesExceedMaxLength, self).__init__(message)
 
@@ -121,8 +121,8 @@ class HeaderValueBytesExceedMaxLength(SerializationError):
 class PaylodBytesExceedMaxLength(SerializationError):
     def __init__(self, length):
         message = (
-            f'Payload exceeded max serialization '
-            f'length of 16 MiB at {length} bytes'
+            f"Payload exceeded max serialization "
+            f"length of 16 MiB at {length} bytes"
         )
         super(PaylodBytesExceedMaxLength, self).__init__(message)
 
@@ -130,35 +130,51 @@ class PaylodBytesExceedMaxLength(SerializationError):
 class HeaderValue:
     """A wrapper class for explicit header serialization."""
 
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError
+
 
 class Int8HeaderValue(HeaderValue):
     """Value that should be explicitly serialized as an int8."""
+
     def __init__(self, value: int):
         self.value = value
 
 
 class Int16HeaderValue(HeaderValue):
     """Value that should be explicitly serialized as an int16"""
+
     def __init__(self, value: int):
         self.value = value
 
 
 class Int32HeaderValue(HeaderValue):
     """Value that should be explicitly serialized as an int32"""
+
     def __init__(self, value: int):
         self.value = value
 
 
 class Int64HeaderValue(HeaderValue):
     """Value that should be explicitly serialized as an int64"""
+
     def __init__(self, value: int):
         self.value = value
+
+
+# Possible types for serializing headers differs from possible types returned when decoding
+HEADER_SERIALIZATION_VALUE = Union[
+    bool, bytes, int, str, uuid.UUID, datetime.datetime, HeaderValue
+]
+HEADERS_SERIALIZATION_DICT = Dict[str, HEADER_SERIALIZATION_VALUE]
 
 
 class EventStreamMessageSerializer:
     DEFAULT_INT_TYPE: Type[HeaderValue] = Int32HeaderValue
 
-    def serialize(self, headers: dict, payload: bytes) -> bytes:
+    def serialize(
+        self, headers: HEADERS_SERIALIZATION_DICT, payload: bytes
+    ) -> bytes:
         # TODO: Investigate preformance of this once we can make requests
         if len(payload) > _MAX_PAYLOAD_LENGTH:
             raise PaylodBytesExceedMaxLength(len(payload))
@@ -170,69 +186,69 @@ class EventStreamMessageSerializer:
         prelude_bytes = self._encode_prelude(encoded_headers, payload)
         # Calculate the prelude_crc and it's byte representation
         prelude_crc = self._calculate_checksum(prelude_bytes)
-        prelude_crc_bytes = pack('!I', prelude_crc)
+        prelude_crc_bytes = pack("!I", prelude_crc)
         messages_bytes = prelude_crc_bytes + encoded_headers + payload
         # Calculate the checksum continuing from the prelude crc
         final_crc = self._calculate_checksum(messages_bytes, crc=prelude_crc)
-        final_crc_bytes = pack('!I', final_crc)
+        final_crc_bytes = pack("!I", final_crc)
         return prelude_bytes + messages_bytes + final_crc_bytes
 
-    def _encode_headers(self, headers: dict) -> bytes:
-        encoded = b''
+    def _encode_headers(self, headers: HEADERS_SERIALIZATION_DICT) -> bytes:
+        encoded = b""
         for key, val in headers.items():
             encoded += self._encode_header_key(key)
             encoded += self._encode_header_val(val)
         return encoded
 
     def _encode_header_key(self, key: str) -> bytes:
-        enc = key.encode('utf-8')
-        return pack('B', len(enc)) + enc
+        enc = key.encode("utf-8")
+        return pack("B", len(enc)) + enc
 
-    def _encode_header_val(self, val) -> bytes:
+    def _encode_header_val(self, val: HEADER_SERIALIZATION_VALUE) -> bytes:
         # Handle booleans first to avoid being viewed as ints
         if val is True:
-            return b'\x00'
+            return b"\x00"
         elif val is False:
-            return b'\x01'
+            return b"\x01"
 
         if isinstance(val, int):
             val = self.DEFAULT_INT_TYPE(val)
 
         if isinstance(val, Int8HeaderValue):
-            return b'\x02' + pack('!b', val.value)
+            return b"\x02" + pack("!b", val.value)
         elif isinstance(val, Int16HeaderValue):
-            return b'\x03' + pack('!h', val.value)
+            return b"\x03" + pack("!h", val.value)
         elif isinstance(val, Int32HeaderValue):
-            return b'\x04' + pack('!i', val.value)
+            return b"\x04" + pack("!i", val.value)
         elif isinstance(val, Int64HeaderValue):
-            return b'\x05' + pack('!q', val.value)
+            return b"\x05" + pack("!q", val.value)
         elif isinstance(val, bytes):
             # Byte arrays are prefaced with a 16bit length, but are restricted
             # to a max length of 2**15 - 1, enforce this explicitly
             if len(val) > _MAX_HEADER_VALUE_BYTE_LENGTH:
                 raise HeaderValueBytesExceedMaxLength(len(val))
-            return b'\x06' + pack('!H', len(val)) + val
+            return b"\x06" + pack("!H", len(val)) + val
         elif isinstance(val, str):
-            utf8_string = val.encode('utf-8')
+            utf8_string = val.encode("utf-8")
             # Strings are prefaced with a 16bit length, but are restricted
             # to a max length of 2**15 - 1, enforce this explicitly
             if len(utf8_string) > _MAX_HEADER_VALUE_BYTE_LENGTH:
                 raise HeaderValueBytesExceedMaxLength(len(utf8_string))
-            return b'\x07' + pack('!H', len(utf8_string)) + utf8_string
+            return b"\x07" + pack("!H", len(utf8_string)) + utf8_string
         elif isinstance(val, datetime.datetime):
             ms_timestamp = int(val.timestamp() * 1000)
-            return b'\x08' + pack('!q', ms_timestamp)
+            return b"\x08" + pack("!q", ms_timestamp)
         elif isinstance(val, uuid.UUID):
-            return b'\x09' + val.bytes
+            return b"\x09" + val.bytes
         raise InvalidHeaderValue(val)
 
     def _encode_prelude(self, encoded_headers: bytes, payload: bytes) -> bytes:
         header_length = len(encoded_headers)
         payload_length = len(payload)
         total_length = header_length + payload_length + 16
-        return pack('!II', total_length, header_length)
+        return pack("!II", total_length, header_length)
 
-    def _calculate_checksum(self, data, crc=0):
+    def _calculate_checksum(self, data: bytes, crc: int = 0) -> int:
         return crc32(data, crc) & 0xFFFFFFFF
 
 
@@ -247,7 +263,7 @@ class DecodeUtils:
     UINT8_BYTE_FORMAT = "!B"
     UINT16_BYTE_FORMAT = "!H"
     UINT32_BYTE_FORMAT = "!I"
-    INT8_BYTE_FORMAT = '!b'
+    INT8_BYTE_FORMAT = "!b"
     INT16_BYTE_FORMAT = "!h"
     INT32_BYTE_FORMAT = "!i"
     INT64_BYTE_FORMAT = "!q"

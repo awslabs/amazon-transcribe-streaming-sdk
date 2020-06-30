@@ -4,13 +4,22 @@ from unittest.mock import Mock
 import pytest
 
 from transcribe.exceptions import ValidationException
-from transcribe.model import AudioEvent, AudioStream, StartStreamTranscriptionRequest
-from transcribe.serialize import Serializer, TranscribeStreamingRequestSerializer
+from transcribe.model import (
+    AudioEvent,
+    AudioStream,
+    StartStreamTranscriptionRequest,
+)
+from transcribe.serialize import (
+    Serializer,
+    TranscribeStreamingRequestSerializer,
+)
 
 
 @pytest.fixture
 def audio_stream():
-    audio_event = AudioEvent(audio_chunk=b"test", event_payload=True, event=True)
+    audio_event = AudioEvent(
+        audio_chunk=b"test", event_payload=True, event=True
+    )
     return AudioStream(audio_event, eventstream=True)
 
 
@@ -23,7 +32,9 @@ def request_serializer(audio_stream):
         audio_stream=audio_stream,
     )
 
-    return TranscribeStreamingRequestSerializer("https://transcribe.aws.com", req_shape)
+    return TranscribeStreamingRequestSerializer(
+        "https://transcribe.aws.com", req_shape
+    )
 
 
 @pytest.fixture

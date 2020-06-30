@@ -1,6 +1,10 @@
 from io import BytesIO
 
-from awscrt.auth import AwsCredentialsProvider, AwsSigningAlgorithm, AwsSignatureType
+from awscrt.auth import (
+    AwsCredentialsProvider,
+    AwsSigningAlgorithm,
+    AwsSignatureType,
+)
 
 from awscrt.http import HttpRequest, HttpHeaders
 import pytest
