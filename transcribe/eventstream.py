@@ -22,6 +22,7 @@ from struct import unpack, pack
 # byte length of the prelude (total_length + header_length + prelude_crc)
 _PRELUDE_LENGTH = 12
 _MAX_HEADERS_LENGTH = 128 * 1024  # 128 Kb
+_MAX_HEADER_VALUE_BYTE_LENGTH = 32 * 1024 - 1
 _MAX_PAYLOAD_LENGTH = 16 * 1024 ** 2  # 16 Mb
 
 HEADER_VALUE = Union[bool, bytes, int, str]
@@ -99,6 +100,33 @@ class InvalidHeaderValue(SerializationError):
         self.value = value
 
 
+class HeaderBytesExceedMaxLength(SerializationError):
+    def __init__(self, length):
+        message = (
+            f'Headers exceeded max serialization '
+            f'length of 128 KiB at {length} bytes'
+        )
+        super(HeaderBytesExceedMaxLength, self).__init__(message)
+
+
+class HeaderValueBytesExceedMaxLength(SerializationError):
+    def __init__(self, length):
+        message = (
+            f'Header bytes value exceeds max serialization '
+            f'length of (32 KiB - 1) at {length} bytes'
+        )
+        super(HeaderValueBytesExceedMaxLength, self).__init__(message)
+
+
+class PaylodBytesExceedMaxLength(SerializationError):
+    def __init__(self, length):
+        message = (
+            f'Payload exceeded max serialization '
+            f'length of 16 MiB at {length} bytes'
+        )
+        super(PaylodBytesExceedMaxLength, self).__init__(message)
+
+
 class HeaderValue:
     """A wrapper class for explicit header serialization."""
 
@@ -131,10 +159,14 @@ class EventStreamMessageSerializer:
     DEFAULT_INT_TYPE: Type[HeaderValue] = Int32HeaderValue
 
     def serialize(self, headers: dict, payload: bytes) -> bytes:
-        # TODO: fix all this byte concatenation
+        # TODO: Investigate preformance of this once we can make requests
+        if len(payload) > _MAX_PAYLOAD_LENGTH:
+            raise PaylodBytesExceedMaxLength(len(payload))
         # The encoded headers are variable length and this length
-        # is required to generate the prelude
+        # is required to generate the prelude, generate the headers first
         encoded_headers = self._encode_headers(headers)
+        if len(encoded_headers) > _MAX_HEADERS_LENGTH:
+            raise HeaderBytesExceedMaxLength(len(encoded_headers))
         prelude_bytes = self._encode_prelude(encoded_headers, payload)
         # Calculate the prelude_crc and it's byte representation
         prelude_crc = self._calculate_checksum(prelude_bytes)
@@ -175,11 +207,17 @@ class EventStreamMessageSerializer:
         elif isinstance(val, Int64HeaderValue):
             return b'\x05' + pack('!q', val.value)
         elif isinstance(val, bytes):
-            # Byte arrays are prefaced with a 16bit length
+            # Byte arrays are prefaced with a 16bit length, but are restricted
+            # to a max length of 2**15 - 1, enforce this explicitly
+            if len(val) > _MAX_HEADER_VALUE_BYTE_LENGTH:
+                raise HeaderValueBytesExceedMaxLength(len(val))
             return b'\x06' + pack('!H', len(val)) + val
         elif isinstance(val, str):
-            # Strings are prefaced with a 16bit length
             utf8_string = val.encode('utf-8')
+            # Strings are prefaced with a 16bit length, but are restricted
+            # to a max length of 2**15 - 1, enforce this explicitly
+            if len(utf8_string) > _MAX_HEADER_VALUE_BYTE_LENGTH:
+                raise HeaderValueBytesExceedMaxLength(len(utf8_string))
             return b'\x07' + pack('!H', len(utf8_string)) + utf8_string
         elif isinstance(val, datetime.datetime):
             ms_timestamp = int(val.timestamp() * 1000)

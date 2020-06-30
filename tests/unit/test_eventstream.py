@@ -35,6 +35,9 @@ from transcribe.eventstream import (
     Int16HeaderValue,
     Int32HeaderValue,
     Int64HeaderValue,
+    HeaderBytesExceedMaxLength,
+    PaylodBytesExceedMaxLength,
+    HeaderValueBytesExceedMaxLength,
 )
 
 EMPTY_MESSAGE = (
@@ -621,3 +624,40 @@ class TestEventStreamMessageSerializer:
     def test_serialized_message(self, serializer, expected, headers, payload):
         serialized = serializer.serialize(headers, payload)
         assert expected == serialized
+
+    def test_header_str_too_long(self, serializer):
+        # Str header value len are stored in a uint16 but cannot be larger
+        # than 2 ** 15 - 1
+        headers = {
+            "foo": "a" * (2 ** 16 - 1),
+        }
+        with pytest.raises(HeaderValueBytesExceedMaxLength):
+            serializer.serialize(headers, b"")
+
+    def test_header_bytes_too_long(self, serializer):
+        # Bytes header value len are stored in a uint16 but cannot be larger
+        # than 2 ** 15 - 1
+        headers = {
+            "foo": b"a" * (2 ** 16 - 1),
+        }
+        with pytest.raises(HeaderValueBytesExceedMaxLength):
+            serializer.serialize(headers, b"")
+
+    def test_headers_too_long(self, serializer):
+        # These headers are rougly 150k bytes, more than 128 KiB max
+        long_header_value = b'a' * 30000
+        headers = {
+            "a": long_header_value,
+            "b": long_header_value,
+            "c": long_header_value,
+            "d": long_header_value,
+            "e": long_header_value,
+        }
+        with pytest.raises(HeaderBytesExceedMaxLength):
+            serializer.serialize(headers, b"")
+
+    def test_payload_too_long(self, serializer):
+        # 18 MiB payaload, larger than the max of 16 MiB
+        payload = b"abcdefghijklmnopqr" * (1024 ** 2)
+        with pytest.raises(PaylodBytesExceedMaxLength):
+            serializer.serialize({}, payload)
