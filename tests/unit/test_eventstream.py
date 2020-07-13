@@ -37,7 +37,7 @@ from transcribe.eventstream import (
     Int64HeaderValue,
     InvalidHeaderValue,
     HeaderBytesExceedMaxLength,
-    PaylodBytesExceedMaxLength,
+    PayloadBytesExceedMaxLength,
     HeaderValueBytesExceedMaxLength,
 )
 
@@ -662,5 +662,5 @@ class TestEventStreamMessageSerializer:
     def test_payload_too_long(self, serializer):
         # 18 MiB payaload, larger than the max of 16 MiB
         payload = b"abcdefghijklmnopqr" * (1024 ** 2)
-        with pytest.raises(PaylodBytesExceedMaxLength):
+        with pytest.raises(PayloadBytesExceedMaxLength):
             serializer.serialize({}, payload)

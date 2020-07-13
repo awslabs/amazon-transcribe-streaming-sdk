@@ -118,13 +118,13 @@ class HeaderValueBytesExceedMaxLength(SerializationError):
         super(HeaderValueBytesExceedMaxLength, self).__init__(message)
 
 
-class PaylodBytesExceedMaxLength(SerializationError):
+class PayloadBytesExceedMaxLength(SerializationError):
     def __init__(self, length):
         message = (
             f"Payload exceeded max serialization "
             f"length of 16 MiB at {length} bytes"
         )
-        super(PaylodBytesExceedMaxLength, self).__init__(message)
+        super(PayloadBytesExceedMaxLength, self).__init__(message)
 
 
 class HeaderValue:
@@ -177,7 +177,7 @@ class EventStreamMessageSerializer:
     ) -> bytes:
         # TODO: Investigate preformance of this once we can make requests
         if len(payload) > _MAX_PAYLOAD_LENGTH:
-            raise PaylodBytesExceedMaxLength(len(payload))
+            raise PayloadBytesExceedMaxLength(len(payload))
         # The encoded headers are variable length and this length
         # is required to generate the prelude, generate the headers first
         encoded_headers = self._encode_headers(headers)
