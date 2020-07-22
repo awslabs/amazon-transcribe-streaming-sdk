@@ -43,12 +43,6 @@ class AudioEvent(BaseEvent):
 
 
 class AudioStream(BaseStream):
-    def __init__(self, event_serializer, eventstream_serializer=None):
-        super().__init__(
-            event_serializer=event_serializer,
-            eventstream_serializer=eventstream_serializer,
-        )
-
     def send_audio_event(self, audio_chunk: Optional[bytes]):
         audio_event = AudioEvent(audio_chunk)
         super().send_event(audio_event)
@@ -105,7 +99,6 @@ class StartStreamTranscriptionRequest:
         language_code=None,
         media_sample_rate_hz=None,
         media_encoding=None,
-        audio_stream=None,
         vocabulary_name=None,
         session_id=None,
         vocab_filter_method=None,
@@ -114,7 +107,6 @@ class StartStreamTranscriptionRequest:
         self.language_code: Optional[str] = language_code
         self.media_sample_rate_hz: Optional[int] = media_sample_rate_hz
         self.media_encoding: Optional[str] = media_encoding
-        self.audio_stream: AudioStream = audio_stream
         self.vocabulary_name: Optional[str] = vocabulary_name
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method

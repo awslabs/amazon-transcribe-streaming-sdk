@@ -18,6 +18,7 @@ import uuid
 import datetime
 
 from transcribe.eventstream import (
+    EventSigner,
     EventStreamMessage,
     MessagePrelude,
     EventStreamBuffer,
@@ -619,6 +620,11 @@ class TestEventStreamMessageSerializer:
         serialized = serializer.serialize(headers, payload)
         assert expected == serialized
 
+    def test_encode_headers(self, serializer):
+        headers = {"foo": "bar"}
+        encoded_headers = serializer.encode_headers(headers)
+        assert b"\x03foo\x07\x00\x03bar" == encoded_headers
+
     def test_invalid_header_value(self, serializer):
         # Str header value len are stored in a uint16 but cannot be larger
         # than 2 ** 15 - 1
@@ -664,3 +670,33 @@ class TestEventStreamMessageSerializer:
         payload = b"abcdefghijklmnopqr" * (1024 ** 2)
         with pytest.raises(PayloadBytesExceedMaxLength):
             serializer.serialize({}, payload)
+
+
+class TestEventSigner:
+    @pytest.fixture
+    def credentials(self):
+        mock_creds = Mock()
+        mock_creds.access_key = "foo"
+        mock_creds.secret_key = "bar"
+        mock_creds.session_token = None
+        return mock_creds
+
+    @pytest.fixture
+    def event_signer(self, credentials):
+        return EventSigner(
+            "signing-name", "region-name", credentials, utc_now=self.utc_now,
+        )
+
+    def utc_now(self):
+        return datetime.datetime(
+            2020, 7, 23, 22, 39, 55, 29943, tzinfo=datetime.timezone.utc
+        )
+
+    def test_basic_event_signature(self, event_signer):
+        signed_headers = event_signer.sign(b"message", b"prior")
+        assert signed_headers[":date"] == self.utc_now()
+        expected_signature = (
+            b"\x0e\xf5n\xbf\x8cW\x0b>\xf3\xdc\x9fA\x99^\xd17\xcd"
+            b"\x86\x9c\xdb\xa0Y\x18\x88+\x9b\x10p{n$e"
+        )
+        assert signed_headers[":chunk-signature"] == expected_signature

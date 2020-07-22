@@ -46,7 +46,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
         }
         _add_required_headers(self.endpoint, headers)
 
-        body = self.request_shape.audio_stream.input_stream
+        body = BufferableByteStream()
         return headers, body
 
     def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
@@ -70,8 +70,8 @@ class AudioEventSerializer:
         self, audio_event: AudioEvent
     ) -> Tuple[Dict[str, str], bytes]:
         headers = {
-            ":message_type": "event",
-            ":event_type": "blob",
+            ":message-type": "event",
+            ":event-type": "AudioEvent",
             ":content-type": "application/octet-stream",
         }
         return headers, audio_event.payload

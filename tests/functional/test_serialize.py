@@ -1,11 +1,8 @@
-from unittest.mock import Mock
-
 import pytest
 
 from transcribe.exceptions import ValidationException
 from transcribe.model import (
     AudioEvent,
-    AudioStream,
     StartStreamTranscriptionRequest,
 )
 from transcribe.serialize import (
@@ -17,19 +14,9 @@ from transcribe.structures import BufferableByteStream
 
 
 @pytest.fixture
-def audio_stream():
-    stream = AudioStream(event_serializer=AudioEventSerializer())
-    stream.send_audio_event(b"test")
-    return stream
-
-
-@pytest.fixture
-def request_serializer(audio_stream):
+def request_serializer():
     req_shape = StartStreamTranscriptionRequest(
-        language_code="en-US",
-        media_sample_rate_hz=9000,
-        media_encoding="pcm",
-        audio_stream=audio_stream,
+        language_code="en-US", media_sample_rate_hz=9000, media_encoding="pcm",
     )
 
     return TranscribeStreamingRequestSerializer(
@@ -48,11 +35,6 @@ class TestStartStreamTransactionRequest:
         assert request.headers["host"] == "transcribe.aws.com"
         assert "user-agent" in request.headers
         assert isinstance(request.body, BufferableByteStream)
-        assert request.body.read() == (
-            b"\x00\x00\x00f\x00\x00\x00R\xf65m\\\r:message_type\x07\x00\x05event\x0b:even"
-            b"t_type\x07\x00\x04blob\r:content-type\x07\x00\x18application/octet-streamte"
-            b"st\x8a\x9c\xb4Z"
-        )
 
     def test_unprepared_serialization(self, request_serializer):
         request = request_serializer.serialize_to_request(prepare=False)
@@ -64,13 +46,22 @@ class TestStartStreamTransactionRequest:
         assert request.headers["host"] == "transcribe.aws.com"
         assert "user-agent" in request.headers
         assert isinstance(request.body, BufferableByteStream)
-        assert request.body.read() == (
-            b"\x00\x00\x00f\x00\x00\x00R\xf65m\\\r:message_type\x07\x00\x05event\x0b:even"
-            b"t_type\x07\x00\x04blob\r:content-type\x07\x00\x18application/octet-streamte"
-            b"st\x8a\x9c\xb4Z"
-        )
 
     def test_serialization_with_missing_endpoint(self, request_serializer):
         request_serializer.endpoint = None
         with pytest.raises(ValidationException):
             request_serializer.serialize_to_request()
+
+
+class TestAudioEventSerializer:
+    def test_serialization(self):
+        audio_event = AudioEvent(audio_chunk=b"foo")
+        event_serializer = AudioEventSerializer()
+        headers, payload = event_serializer.serialize(audio_event)
+        expected_headers = {
+            ":message-type": "event",
+            ":event-type": "AudioEvent",
+            ":content-type": "application/octet-stream",
+        }
+        assert headers == expected_headers
+        assert payload == b"foo"
