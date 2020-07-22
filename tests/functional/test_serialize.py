@@ -1,4 +1,3 @@
-from io import BytesIO
 from unittest.mock import Mock
 
 import pytest
@@ -14,6 +13,7 @@ from transcribe.serialize import (
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
+from transcribe.structures import BufferableByteStream
 
 
 @pytest.fixture
@@ -47,7 +47,7 @@ class TestStartStreamTransactionRequest:
         assert request.headers["x-amzn-transcribe-session-id"] is None
         assert request.headers["host"] == "transcribe.aws.com"
         assert "user-agent" in request.headers
-        assert isinstance(request.body, BytesIO)
+        assert isinstance(request.body, BufferableByteStream)
         assert request.body.read() == (
             b"\x00\x00\x00f\x00\x00\x00R\xf65m\\\r:message_type\x07\x00\x05event\x0b:even"
             b"t_type\x07\x00\x04blob\r:content-type\x07\x00\x18application/octet-streamte"
@@ -63,7 +63,7 @@ class TestStartStreamTransactionRequest:
         assert request.headers["x-amzn-transcribe-session-id"] is None
         assert request.headers["host"] == "transcribe.aws.com"
         assert "user-agent" in request.headers
-        assert isinstance(request.body, BytesIO)
+        assert isinstance(request.body, BufferableByteStream)
         assert request.body.read() == (
             b"\x00\x00\x00f\x00\x00\x00R\xf65m\\\r:message_type\x07\x00\x05event\x0b:even"
             b"t_type\x07\x00\x04blob\r:content-type\x07\x00\x18application/octet-streamte"

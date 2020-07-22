@@ -12,7 +12,6 @@
 # language governing permissions and limitations under the License.
 
 from collections import UserList
-from io import BytesIO
 from typing import Dict, Optional, Tuple, Union
 import re
 
@@ -35,10 +34,7 @@ class AlternativeList(UserList):
 
 
 class AudioEvent(BaseEvent):
-    def __init__(
-        self,
-        audio_chunk: Optional[bytes]
-    ):
+    def __init__(self, audio_chunk: Optional[bytes]):
         super().__init__(payload=audio_chunk)
 
     @property

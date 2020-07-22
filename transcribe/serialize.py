@@ -1,9 +1,10 @@
-from io import BytesIO
+from io import BufferedIOBase, BytesIO
 from typing import Dict, List, Tuple, Union
 
 from transcribe.model import AudioEvent, StartStreamTranscriptionRequest
 from transcribe.exceptions import ValidationException
 from transcribe.request import PreparedRequest, Request
+from transcribe.structures import BufferableByteStream
 from transcribe.utils import _add_required_headers
 
 REQUEST_TYPE = Union[Request, PreparedRequest]
@@ -14,7 +15,7 @@ class Serializer:
     def __init__(self):
         raise NotImplementedError("Serializer")
 
-    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BytesIO]:
+    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BufferedIOBase]:
         """Serialize out to payload and headers."""
         raise NotImplementedError("serialize")
 
@@ -34,7 +35,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
         self.request_uri: str = "/stream-transcription"
         self.request_shape: StartStreamTranscriptionRequest = transcribe_request
 
-    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BytesIO]:
+    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BufferedIOBase]:
         headers = {
             "x-amzn-transcribe-language-code": self.request_shape.language_code,
             "x-amzn-transcribe-sample-rate": self.request_shape.media_sample_rate_hz,

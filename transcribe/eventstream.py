@@ -16,8 +16,9 @@ import datetime
 from typing import Any, Callable, Dict, Generator, Optional, Tuple, Union, Type
 
 from binascii import crc32
-from io import BytesIO
 from struct import unpack, pack
+
+from transcribe.structures import BufferableByteStream
 
 # byte length of the prelude (total_length + header_length + prelude_crc)
 _PRELUDE_LENGTH = 12
@@ -267,8 +268,8 @@ class BaseStream:
         eventstream_serializer=None,
     ):
         if input_stream is None:
-            input_stream = BytesIO()
-        self.input_stream: BytesIO = input_stream
+            input_stream = BufferableByteStream()
+        self.input_stream: BufferableByteStream = input_stream
         self._event_serializer: Serializer = event_serializer
         if eventstream_serializer is None:
             eventstream_serializer = EventStreamMessageSerializer()
@@ -278,7 +279,6 @@ class BaseStream:
         headers, payload = self._event_serializer.serialize(event)
         event_bytes = self._eventstream_serializer.serialize(headers, payload)
         self.input_stream.write(event_bytes)
-        self.input_stream.seek(0)
 
 
 class DecodeUtils:
@@ -450,7 +450,7 @@ class EventStreamMessage:
     def __init__(self, prelude, headers, payload, crc):
         self.prelude: MessagePrelude = prelude
         self.headers: Dict = headers
-        self.payload: BytesIO = payload
+        self.payload: BufferableByteStream = payload
         self.crc: int = crc
 
     def to_response_dict(self, status_code=200) -> Dict[str, Any]:

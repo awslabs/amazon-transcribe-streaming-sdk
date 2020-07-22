@@ -6,7 +6,7 @@ from transcribe.model import AudioEvent, AudioStream
 from transcribe.serialize import AudioEventSerializer
 
 
-async def json_from_body(response):
+async def exhaust_body(response, stream):
     response_body = BytesIO()
     while True:
         chunk = await response.get_chunk()
@@ -22,9 +22,7 @@ class TestClientStreaming:
     @pytest.mark.asyncio
     async def test_client_start_transcribe_stream(self):
         client = TranscribeStreamingClient("us-west-2")
-
-        audio_stream = AudioStream(AudioEventSerializer())
-        audio_stream.send_audio_event(b"test")
+        audio_stream = client.create_audio_stream()
 
         response = await client.start_transcribe_stream(
             language_code="en-US",
@@ -32,7 +30,11 @@ class TestClientStreaming:
             media_encoding="pcm",
             audio_stream=audio_stream,
         )
-        body = await json_from_body(response)
+
+        audio_stream.send_audio_event(b"test")
+        audio_stream.input_stream.end_stream()
+
+        body = await exhaust_body(response, audio_stream)
         headers = await response.headers
         status = await response.status_code
         assert status == 200

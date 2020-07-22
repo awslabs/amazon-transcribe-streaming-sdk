@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from awscrt.http import HttpHeaders, HttpRequest
 from awscrt.auth import (
     AwsCredentialsProvider,
