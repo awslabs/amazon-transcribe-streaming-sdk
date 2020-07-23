@@ -9,24 +9,18 @@ from awscrt.auth import (
 from awscrt.http import HttpRequest, HttpHeaders
 import pytest
 
+from transcribe.auth import StaticCredentialResolver
 from transcribe.request import Request
 from transcribe.signer import (
-    CredentialsProvider,
     RequestSigner,
     SigV4RequestSigner,
     _convert_request,
 )
 
 
-def test_signing_config_creation():
-    cred_provider = CredentialsProvider().get_provider(
-        "test", "secret-123", "session-123"
-    )
-    assert isinstance(cred_provider, AwsCredentialsProvider)
-    creds = cred_provider.get_credentials().result()
-    assert creds.access_key_id == "test"
-    assert creds.secret_access_key == "secret-123"
-    assert creds.session_token == "session-123"
+@pytest.fixture
+def default_credential_resolver():
+    return StaticCredentialResolver("test", "53cr37", "12345")
 
 
 def test_convert_request():
@@ -50,12 +44,8 @@ def test_convert_request():
 
 
 @pytest.mark.asyncio
-async def test_default_request_signer():
-    cred_provider = CredentialsProvider().get_provider(
-        "test", "secret-123", "session-123"
-    )
-
-    signer = RequestSigner("transcribe", "us-west-2", cred_provider)
+async def test_default_request_signer(default_credential_resolver):
+    signer = RequestSigner("transcribe", "us-west-2")
 
     request = Request(
         endpoint="https://transcribestreaming.amazonaws.com",
@@ -67,18 +57,14 @@ async def test_default_request_signer():
     ).prepare()
 
     assert request.headers == {"x-test-header": "test-transcribe-0.0.1"}
-    request = signer.sign(request)
+    request = signer.sign(request, default_credential_resolver)
     assert "Authorization" in request.headers
     assert "X-Amz-Date" in request.headers
 
 
 @pytest.mark.asyncio
-async def test_sigv4_request_signer():
-    cred_provider = CredentialsProvider().get_provider(
-        "test", "secret-123", "session-123"
-    )
-
-    signer = SigV4RequestSigner("transcribe", "us-west-2", cred_provider)
+async def test_sigv4_request_signer(default_credential_resolver):
+    signer = SigV4RequestSigner("transcribe", "us-west-2")
     assert signer.algorithm == AwsSigningAlgorithm.V4
     assert signer.signature_type == AwsSignatureType.HTTP_REQUEST_HEADERS
 
@@ -92,7 +78,7 @@ async def test_sigv4_request_signer():
     ).prepare()
 
     assert request.headers == {"x-test-header": "test-transcribe-0.0.1"}
-    request = signer.sign(request)
+    request = signer.sign(request, default_credential_resolver)
     assert "Authorization" in request.headers
     assert "X-Amz-Date" in request.headers
     assert "x-test-header" in request.headers

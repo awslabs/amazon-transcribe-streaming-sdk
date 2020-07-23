@@ -3,6 +3,7 @@ import re
 from binascii import unhexlify
 
 from transcribe import AWSCRTEventLoop
+from transcribe.auth import AwsCrtCredentialResolver, CredentialResolver
 from transcribe.endpoints import (
     BaseEndpointResolver,
     _TranscribeRegionEndpointResolver,
@@ -21,24 +22,12 @@ from transcribe.serialize import (
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
-from transcribe.signer import CredentialsProvider, SigV4RequestSigner
+from transcribe.signer import SigV4RequestSigner
 
 
 def create_client(region="us-east-2", endpoint_resolver=None):
     """Helper function for easy default client setup"""
     return TranscribeStreamingClient(region, endpoint_resolver)
-
-
-def create_default_signer(region):
-    """Helper function for simple SigV4 signing"""
-    access_key = os.environ.get("AWS_ACCESS_KEY_ID")
-    secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    session_token = os.environ.get("AWS_SESSION_TOKEN")
-    cred_provider = CredentialsProvider().get_provider(
-        access_key, secret_key, session_token
-    )
-
-    return SigV4RequestSigner("transcribe", region, cred_provider)
 
 
 # TODO unjank credentials
@@ -62,7 +51,10 @@ class TranscribeStreamingClient:
     """
 
     def __init__(
-        self, region, endpoint_resolver=None, credentials=None, eventloop=None
+        self,
+        region,
+        endpoint_resolver=None,
+        credential_resolver=None
     ):
         if endpoint_resolver is None:
             endpoint_resolver = _TranscribeRegionEndpointResolver()
@@ -70,9 +62,10 @@ class TranscribeStreamingClient:
         self.service_name: str = "transcribe"
         self.region: str = region
         self._event_signer: EventSigner = create_default_event_signer(self.region)
-        if eventloop is None:
-            eventloop = AWSCRTEventLoop().bootstrap
-        self._eventloop = eventloop
+        self._eventloop = AWSCRTEventLoop().bootstrap
+        if credential_resolver is None:
+            credential_resolver = AwsCrtCredentialResolver(self._eventloop)
+        self._credential_resolver = credential_resolver
 
     async def start_transcribe_stream(
         self,
@@ -94,13 +87,13 @@ class TranscribeStreamingClient:
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
         self._serializer = TranscribeStreamingRequestSerializer(
-            endpoint=endpoint,
-            transcribe_request=transcribe_streaming_request,
+            endpoint=endpoint, transcribe_request=transcribe_streaming_request,
         )
-
-        signer = create_default_signer(self.region)
         request = self._serializer.serialize_to_request()
-        signed_request = signer.sign(request)
+
+        creds = await self._credential_resolver.get_credentials()
+        signer = SigV4RequestSigner("transcribe", self.region)
+        signed_request = signer.sign(request, creds)
 
         session = AwsCrtHttpSessionManager(self._eventloop)
 
