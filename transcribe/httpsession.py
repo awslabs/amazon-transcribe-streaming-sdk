@@ -80,13 +80,9 @@ class AwsCrtHttpSessionManager:
     _HTTPS_PORT = 443
     HTTP_CONNECTION_CLS = http.HttpClientConnection
 
-    def __init__(self):
+    def __init__(self, eventloop):
         # TODO: accept an AWSEventLoop object or similar
-        event_loop_group = io.EventLoopGroup(1)
-        host_resolver = io.DefaultHostResolver(event_loop_group)
-        self._client_bootstrap = io.ClientBootstrap(
-            event_loop_group, host_resolver,
-        )
+        self._client_bootstrap = eventloop
         self._tls_ctx = io.ClientTlsContext(io.TlsContextOptions())
         self._socket_options = io.SocketOptions()
         self._connections = {}

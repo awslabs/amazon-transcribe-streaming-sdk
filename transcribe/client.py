@@ -2,6 +2,7 @@ import os
 import re
 from binascii import unhexlify
 
+from transcribe import AWSCRTEventLoop
 from transcribe.endpoints import (
     BaseEndpointResolver,
     _TranscribeRegionEndpointResolver,
@@ -61,16 +62,17 @@ class TranscribeStreamingClient:
     """
 
     def __init__(
-        self, region, endpoint_resolver=None, serializer=None, signer=None,
+        self, region, endpoint_resolver=None, credentials=None, eventloop=None
     ):
         if endpoint_resolver is None:
             endpoint_resolver = _TranscribeRegionEndpointResolver()
         self._endpoint_resolver: BaseEndpointResolver = endpoint_resolver
         self.service_name: str = "transcribe"
         self.region: str = region
-        self._serializer: Optional[Serializer] = serializer
-        self._signer: Optional[RequestSigner] = signer
         self._event_signer: EventSigner = create_default_event_signer(self.region)
+        if eventloop is None:
+            eventloop = AWSCRTEventLoop().bootstrap
+        self._eventloop = eventloop
 
     async def start_transcribe_stream(
         self,
@@ -91,20 +93,16 @@ class TranscribeStreamingClient:
             vocab_filter_method,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
-        if self._serializer is None:
-            self._serializer = TranscribeStreamingRequestSerializer(
-                endpoint=endpoint,
-                transcribe_request=transcribe_streaming_request,
-            )
+        self._serializer = TranscribeStreamingRequestSerializer(
+            endpoint=endpoint,
+            transcribe_request=transcribe_streaming_request,
+        )
 
+        signer = create_default_signer(self.region)
         request = self._serializer.serialize_to_request()
+        signed_request = signer.sign(request)
 
-        if self._signer is None:
-            self._signer = create_default_signer(self.region)
-
-        signed_request = self._signer.sign(request)
-
-        session = AwsCrtHttpSessionManager()
+        session = AwsCrtHttpSessionManager(self._eventloop)
 
         response = await session.make_request(
             signed_request.uri,

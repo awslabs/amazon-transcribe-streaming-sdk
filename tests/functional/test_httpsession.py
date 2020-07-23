@@ -5,6 +5,7 @@ import pytest
 from io import BytesIO
 from awscrt import io, http
 from concurrent.futures import Future
+from tests import default_eventloop
 from transcribe.exceptions import HTTPException
 from transcribe.httpsession import AwsCrtHttpSessionManager
 
@@ -35,7 +36,7 @@ def mock_connection_cls(mock_connection):
 
 @pytest.fixture
 def session_manager(mock_connection_cls):
-    session_manager = AwsCrtHttpSessionManager()
+    session_manager = AwsCrtHttpSessionManager(default_eventloop)
     session_manager.HTTP_CONNECTION_CLS = mock_connection_cls
     return session_manager
 
