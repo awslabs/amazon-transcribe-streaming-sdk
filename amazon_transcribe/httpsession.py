@@ -7,8 +7,8 @@ from awscrt import io, http
 from concurrent.futures import Future
 from typing import Optional, List, Tuple, Union, Awaitable, Dict, AsyncGenerator
 
-from transcribe.exceptions import HTTPException
-from transcribe.response import Response
+from amazon_transcribe.exceptions import HTTPException
+from amazon_transcribe.response import Response
 
 HeadersList = List[Tuple[str, str]]
 

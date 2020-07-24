@@ -1,6 +1,6 @@
 import pytest
 
-from transcribe.auth import StaticCredentialResolver
+from amazon_transcribe.auth import StaticCredentialResolver
 
 
 class TestCredentialResolvers:

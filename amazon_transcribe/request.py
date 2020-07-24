@@ -3,7 +3,7 @@ from io import BufferedIOBase, BytesIO
 from typing import Dict, List, Optional, Tuple, Union
 import json
 
-from transcribe.exceptions import ValidationException
+from amazon_transcribe.exceptions import ValidationException
 
 
 class _HeaderKey:

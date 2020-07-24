@@ -1,8 +1,8 @@
 from urllib.parse import urlsplit
 from typing import Dict, Union
 
-from transcribe import __version__ as version
-from transcribe.exceptions import ValidationException
+from amazon_transcribe import __version__ as version
+from amazon_transcribe.exceptions import ValidationException
 
 HEADER_VALUE = Union[int, None, str]
 

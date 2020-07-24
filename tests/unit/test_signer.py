@@ -9,9 +9,9 @@ from awscrt.auth import (
 from awscrt.http import HttpRequest, HttpHeaders
 import pytest
 
-from transcribe.auth import StaticCredentialResolver
-from transcribe.request import Request
-from transcribe.signer import (
+from amazon_transcribe.auth import StaticCredentialResolver
+from amazon_transcribe.request import Request
+from amazon_transcribe.signer import (
     RequestSigner,
     SigV4RequestSigner,
     _convert_request,

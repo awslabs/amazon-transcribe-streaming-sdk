@@ -2,9 +2,9 @@ from io import BytesIO
 import asyncio
 import pytest
 
-from transcribe.model import TranscriptEvent
-from transcribe.client import TranscribeStreamingClient
-from transcribe.exceptions import BadRequestException
+from amazon_transcribe.model import TranscriptEvent
+from amazon_transcribe.client import TranscribeStreamingClient
+from amazon_transcribe.exceptions import BadRequestException
 from tests.integration import TEST_WAV_PATH
 
 

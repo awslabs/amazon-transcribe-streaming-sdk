@@ -1,11 +1,11 @@
 from io import BufferedIOBase, BytesIO
 from typing import Dict, List, Tuple, Union
 
-from transcribe.model import AudioEvent, StartStreamTranscriptionRequest
-from transcribe.exceptions import ValidationException
-from transcribe.request import PreparedRequest, Request
-from transcribe.structures import BufferableByteStream
-from transcribe.utils import _add_required_headers
+from amazon_transcribe.model import AudioEvent, StartStreamTranscriptionRequest
+from amazon_transcribe.exceptions import ValidationException
+from amazon_transcribe.request import PreparedRequest, Request
+from amazon_transcribe.structures import BufferableByteStream
+from amazon_transcribe.utils import _add_required_headers
 
 HEADER_VALUE = Union[int, None, str]
 

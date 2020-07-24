@@ -1,7 +1,7 @@
 from io import BytesIO
 import pytest
 
-from transcribe.request import Request, PreparedRequest, HeadersDict
+from amazon_transcribe.request import Request, PreparedRequest, HeadersDict
 
 
 class TestRequest:

@@ -1,6 +1,6 @@
 import pytest
 
-from transcribe.endpoints import (
+from amazon_transcribe.endpoints import (
     BaseEndpointResolver,
     StaticEndpointResolver,
     _TranscribeRegionEndpointResolver,

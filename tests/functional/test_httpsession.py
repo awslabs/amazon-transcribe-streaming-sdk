@@ -5,8 +5,8 @@ import pytest
 from io import BytesIO
 from awscrt import io, http
 from concurrent.futures import Future
-from transcribe.exceptions import HTTPException
-from transcribe.httpsession import AwsCrtHttpSessionManager
+from amazon_transcribe.exceptions import HTTPException
+from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
 
 
 @pytest.fixture

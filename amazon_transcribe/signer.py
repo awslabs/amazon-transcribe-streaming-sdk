@@ -8,8 +8,8 @@ from awscrt.auth import (
     AwsSignedBodyHeaderType,
     aws_sign_request,
 )
-from transcribe.auth import Credentials
-from transcribe.request import PreparedRequest, HeadersDict
+from amazon_transcribe.auth import Credentials
+from amazon_transcribe.request import PreparedRequest, HeadersDict
 
 
 class RequestSigner:

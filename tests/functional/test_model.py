@@ -1,11 +1,11 @@
 import pytest
 
 from mock import Mock
-from transcribe.auth import StaticCredentialResolver
-from transcribe.model import AudioStream
-from transcribe.serialize import AudioEventSerializer
-from transcribe.structures import BufferableByteStream
-from transcribe.eventstream import EventSigner, EventStreamBuffer
+from amazon_transcribe.auth import StaticCredentialResolver
+from amazon_transcribe.model import AudioStream
+from amazon_transcribe.serialize import AudioEventSerializer
+from amazon_transcribe.structures import BufferableByteStream
+from amazon_transcribe.eventstream import EventSigner, EventStreamBuffer
 
 
 @pytest.fixture

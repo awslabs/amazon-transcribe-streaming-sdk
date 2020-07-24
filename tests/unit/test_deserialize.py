@@ -2,14 +2,14 @@ import json
 import pytest
 from mock import Mock
 
-from transcribe.request import HeadersDict
-from transcribe.response import Response
-from transcribe.deserialize import (
+from amazon_transcribe.request import HeadersDict
+from amazon_transcribe.response import Response
+from amazon_transcribe.deserialize import (
     TranscribeStreamingResponseParser,
     TranscribeStreamingEventParser,
 )
-from transcribe.eventstream import EventStreamMessage
-from transcribe.exceptions import (
+from amazon_transcribe.eventstream import EventStreamMessage
+from amazon_transcribe.exceptions import (
     ServiceException,
     BadRequestException,
     ConflictException,

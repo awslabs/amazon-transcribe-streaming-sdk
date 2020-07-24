@@ -13,9 +13,9 @@
 import json
 from typing import Optional, Dict, Type, Any, List
 
-import transcribe.exceptions as transcribe_exceptions
-from transcribe.eventstream import BaseEvent
-from transcribe.model import (
+import amazon_transcribe.exceptions as transcribe_exceptions
+from amazon_transcribe.eventstream import BaseEvent
+from amazon_transcribe.model import (
     StartStreamTranscriptionResponse,
     TranscriptResultStream,
     TranscriptEvent,
@@ -24,8 +24,8 @@ from transcribe.model import (
     Alternative,
     Item,
 )
-from transcribe.response import Response
-from transcribe.exceptions import (
+from amazon_transcribe.response import Response
+from amazon_transcribe.exceptions import (
     ServiceException,
     BadRequestException,
     ConflictException,

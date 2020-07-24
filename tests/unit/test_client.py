@@ -1,4 +1,4 @@
-from transcribe.client import TranscribeStreamingClient, create_client
+from amazon_transcribe.client import TranscribeStreamingClient, create_client
 
 
 class TestClientSetup:

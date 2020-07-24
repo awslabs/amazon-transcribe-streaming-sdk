@@ -2,7 +2,7 @@ from io import BytesIO
 
 import pytest
 
-from transcribe.structures import BufferableByteStream
+from amazon_transcribe.structures import BufferableByteStream
 
 
 @pytest.fixture()

@@ -14,8 +14,8 @@
 import re
 from typing import Dict, Optional, Tuple, Union, List
 
-from transcribe.exceptions import ValidationException
-from transcribe.eventstream import BaseEvent, BaseStream, EventStream
+from amazon_transcribe.exceptions import ValidationException
+from amazon_transcribe.eventstream import BaseEvent, BaseStream, EventStream
 
 
 class Alternative:

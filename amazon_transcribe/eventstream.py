@@ -18,7 +18,7 @@ from typing import Any, Callable, Dict, AsyncGenerator, Optional, Tuple, Union, 
 from binascii import crc32
 from struct import unpack, pack
 
-from transcribe.structures import BufferableByteStream
+from amazon_transcribe.structures import BufferableByteStream
 
 
 # TODO: move this to another module when we fix structure
@@ -26,7 +26,7 @@ from transcribe.structures import BufferableByteStream
 import hmac
 from hashlib import sha256
 from binascii import hexlify
-from transcribe.auth import Credentials
+from amazon_transcribe.auth import Credentials
 
 
 # byte length of the prelude (total_length + header_length + prelude_crc)

@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 from typing import Optional, Dict
 
-from transcribe.request import HeadersDict
+from amazon_transcribe.request import HeadersDict
 
 
 class Response:

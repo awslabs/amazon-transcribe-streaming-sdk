@@ -17,8 +17,8 @@ import pytest
 import uuid
 import datetime
 
-from transcribe.auth import Credentials
-from transcribe.eventstream import (
+from amazon_transcribe.auth import Credentials
+from amazon_transcribe.eventstream import (
     EventSigner,
     EventStreamMessage,
     MessagePrelude,

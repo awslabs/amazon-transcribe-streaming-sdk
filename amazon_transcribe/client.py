@@ -2,30 +2,30 @@ import os
 import re
 from binascii import unhexlify
 
-from transcribe import AWSCRTEventLoop
-from transcribe.auth import AwsCrtCredentialResolver, CredentialResolver
-from transcribe.endpoints import (
+from amazon_transcribe import AWSCRTEventLoop
+from amazon_transcribe.auth import AwsCrtCredentialResolver, CredentialResolver
+from amazon_transcribe.endpoints import (
     BaseEndpointResolver,
     _TranscribeRegionEndpointResolver,
 )
-from transcribe.eventstream import EventStreamMessageSerializer
-from transcribe.eventstream import EventSigner
-from transcribe.exceptions import ValidationException
-from transcribe.httpsession import AwsCrtHttpSessionManager
-from transcribe.model import (
+from amazon_transcribe.eventstream import EventStreamMessageSerializer
+from amazon_transcribe.eventstream import EventSigner
+from amazon_transcribe.exceptions import ValidationException
+from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
+from amazon_transcribe.model import (
     AudioEvent,
     AudioStream,
     StartStreamTranscriptionRequest,
     StartStreamTranscriptionResponse,
     StartStreamTranscriptionEventStream,
 )
-from transcribe.serialize import (
+from amazon_transcribe.serialize import (
     AudioEventSerializer,
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
-from transcribe.deserialize import TranscribeStreamingResponseParser
-from transcribe.signer import SigV4RequestSigner
+from amazon_transcribe.deserialize import TranscribeStreamingResponseParser
+from amazon_transcribe.signer import SigV4RequestSigner
 
 
 def create_client(region="us-east-2", endpoint_resolver=None):

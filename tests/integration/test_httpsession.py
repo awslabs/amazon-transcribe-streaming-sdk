@@ -3,7 +3,7 @@ import json
 import pytest
 
 from io import BytesIO
-from transcribe.httpsession import AwsCrtHttpSessionManager
+from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
 
 
 async def json_from_body(response):

@@ -1,6 +1,6 @@
 import pytest
 
-from transcribe import AWSCRTEventLoop
+from amazon_transcribe import AWSCRTEventLoop
 
 
 @pytest.fixture

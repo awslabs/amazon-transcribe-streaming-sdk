@@ -1,16 +1,16 @@
 import pytest
 
-from transcribe.exceptions import ValidationException
-from transcribe.model import (
+from amazon_transcribe.exceptions import ValidationException
+from amazon_transcribe.model import (
     AudioEvent,
     StartStreamTranscriptionRequest,
 )
-from transcribe.serialize import (
+from amazon_transcribe.serialize import (
     AudioEventSerializer,
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
-from transcribe.structures import BufferableByteStream
+from amazon_transcribe.structures import BufferableByteStream
 
 
 @pytest.fixture
