@@ -3,7 +3,6 @@ import json
 import pytest
 
 from io import BytesIO
-from tests import default_eventloop
 from transcribe.httpsession import AwsCrtHttpSessionManager
 
 
@@ -21,7 +20,6 @@ async def json_from_body(response):
 
 
 @pytest.mark.asyncio
-@pytest.mark.usefixtures("default_eventloop")
 async def test_make_request(default_eventloop):
     session = AwsCrtHttpSessionManager(default_eventloop)
     url = "https://httpbin.org/anything"

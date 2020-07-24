@@ -30,38 +30,22 @@ def create_client(region="us-east-2", endpoint_resolver=None):
     return TranscribeStreamingClient(region, endpoint_resolver)
 
 
-# TODO unjank credentials
-def create_default_event_signer(region: str) -> EventSigner:
-    """Helper function for simple SigV4 signing"""
-    access_key = os.environ.get("AWS_ACCESS_KEY_ID")
-    secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    session_token = os.environ.get("AWS_SESSION_TOKEN")
-    from collections import namedtuple
-
-    Credentials = namedtuple(
-        "Creds", ["access_key", "secret_key", "session_token"]
-    )
-    creds = Credentials(access_key, secret_key, session_token)
-    return EventSigner("transcribe", region, creds)
-
-
 class TranscribeStreamingClient:
     """High level client for orchestrating setup and transmission of audio
     streams to Amazon TranscribeStreaming service.
     """
 
     def __init__(
-        self,
-        region,
-        endpoint_resolver=None,
-        credential_resolver=None
+        self, region, endpoint_resolver=None, credential_resolver=None
     ):
         if endpoint_resolver is None:
             endpoint_resolver = _TranscribeRegionEndpointResolver()
         self._endpoint_resolver: BaseEndpointResolver = endpoint_resolver
         self.service_name: str = "transcribe"
         self.region: str = region
-        self._event_signer: EventSigner = create_default_event_signer(self.region)
+        self._event_signer: EventSigner = EventSigner(
+            self.service_name, self.region
+        )
         self._eventloop = AWSCRTEventLoop().bootstrap
         if credential_resolver is None:
             credential_resolver = AwsCrtCredentialResolver(self._eventloop)
@@ -118,6 +102,7 @@ class TranscribeStreamingClient:
             eventstream_serializer=EventStreamMessageSerializer(),
             event_signer=self._event_signer,
             initial_signature=initial_signature,
+            credential_resolver=self._credential_resolver,
         )
 
     def _extract_signature(self, signed_request):

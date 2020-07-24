@@ -1,13 +1,15 @@
 import asyncio
 from typing import Optional
 
-from awscrt.auth import AwsCredentials, AwsCredentialsProvider
+from awscrt.auth import AwsCredentialsProvider
 
 
-class Credentials(AwsCredentials):
-    """Wrapper for CRT Credentials internals"""
-
-    pass
+class Credentials:
+    def __init__(self, access_key_id: str, secret_access_key: str,
+            session_token: Optional[str]=None):
+        self.access_key_id = access_key_id
+        self.secret_access_key = secret_access_key
+        self.session_token = session_token
 
 
 class CredentialResolver:

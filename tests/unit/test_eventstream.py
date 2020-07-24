@@ -17,6 +17,7 @@ import pytest
 import uuid
 import datetime
 
+from transcribe.auth import Credentials
 from transcribe.eventstream import (
     EventSigner,
     EventStreamMessage,
@@ -675,16 +676,12 @@ class TestEventStreamMessageSerializer:
 class TestEventSigner:
     @pytest.fixture
     def credentials(self):
-        mock_creds = Mock()
-        mock_creds.access_key = "foo"
-        mock_creds.secret_key = "bar"
-        mock_creds.session_token = None
-        return mock_creds
+        return Credentials("foo", "bar", None)
 
     @pytest.fixture
-    def event_signer(self, credentials):
+    def event_signer(self):
         return EventSigner(
-            "signing-name", "region-name", credentials, utc_now=self.utc_now,
+            "signing-name", "region-name", utc_now=self.utc_now,
         )
 
     def utc_now(self):
@@ -692,8 +689,8 @@ class TestEventSigner:
             2020, 7, 23, 22, 39, 55, 29943, tzinfo=datetime.timezone.utc
         )
 
-    def test_basic_event_signature(self, event_signer):
-        signed_headers = event_signer.sign(b"message", b"prior")
+    def test_basic_event_signature(self, event_signer, credentials):
+        signed_headers = event_signer.sign(b"message", b"prior", credentials)
         assert signed_headers[":date"] == self.utc_now()
         expected_signature = (
             b"\x0e\xf5n\xbf\x8cW\x0b>\xf3\xdc\x9fA\x99^\xd17\xcd"

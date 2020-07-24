@@ -27,8 +27,8 @@ class TestClientStreaming:
             media_encoding="pcm",
         )
 
-        audio_stream.send_audio_event(audio_chunk=b"test")
-        audio_stream.end_stream()
+        await audio_stream.send_audio_event(audio_chunk=b"test")
+        await audio_stream.end_stream()
 
         body = await exhaust_body(response, audio_stream)
         headers = await response.headers

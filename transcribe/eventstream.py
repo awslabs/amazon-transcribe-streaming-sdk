@@ -26,6 +26,7 @@ from transcribe.structures import BufferableByteStream
 import hmac
 from hashlib import sha256
 from binascii import hexlify
+from transcribe.auth import Credentials
 
 
 # byte length of the prelude (total_length + header_length + prelude_crc)
@@ -276,6 +277,7 @@ class BaseStream:
         eventstream_serializer=None,
         event_signer=None,
         initial_signature=None,
+        credential_resolver=None,
     ):
         if input_stream is None:
             input_stream = BufferableByteStream()
@@ -286,21 +288,23 @@ class BaseStream:
         self._eventstream_serializer = eventstream_serializer
         self._event_signer = event_signer
         self._prior_signature = initial_signature
+        self._credential_resolver = credential_resolver
 
-    def send_event(self, event: BaseEvent):
+    async def send_event(self, event: BaseEvent):
         headers, payload = self._event_serializer.serialize(event)
         event_bytes = self._eventstream_serializer.serialize(headers, payload)
-        signed_bytes = self._sign_event(event_bytes)
+        signed_bytes = await self._sign_event(event_bytes)
         self._input_stream.write(signed_bytes)
 
-    def end_stream(self):
-        signed_bytes = self._sign_event(b"")
+    async def end_stream(self):
+        signed_bytes = await self._sign_event(b"")
         self._input_stream.write(signed_bytes)
         self._input_stream.end_stream()
 
-    def _sign_event(self, event_bytes):
+    async def _sign_event(self, event_bytes):
+        creds = await self._credential_resolver.get_credentials()
         signed_headers = self._event_signer.sign(
-            event_bytes, self._prior_signature
+            event_bytes, self._prior_signature, creds
         )
         self._prior_signature = signed_headers.get(":chunk-signature")
         return self._eventstream_serializer.serialize(
@@ -719,22 +723,17 @@ class EventSigner:
     _NOW_TYPE = Optional[Callable[[], datetime.datetime]]
 
     def __init__(
-        self,
-        signing_name: str,
-        region: str,
-        credentials,
-        utc_now: _NOW_TYPE = None,
+        self, signing_name: str, region: str, utc_now: _NOW_TYPE = None,
     ):
         self.signing_name = signing_name
         self.region = region
-        self.credentials = credentials
         self.serializer = EventStreamMessageSerializer()
         if utc_now is None:
             utc_now = _utc_now
         self._utc_now = utc_now
 
     def sign(
-        self, payload: bytes, prior_signature: bytes
+        self, payload: bytes, prior_signature: bytes, credentials: Credentials
     ) -> HEADERS_SERIALIZATION_DICT:
         now = self._utc_now()
         headers: HEADERS_SERIALIZATION_DICT = {
@@ -744,7 +743,9 @@ class EventSigner:
         string_to_sign = self._string_to_sign(
             timestamp, headers, payload, prior_signature
         )
-        event_signature = self._sign_event(timestamp, string_to_sign)
+        event_signature = self._sign_event(
+            timestamp, string_to_sign, credentials
+        )
         headers[":chunk-signature"] = event_signature
         return headers
 
@@ -778,8 +779,10 @@ class EventSigner:
     def _hmac(self, key: bytes, msg: bytes) -> bytes:
         return hmac.new(key, msg, sha256).digest()
 
-    def _sign_event(self, timestamp: str, string_to_sign: str) -> bytes:
-        key = self.credentials.secret_key.encode("utf-8")
+    def _sign_event(
+        self, timestamp: str, string_to_sign: str, credentials: Credentials
+    ) -> bytes:
+        key = credentials.secret_access_key.encode("utf-8")
         today = timestamp[:8].encode("utf-8")  # Only using the YYYYMMDD
         k_date = self._hmac(b"AWS4" + key, today)
         k_region = self._hmac(k_date, self.region.encode("utf-8"))

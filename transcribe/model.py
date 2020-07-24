@@ -43,9 +43,9 @@ class AudioEvent(BaseEvent):
 
 
 class AudioStream(BaseStream):
-    def send_audio_event(self, audio_chunk: Optional[bytes]):
+    async def send_audio_event(self, audio_chunk: Optional[bytes]):
         audio_event = AudioEvent(audio_chunk)
-        super().send_event(audio_event)
+        await super().send_event(audio_event)
 
 
 class Item:
