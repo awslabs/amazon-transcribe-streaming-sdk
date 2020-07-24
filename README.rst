@@ -1,1 +1,0 @@
-Amazon Transcribe Streaming SDK

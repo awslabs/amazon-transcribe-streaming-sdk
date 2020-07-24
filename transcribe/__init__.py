@@ -1,4 +1,4 @@
-__version__ = "0.0.1dev"
+__version__ = "0.1.0dev"
 
 from awscrt.io import ClientBootstrap, DefaultHostResolver, EventLoopGroup
 
