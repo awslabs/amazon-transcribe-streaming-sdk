@@ -11,7 +11,7 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
-from typing import Optional, Dict, Type, Any, List
+from typing import Optional, Type, Any, List
 
 import amazon_transcribe.exceptions as transcribe_exceptions
 from amazon_transcribe.eventstream import BaseEvent

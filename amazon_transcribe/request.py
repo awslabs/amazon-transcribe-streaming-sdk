@@ -1,9 +1,13 @@
 from collections.abc import MutableMapping
 from io import BufferedIOBase, BytesIO
-from typing import Dict, List, Optional, Tuple, Union
-import json
+from typing import Dict, List, Tuple, Union
 
 from amazon_transcribe.exceptions import ValidationException
+
+
+LIST_TYPE = Union[Tuple[str, ...], List[str]]
+HEADER_VALUE_TYPE = Union[str, LIST_TYPE]
+BODY_TYPE = Union[BytesIO, BufferedIOBase]
 
 
 class _HeaderKey:
@@ -26,9 +30,6 @@ class _HeaderKey:
 
 class HeadersDict(MutableMapping):
     """A case-insenseitive dictionary to represent HTTP headers."""
-
-    LIST_TYPE = Union[Tuple[str, ...], List[str]]
-    HEADER_VALUE_TYPE = Union[str, LIST_TYPE]
 
     def __init__(self, *args, **kwargs):
         self._dict: Dict = {}
@@ -86,8 +87,6 @@ class HeadersDict(MutableMapping):
 
 
 class Request:
-    BODY_TYPE = Union[BytesIO, BufferedIOBase]
-
     def __init__(
         self, endpoint, path="/", method="GET", headers=None, body=None, params=None,
     ):

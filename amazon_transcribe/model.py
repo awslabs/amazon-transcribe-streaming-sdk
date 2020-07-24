@@ -11,10 +11,8 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import re
-from typing import Dict, Optional, Tuple, Union, List
+from typing import Optional, List
 
-from amazon_transcribe.exceptions import ValidationException
 from amazon_transcribe.eventstream import BaseEvent, BaseStream, EventStream
 
 
@@ -57,7 +55,7 @@ class Item:
 
 class Result:
     def __init__(self, result_id, start_time, end_time, is_partial, alternatives):
-        self.result_id: Optiona[str] = result_id
+        self.result_id: Optional[str] = result_id
         self.start_time: Optional[float] = start_time
         self.end_time: Optional[float] = end_time
         self.is_partial: Optional[bool] = is_partial

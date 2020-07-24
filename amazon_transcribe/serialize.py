@@ -1,11 +1,15 @@
-from io import BufferedIOBase, BytesIO
-from typing import Dict, List, Tuple, Union
+from io import BufferedIOBase
+from typing import Dict, Tuple, Union
 
-from amazon_transcribe.model import AudioEvent, StartStreamTranscriptionRequest
-from amazon_transcribe.exceptions import ValidationException
 from amazon_transcribe.request import PreparedRequest, Request
 from amazon_transcribe.structures import BufferableByteStream
 from amazon_transcribe.utils import _add_required_headers
+from amazon_transcribe.exceptions import SerializationException
+from amazon_transcribe.model import (
+    AudioEvent,
+    StartStreamTranscriptionRequest,
+    BaseEvent,
+)
 
 HEADER_VALUE = Union[int, None, str]
 
@@ -60,10 +64,25 @@ class TranscribeStreamingRequestSerializer(Serializer):
         return request.prepare()
 
 
-class AudioEventSerializer:
+SERIALIZED_EVENT = Tuple[Dict, bytes]
+
+
+class EventSerializer:
+    def serialize(self, audio_event: BaseEvent) -> SERIALIZED_EVENT:
+        raise NotImplementedError("serialize")
+
+
+class AudioEventSerializer(EventSerializer):
     """Convert AudioEvent objects into payload and header outputs for eventstreams"""
 
-    def serialize(self, audio_event: AudioEvent) -> Tuple[Dict[str, str], bytes]:
+    def serialize(self, event: BaseEvent) -> SERIALIZED_EVENT:
+        if isinstance(event, AudioEvent):
+            return self._serialize_audio_event(event)
+        raise SerializationException(
+            f'Unexpected event type encountered: "{type(event)}"'
+        )
+
+    def _serialize_audio_event(self, audio_event: AudioEvent):
         headers = {
             ":message-type": "event",
             ":event-type": "AudioEvent",

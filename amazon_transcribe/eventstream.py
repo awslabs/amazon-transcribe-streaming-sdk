@@ -263,7 +263,8 @@ class BaseStream:
         if input_stream is None:
             input_stream = BufferableByteStream()
         self._input_stream: BufferableByteStream = input_stream
-        self._event_serializer: Serializer = event_serializer
+        # TODO: Cant type due to circular import
+        self._event_serializer = event_serializer
         if eventstream_serializer is None:
             eventstream_serializer = EventStreamMessageSerializer()
         self._eventstream_serializer = eventstream_serializer

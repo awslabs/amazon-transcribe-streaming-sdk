@@ -16,9 +16,7 @@ from amazon_transcribe.request import HeadersDict
 
 
 class Response:
-    def __init__(
-        self, status_code: int = 500, headers: Optional[Dict] = None
-    ):
+    def __init__(self, status_code: int = 500, headers: Optional[Dict] = None):
         self.status_code = status_code
         if headers is None:
             headers = {}

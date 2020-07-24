@@ -1,3 +1,5 @@
+from typing import Optional
+
 from awscrt.http import HttpHeaders, HttpRequest
 from awscrt.auth import (
     AwsCredentialsProvider,
@@ -10,6 +12,7 @@ from awscrt.auth import (
 )
 from amazon_transcribe.auth import Credentials
 from amazon_transcribe.request import PreparedRequest, HeadersDict
+from amazon_transcribe.exceptions import CredentialsException
 
 
 class RequestSigner:
@@ -22,8 +25,10 @@ class RequestSigner:
         self.signature_type: int = signature_type
 
     def sign(
-        self, request: PreparedRequest, credentials: Credentials
+        self, request: PreparedRequest, credentials: Optional[Credentials]
     ) -> PreparedRequest:
+        if credentials is None:
+            raise CredentialsException("Failed to resolve credentials")
         alg = AwsSigningAlgorithm(self.algorithm)
         sig_type = AwsSignatureType(self.signature_type)
 

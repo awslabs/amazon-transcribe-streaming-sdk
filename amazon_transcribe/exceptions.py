@@ -63,3 +63,11 @@ class ServiceUnavailableException(ServiceException):
 
 class ValidationException(SDKError):
     """Encountered an issue validating a given value"""
+
+
+class SerializationException(SDKError):
+    """Encountered an issue when seralizing a request or event"""
+
+
+class CredentialsException(SDKError):
+    """Encountered an issue while resolving or using credentials"""

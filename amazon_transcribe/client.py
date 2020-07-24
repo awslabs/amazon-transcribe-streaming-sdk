@@ -1,4 +1,3 @@
-import os
 import re
 from binascii import unhexlify
 
@@ -10,13 +9,10 @@ from amazon_transcribe.endpoints import (
 )
 from amazon_transcribe.eventstream import EventStreamMessageSerializer
 from amazon_transcribe.eventstream import EventSigner
-from amazon_transcribe.exceptions import ValidationException
 from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
 from amazon_transcribe.model import (
-    AudioEvent,
     AudioStream,
     StartStreamTranscriptionRequest,
-    StartStreamTranscriptionResponse,
     StartStreamTranscriptionEventStream,
 )
 from amazon_transcribe.serialize import (
@@ -48,7 +44,7 @@ class TranscribeStreamingClient:
         self._eventloop = AWSCRTEventLoop().bootstrap
         if credential_resolver is None:
             credential_resolver = AwsCrtCredentialResolver(self._eventloop)
-        self._credential_resolver = credential_resolver
+        self._credential_resolver: CredentialResolver = credential_resolver
         self._response_parser = TranscribeStreamingResponseParser()
 
     async def start_stream_transcription(
@@ -70,7 +66,7 @@ class TranscribeStreamingClient:
             vocab_filter_method,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
-        self._serializer = TranscribeStreamingRequestSerializer(
+        self._serializer: Serializer = TranscribeStreamingRequestSerializer(
             endpoint=endpoint, transcribe_request=transcribe_streaming_request,
         )
         request = self._serializer.serialize_to_request()

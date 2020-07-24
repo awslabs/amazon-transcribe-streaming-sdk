@@ -16,6 +16,7 @@ from amazon_transcribe.signer import (
     SigV4RequestSigner,
     _convert_request,
 )
+from amazon_transcribe.exceptions import CredentialsException
 
 
 @pytest.fixture
@@ -41,8 +42,7 @@ def test_convert_request():
     assert crt_req.body_stream is not None
 
 
-@pytest.mark.asyncio
-async def test_default_request_signer(default_credential_resolver):
+def test_default_request_signer(default_credential_resolver):
     signer = RequestSigner("transcribe", "us-west-2")
 
     request = Request(
@@ -60,8 +60,7 @@ async def test_default_request_signer(default_credential_resolver):
     assert "X-Amz-Date" in request.headers
 
 
-@pytest.mark.asyncio
-async def test_sigv4_request_signer(default_credential_resolver):
+def test_sigv4_request_signer(default_credential_resolver):
     signer = SigV4RequestSigner("transcribe", "us-west-2")
     assert signer.algorithm == AwsSigningAlgorithm.V4
     assert signer.signature_type == AwsSignatureType.HTTP_REQUEST_HEADERS
@@ -80,3 +79,10 @@ async def test_sigv4_request_signer(default_credential_resolver):
     assert "Authorization" in request.headers
     assert "X-Amz-Date" in request.headers
     assert "x-test-header" in request.headers
+
+
+def test_sigv4_request_signer_handles_no_credentials():
+    signer = SigV4RequestSigner("transcribe", "us-west-2")
+    request = Request(endpoint="https://transcribestreaming.amazonaws.com",).prepare()
+    with pytest.raises(CredentialsException):
+        signer.sign(request, None)

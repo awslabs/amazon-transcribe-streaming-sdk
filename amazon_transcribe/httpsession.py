@@ -5,7 +5,7 @@ from threading import Lock
 from urllib.parse import urlparse, ParseResult
 from awscrt import io, http
 from concurrent.futures import Future
-from typing import Optional, List, Tuple, Union, Awaitable, Dict, AsyncGenerator
+from typing import Optional, List, Tuple, Union, Awaitable, AsyncGenerator
 
 from amazon_transcribe.exceptions import HTTPException
 from amazon_transcribe.response import Response
