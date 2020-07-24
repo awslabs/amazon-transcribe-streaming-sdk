@@ -80,12 +80,8 @@ class TranscribeStreamingResponseParser:
         media_encoding = headers.get("x-amzn-transcribe-media-encoding")
         vocabulary_name = headers.get("x-amzn-transcribe-vocabulary-name")
         session_id = headers.get("x-amzn-transcribe-session-id")
-        vocab_filter_name = headers.get(
-            "x-amzn-transcribe-vocabulary-filter-name"
-        )
-        vocab_filter_method = headers.get(
-            "x-amzn-transcribe-vocabulary-filter-method"
-        )
+        vocab_filter_name = headers.get("x-amzn-transcribe-vocabulary-filter-name")
+        vocab_filter_method = headers.get("x-amzn-transcribe-vocabulary-filter-method")
         media_sample_rate_hz = self._raw_value_to_int(
             headers.get("x-amzn-transcribe-sample-rate")
         )

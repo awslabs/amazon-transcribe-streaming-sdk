@@ -22,9 +22,7 @@ class TestClientStreaming:
         client = TranscribeStreamingClient("us-west-2")
 
         audio_stream, response = await client.start_transcribe_stream(
-            language_code="en-US",
-            media_sample_rate_hz=16000,
-            media_encoding="pcm",
+            language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
         )
 
         await audio_stream.send_audio_event(audio_chunk=b"test")
@@ -34,10 +32,7 @@ class TestClientStreaming:
         headers = await response.headers
         status = await response.status_code
         assert status == 200
-        assert (
-            "content-type",
-            "application/vnd.amazon.eventstream",
-        ) in headers
+        assert ("content-type", "application/vnd.amazon.eventstream",) in headers
 
         # The stream should have returned no events and end cleanly
         assert not body.read()

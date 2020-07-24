@@ -62,9 +62,7 @@ class BufferableByteStream(BufferedIOBase):
             )
 
         if self.closed or self.__done:
-            raise IOError(
-                "Stream is completed and doesn't support further writes."
-            )
+            raise IOError("Stream is completed and doesn't support further writes.")
 
         if b:
             self._byte_chunks.append(b)

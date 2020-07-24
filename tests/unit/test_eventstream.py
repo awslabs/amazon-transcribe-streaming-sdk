@@ -46,9 +46,7 @@ from transcribe.eventstream import (
 EMPTY_MESSAGE = (
     b"\x00\x00\x00\x10\x00\x00\x00\x00\x05\xc2H\xeb}\x98\xc8\xff",
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x10, headers_length=0, crc=0x05C248EB,
-        ),
+        prelude=MessagePrelude(total_length=0x10, headers_length=0, crc=0x05C248EB,),
         headers={},
         payload=b"",
         crc=0x7D98C8FF,
@@ -56,14 +54,9 @@ EMPTY_MESSAGE = (
 )
 
 INT8_HEADER = (
-    (
-        b"\x00\x00\x00\x17\x00\x00\x00\x07)\x86\x01X\x04"
-        b"byte\x02\xff\xc2\xf8i\xdc"
-    ),
+    (b"\x00\x00\x00\x17\x00\x00\x00\x07)\x86\x01X\x04" b"byte\x02\xff\xc2\xf8i\xdc"),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x17, headers_length=0x7, crc=0x29860158,
-        ),
+        prelude=MessagePrelude(total_length=0x17, headers_length=0x7, crc=0x29860158,),
         headers={"byte": -1},
         payload=b"",
         crc=0xC2F869DC,
@@ -71,14 +64,9 @@ INT8_HEADER = (
 )
 
 INT16_HEADER = (
-    (
-        b"\x00\x00\x00\x19\x00\x00\x00\tq\x0e\x92>\x05"
-        b"short\x03\xff\xff\xb2|\xb6\xcc"
-    ),
+    (b"\x00\x00\x00\x19\x00\x00\x00\tq\x0e\x92>\x05" b"short\x03\xff\xff\xb2|\xb6\xcc"),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x19, headers_length=0x9, crc=0x710E923E,
-        ),
+        prelude=MessagePrelude(total_length=0x19, headers_length=0x9, crc=0x710E923E,),
         headers={"short": -1},
         payload=b"",
         crc=0xB27CB6CC,
@@ -91,9 +79,7 @@ INT32_HEADER = (
         b"integer\x04\xff\xff\xff\xff\x8b\x8e\x12\xeb"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x1D, headers_length=0xD, crc=0x83E3F0E7,
-        ),
+        prelude=MessagePrelude(total_length=0x1D, headers_length=0xD, crc=0x83E3F0E7,),
         headers={"integer": -1},
         payload=b"",
         crc=0x8B8E12EB,
@@ -106,9 +92,7 @@ INT64_HEADER = (
         b"long\x05\xff\xff\xff\xff\xff\xff\xff\xffK\xc22\xda"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x1E, headers_length=0xE, crc=0x5D4ADB8D,
-        ),
+        prelude=MessagePrelude(total_length=0x1E, headers_length=0xE, crc=0x5D4ADB8D,),
         headers={"long": -1},
         payload=b"",
         crc=0x4BC232DA,
@@ -118,9 +102,7 @@ INT64_HEADER = (
 PAYLOAD_NO_HEADERS = (
     b"\x00\x00\x00\x1d\x00\x00\x00\x00\xfdR\x8cZ{'foo':'bar'}\xc3e96",
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x1D, headers_length=0, crc=0xFD528C5A,
-        ),
+        prelude=MessagePrelude(total_length=0x1D, headers_length=0, crc=0xFD528C5A,),
         headers={},
         payload=b"{'foo':'bar'}",
         crc=0xC3653936,
@@ -133,9 +115,7 @@ PAYLOAD_ONE_STR_HEADER = (
         b"application/json{'foo':'bar'}\x8d\x9c\x08\xb1"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x3D, headers_length=0x20, crc=0x07FD8396,
-        ),
+        prelude=MessagePrelude(total_length=0x3D, headers_length=0x20, crc=0x07FD8396,),
         headers={"content-type": "application/json"},
         payload=b"{'foo':'bar'}",
         crc=0x8D9C08B1,
@@ -152,9 +132,7 @@ ALL_HEADERS_TYPES = (
         b"\x63\x35\x36\x71"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x62, headers_length=0x52, crc=0x03B5CB9C,
-        ),
+        prelude=MessagePrelude(total_length=0x62, headers_length=0x52, crc=0x03B5CB9C,),
         headers={
             "0": True,
             "1": False,
@@ -181,9 +159,7 @@ ERROR_EVENT_MESSAGE = (
         b"\x6b\x6c\xea\x3d"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(
-            total_length=0x52, headers_length=0x42, crc=0xBF23637E,
-        ),
+        prelude=MessagePrelude(total_length=0x52, headers_length=0x42, crc=0xBF23637E,),
         headers={
             ":message-type": "error",
             ":error-code": "code",
@@ -680,9 +656,7 @@ class TestEventSigner:
 
     @pytest.fixture
     def event_signer(self):
-        return EventSigner(
-            "signing-name", "region-name", utc_now=self.utc_now,
-        )
+        return EventSigner("signing-name", "region-name", utc_now=self.utc_now,)
 
     def utc_now(self):
         return datetime.datetime(

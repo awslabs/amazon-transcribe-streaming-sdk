@@ -19,9 +19,7 @@ def request_serializer():
         language_code="en-US", media_sample_rate_hz=9000, media_encoding="pcm",
     )
 
-    return TranscribeStreamingRequestSerializer(
-        "https://transcribe.aws.com", req_shape
-    )
+    return TranscribeStreamingRequestSerializer("https://transcribe.aws.com", req_shape)
 
 
 class TestStartStreamTransactionRequest:

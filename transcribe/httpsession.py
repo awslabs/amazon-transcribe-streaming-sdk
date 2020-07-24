@@ -23,9 +23,7 @@ class AwsCrtHttpResponse:
 
     def _set_stream(self, stream: http.HttpClientStream):
         if self._stream is not None:
-            raise HTTPException(
-                "Stream already set on AwsCrtHttpResponse object"
-            )
+            raise HTTPException("Stream already set on AwsCrtHttpResponse object")
         self._stream = stream
         self._stream.completion_future.add_done_callback(self._on_complete)
         self._stream.activate()
@@ -163,8 +161,6 @@ class AwsCrtHttpSessionManager:
 
         connection = await self._get_connection(parsed_url)
         response = AwsCrtHttpResponse()
-        stream = connection.request(
-            request, response._on_headers, response._on_body,
-        )
+        stream = connection.request(request, response._on_headers, response._on_body,)
         response._set_stream(stream)
         return response

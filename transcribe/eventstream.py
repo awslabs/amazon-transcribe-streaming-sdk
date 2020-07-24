@@ -131,8 +131,7 @@ class HeaderValueBytesExceedMaxLength(SerializationError):
 class PayloadBytesExceedMaxLength(SerializationError):
     def __init__(self, length):
         message = (
-            f"Payload exceeded max serialization "
-            f"length of 16 MiB at {length} bytes"
+            f"Payload exceeded max serialization " f"length of 16 MiB at {length} bytes"
         )
         super(PayloadBytesExceedMaxLength, self).__init__(message)
 
@@ -182,9 +181,7 @@ HEADERS_SERIALIZATION_DICT = Dict[str, HEADER_SERIALIZATION_VALUE]
 class EventStreamMessageSerializer:
     DEFAULT_INT_TYPE: Type[HeaderValue] = Int32HeaderValue
 
-    def serialize(
-        self, headers: HEADERS_SERIALIZATION_DICT, payload: bytes
-    ) -> bytes:
+    def serialize(self, headers: HEADERS_SERIALIZATION_DICT, payload: bytes) -> bytes:
         # TODO: Investigate preformance of this once we can make requests
         if len(payload) > _MAX_PAYLOAD_LENGTH:
             raise PayloadBytesExceedMaxLength(len(payload))
@@ -307,9 +304,7 @@ class BaseStream:
             event_bytes, self._prior_signature, creds
         )
         self._prior_signature = signed_headers.get(":chunk-signature")
-        return self._eventstream_serializer.serialize(
-            signed_headers, event_bytes
-        )
+        return self._eventstream_serializer.serialize(signed_headers, event_bytes)
 
 
 class DecodeUtils:
@@ -390,9 +385,7 @@ class DecodeUtils:
         return value, 8
 
     @staticmethod
-    def unpack_byte_array(
-        data: bytes, length_byte_size=2
-    ) -> Tuple[bytes, int]:
+    def unpack_byte_array(data: bytes, length_byte_size=2) -> Tuple[bytes, int]:
         """Parse a variable length byte array from the bytes.
 
         The bytes are expected to be in the following format:
@@ -416,9 +409,7 @@ class DecodeUtils:
         of bytes to hold the maximum length of the array and the following
         bytes are a valid utf-8 string.
         """
-        array_bytes, consumed = DecodeUtils.unpack_byte_array(
-            data, length_byte_size
-        )
+        array_bytes, consumed = DecodeUtils.unpack_byte_array(data, length_byte_size)
         return array_bytes.decode("utf-8"), consumed
 
     @staticmethod
@@ -505,9 +496,7 @@ class EventStreamHeaderParser:
 
     # Maps header type to appropriate unpacking function
     # These unpacking functions return the value and the amount unpacked
-    _HEADER_TYPE_MAP: Dict[
-        int, Callable[[bytes], Tuple[HEADER_VALUE, int]]
-    ] = {
+    _HEADER_TYPE_MAP: Dict[int, Callable[[bytes], Tuple[HEADER_VALUE, int]]] = {
         # boolean_true
         0: DecodeUtils.unpack_true,
         # boolean_false
@@ -622,9 +611,7 @@ class EventStreamBuffer:
 
     def _parse_message_bytes(self) -> bytes:
         # The minus 4 includes the prelude crc to the bytes to be checked
-        message_bytes = self._data[
-            _PRELUDE_LENGTH - 4 : self._prelude.payload_end
-        ]
+        message_bytes = self._data[_PRELUDE_LENGTH - 4 : self._prelude.payload_end]
         return message_bytes
 
     def _validate_message_crc(self) -> int:
@@ -743,9 +730,7 @@ class EventSigner:
         string_to_sign = self._string_to_sign(
             timestamp, headers, payload, prior_signature
         )
-        event_signature = self._sign_event(
-            timestamp, string_to_sign, credentials
-        )
+        event_signature = self._sign_event(timestamp, string_to_sign, credentials)
         headers[":chunk-signature"] = event_signature
         return headers
 

@@ -67,9 +67,7 @@ def test_parse_start_stream_transcription_response_missing_fields(parser):
         ("FooCode", UnknownServiceException),
     ],
 )
-def test_parses_bad_request_exception(
-    error_code, expected_exception_cls, parser
-):
+def test_parses_bad_request_exception(error_code, expected_exception_cls, parser):
     response = Response(headers={"x-amzn-ErrorType": error_code,})
     body_bytes = b'{"message": "exception message"}'
     exception = parser.parse_exception(response, body_bytes)
@@ -89,9 +87,7 @@ def test_parses_exception_message(parser):
 
 
 def test_handles_unknown_exception(parser):
-    response = Response(
-        status_code=404, headers={"x-amzn-ErrorType": "FooCode",}
-    )
+    response = Response(status_code=404, headers={"x-amzn-ErrorType": "FooCode",})
     body_bytes = b'{"message": "exception message"}'
     exception = parser.parse_exception(response, body_bytes)
     assert exception.status_code == 404

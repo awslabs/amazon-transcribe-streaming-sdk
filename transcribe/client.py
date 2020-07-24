@@ -35,17 +35,13 @@ class TranscribeStreamingClient:
     streams to Amazon TranscribeStreaming service.
     """
 
-    def __init__(
-        self, region, endpoint_resolver=None, credential_resolver=None
-    ):
+    def __init__(self, region, endpoint_resolver=None, credential_resolver=None):
         if endpoint_resolver is None:
             endpoint_resolver = _TranscribeRegionEndpointResolver()
         self._endpoint_resolver: BaseEndpointResolver = endpoint_resolver
         self.service_name: str = "transcribe"
         self.region: str = region
-        self._event_signer: EventSigner = EventSigner(
-            self.service_name, self.region
-        )
+        self._event_signer: EventSigner = EventSigner(self.service_name, self.region)
         self._eventloop = AWSCRTEventLoop().bootstrap
         if credential_resolver is None:
             credential_resolver = AwsCrtCredentialResolver(self._eventloop)

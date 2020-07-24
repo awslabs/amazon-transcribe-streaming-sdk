@@ -37,9 +37,7 @@ def test_convert_request():
     assert isinstance(crt_req, HttpRequest)
     assert crt_req.method == "HEAD"
     assert crt_req.path == "/transcribe"
-    assert dict(crt_req.headers) == dict(
-        [("User-Agent", "test-transcribe-0.0.1")]
-    )
+    assert dict(crt_req.headers) == dict([("User-Agent", "test-transcribe-0.0.1")])
     assert crt_req.body_stream is not None
 
 

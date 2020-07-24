@@ -61,16 +61,8 @@ def assert_request(connection, expected_request):
         ("https://example.com", {}, http.HttpRequest("GET", "/")),
         ("https://example.com:4242", {}, http.HttpRequest("GET", "/")),
         ("https://example.com/api", {}, http.HttpRequest("GET", "/api")),
-        (
-            "https://example.com?foo=bar",
-            {},
-            http.HttpRequest("GET", "/?foo=bar"),
-        ),
-        (
-            "https://example.com",
-            {"method": "PUT"},
-            http.HttpRequest("PUT", "/"),
-        ),
+        ("https://example.com?foo=bar", {}, http.HttpRequest("GET", "/?foo=bar"),),
+        ("https://example.com", {"method": "PUT"}, http.HttpRequest("PUT", "/"),),
         (
             "https://example.com/api?foo=bar",
             {},
@@ -89,9 +81,7 @@ def assert_request(connection, expected_request):
         (
             "https://example.com",
             {"headers": [("foo", "bar")]},
-            http.HttpRequest(
-                "GET", "/", headers=http.HttpHeaders([("foo", "bar")]),
-            ),
+            http.HttpRequest("GET", "/", headers=http.HttpHeaders([("foo", "bar")]),),
         ),
     ],
 )
@@ -170,9 +160,7 @@ async def test_make_request_tls_options(session_manager, mock_connection_cls):
 @pytest.mark.parametrize(
     "version", [http.HttpVersion.Http1_0, http.HttpVersion.Http1_1,]
 )
-async def test_make_request_refuses_http1(
-    version, session_manager, mock_connection
-):
+async def test_make_request_refuses_http1(version, session_manager, mock_connection):
     mock_connection.version = version
     with pytest.raises(HTTPException):
         await session_manager.make_request("https://example.com")

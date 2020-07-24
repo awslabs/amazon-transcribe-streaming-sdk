@@ -66,9 +66,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
 class AudioEventSerializer:
     """Convert AudioEvent objects into payload and header outputs for eventstreams"""
 
-    def serialize(
-        self, audio_event: AudioEvent
-    ) -> Tuple[Dict[str, str], bytes]:
+    def serialize(self, audio_event: AudioEvent) -> Tuple[Dict[str, str], bytes]:
         headers = {
             ":message-type": "event",
             ":event-type": "AudioEvent",

@@ -61,9 +61,7 @@ class Item:
         self.end_time: Optional[float] = end_time
         self.item_type: Optional[str] = item_type
         self.content: Optional[str] = content
-        self.is_vocabulary_filter_match: Optional[
-            bool
-        ] = is_vocabulary_filter_match
+        self.is_vocabulary_filter_match: Optional[bool] = is_vocabulary_filter_match
 
 
 class ItemList(UserList):
@@ -75,9 +73,7 @@ class ItemList(UserList):
 
 
 class Result:
-    def __init__(
-        self, result_id, start_time, end_time, is_partial, alternatives
-    ):
+    def __init__(self, result_id, start_time, end_time, is_partial, alternatives):
         self.result_id: Optiona[str] = result_id
         self.start_time: Optional[float] = start_time
         self.end_time: Optional[float] = end_time

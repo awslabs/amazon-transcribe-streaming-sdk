@@ -44,9 +44,7 @@ class TestRequest:
         assert prep.path == "/transcribe"
         assert prep.uri == "https://aws.amazon.com/transcribe?test=value"
         assert prep.method == "HEAD"
-        assert prep.headers == HeadersDict(
-            {"User-Agent": "test-transcribe-0.0.1"}
-        )
+        assert prep.headers == HeadersDict({"User-Agent": "test-transcribe-0.0.1"})
         assert prep.body.read() == BytesIO(b"Test body").read()
         assert prep.query == "test=value"
 
@@ -118,9 +116,7 @@ class TestHeadersDict:
             ("header\r\n", "\ntest\r", "header", "test"),
         ],
     )
-    def test_headers_dict_validation(
-        self, key, value, expected_key, expected_value
-    ):
+    def test_headers_dict_validation(self, key, value, expected_key, expected_value):
         hdict = HeadersDict()
         hdict[key] = value
         assert hdict[expected_key] == expected_value

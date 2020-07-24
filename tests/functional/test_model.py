@@ -36,9 +36,7 @@ def audio_stream(request_body, event_signer, default_credential_resolver):
 
 class TestAudioStream:
     @pytest.mark.asyncio
-    async def test_audio_stream_writes_to_body(
-        self, audio_stream, request_body
-    ):
+    async def test_audio_stream_writes_to_body(self, audio_stream, request_body):
         await audio_stream.send_audio_event(audio_chunk=b"notaudio")
         buffer = EventStreamBuffer()
         # Assert the 'outer' signed event looks right
@@ -52,6 +50,4 @@ class TestAudioStream:
         assert audio_event.payload == b"notaudio"
         assert audio_event.headers[":event-type"] == "AudioEvent"
         assert audio_event.headers[":message-type"] == "event"
-        assert (
-            audio_event.headers[":content-type"] == "application/octet-stream"
-        )
+        assert audio_event.headers[":content-type"] == "application/octet-stream"
