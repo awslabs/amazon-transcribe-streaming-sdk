@@ -5,9 +5,10 @@ from threading import Lock
 from urllib.parse import urlparse, ParseResult
 from awscrt import io, http
 from concurrent.futures import Future
-from typing import Optional, List, Tuple, Union, Awaitable, Dict
+from typing import Optional, List, Tuple, Union, Awaitable, Dict, AsyncGenerator
 
 from transcribe.exceptions import HTTPException
+from transcribe.response import Response
 
 HeadersList = List[Tuple[str, str]]
 
@@ -20,6 +21,17 @@ class AwsCrtHttpResponse:
         self._chunk_futures: List[Future[bytes]] = []
         self._received_chunks: List[bytes] = []
         self._chunk_lock: Lock = Lock()
+
+    async def resolve_response(self) -> Response:
+        return Response(
+            status_code=await self.status_code, headers=dict(await self.headers),
+        )
+
+    async def consume_body(self) -> bytes:
+        body = b""
+        async for chunk in self.chunks():
+            body += chunk
+        return body
 
     def _set_stream(self, stream: http.HttpClientStream):
         if self._stream is not None:
@@ -52,6 +64,14 @@ class AwsCrtHttpResponse:
             else:
                 self._chunk_futures.append(future)
             return asyncio.wrap_future(future)
+
+    async def chunks(self) -> AsyncGenerator[bytes, None]:
+        while True:
+            chunk = await self.get_chunk()
+            if chunk:
+                yield chunk
+            else:
+                break
 
     def _on_headers(self, status_code: int, headers: HeadersList, **kwargs):
         self._status_code_future.set_result(status_code)

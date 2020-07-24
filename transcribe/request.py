@@ -133,9 +133,6 @@ class Request:
             return BytesIO(b"")
         elif isinstance(body, str):
             return BytesIO(body.encode("utf-8"))
-        elif isinstance(body, dict):
-            body = json.dumps(self.body)
-            return BytesIO(body.encode("utf-8"))
         elif isinstance(body, bytes):
             return BytesIO(body)
         elif not isinstance(body, BufferedIOBase):

@@ -7,7 +7,6 @@ from transcribe.request import PreparedRequest, Request
 from transcribe.structures import BufferableByteStream
 from transcribe.utils import _add_required_headers
 
-REQUEST_TYPE = Union[Request, PreparedRequest]
 HEADER_VALUE = Union[int, None, str]
 
 
@@ -19,7 +18,7 @@ class Serializer:
         """Serialize out to payload and headers."""
         raise NotImplementedError("serialize")
 
-    def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
+    def serialize_to_request(self) -> PreparedRequest:
         """Serialize parameters into an HTTP request."""
         raise NotImplementedError("serialize_to_request")
 
@@ -49,7 +48,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
         body = BufferableByteStream()
         return headers, body
 
-    def serialize_to_request(self, prepare=True) -> REQUEST_TYPE:
+    def serialize_to_request(self) -> PreparedRequest:
         headers, body = self.serialize()
         request = Request(
             endpoint=self.endpoint,
@@ -58,9 +57,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
             headers=headers,
             body=body,
         )
-        if prepare:
-            return request.prepare()
-        return request
+        return request.prepare()
 
 
 class AudioEventSerializer:

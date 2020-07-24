@@ -11,9 +11,19 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
-from typing import Optional, Dict, Type, Any
+from typing import Optional, Dict, Type, Any, List
 
-from transcribe.model import StartStreamTranscriptionResponse
+import transcribe.exceptions as transcribe_exceptions
+from transcribe.eventstream import BaseEvent
+from transcribe.model import (
+    StartStreamTranscriptionResponse,
+    TranscriptResultStream,
+    TranscriptEvent,
+    Transcript,
+    Result,
+    Alternative,
+    Item,
+)
 from transcribe.response import Response
 from transcribe.exceptions import (
     ServiceException,
@@ -86,14 +96,17 @@ class TranscribeStreamingResponseParser:
             headers.get("x-amzn-transcribe-sample-rate")
         )
 
+        transcript_result_stream = TranscriptResultStream(
+            body_stream, TranscribeStreamingEventParser()
+        )
         parsed_response = StartStreamTranscriptionResponse(
+            transcript_result_stream=transcript_result_stream,
             request_id=request_id,
             language_code=language_code,
             media_sample_rate_hz=media_sample_rate_hz,
             media_encoding=media_encoding,
             vocabulary_name=vocabulary_name,
             session_id=session_id,
-            transcript_result_stream=None,
             vocab_filter_name=vocab_filter_name,
             vocab_filter_method=vocab_filter_method,
         )
@@ -103,3 +116,73 @@ class TranscribeStreamingResponseParser:
         if value:
             return int(value)
         return None
+
+
+class TranscribeStreamingEventParser:
+    def parse(self, raw_event) -> Optional[BaseEvent]:
+        message_type = raw_event.headers.get(":message-type")
+        if message_type in ["error", "exception"]:
+            raise self._parse_event_exception(raw_event)
+        elif message_type == "event":
+            event_type = raw_event.headers.get(":event-type")
+            raw_body = json.loads(raw_event.payload)
+            if event_type == "TranscriptEvent":
+                # TODO: Handle cases where the service returns an incorrect response
+                return self._parse_transcript_event(raw_body)
+        return None
+
+    def _parse_transcript_event(self, current_node: Any) -> TranscriptEvent:
+        transcript = self._parse_transcript(current_node.get("Transcript"))
+        return TranscriptEvent(transcript)
+
+    def _parse_transcript(self, current_node: Any) -> Transcript:
+        results = self._parse_result_list(current_node.get("Results"))
+        return Transcript(results)
+
+    def _parse_result_list(self, current_node: Any) -> List[Result]:
+        return [self._parse_result(e) for e in current_node]
+
+    def _parse_result(self, current_node: Any) -> Result:
+        alternatives = self._parse_alternative_list(current_node.get("Alternatives"))
+        return Result(
+            result_id=current_node.get("ResultId"),
+            start_time=current_node.get("StartTime"),
+            end_time=current_node.get("EndTime"),
+            is_partial=current_node.get("IsPartial"),
+            alternatives=alternatives,
+        )
+
+    def _parse_alternative_list(self, current_node: Any) -> List[Alternative]:
+        return [self._parse_alternative(e) for e in current_node]
+
+    def _parse_alternative(self, current_node: Any) -> Alternative:
+        return Alternative(
+            transcript=current_node.get("Transcript"),
+            items=self._parse_item_list(current_node.get("Items")),
+        )
+
+    def _parse_item_list(self, current_node: Any) -> List[Item]:
+        return [self._parse_item(e) for e in current_node]
+
+    def _parse_item(self, current_node: Any) -> Item:
+        return Item(
+            start_time=current_node.get("StartTime"),
+            end_time=current_node.get("EndTime"),
+            item_type=current_node.get("Type"),
+            content=current_node.get("Content"),
+            vocabulary_filter_match=current_node.get("VocabularyFilterMatch"),
+        )
+
+    def _parse_event_exception(self, raw_event) -> ServiceException:
+        exception_type: str = raw_event.headers.get(
+            ":exception-type", "ServiceException"
+        )
+        exception_cls: Type[ServiceException] = getattr(
+            transcribe_exceptions, exception_type, ServiceException
+        )
+        try:
+            raw_body = json.loads(raw_event.payload)
+        except ValueError:
+            raw_body = {}
+        exception_msg = raw_body.get("Message", "An unknown service exception occured")
+        return exception_cls(exception_msg)

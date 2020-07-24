@@ -13,12 +13,11 @@
 from typing import Optional, Dict
 
 from transcribe.request import HeadersDict
-from transcribe.httpsession import AwsCrtHttpResponse
 
 
 class Response:
     def __init__(
-        self, status_code: Optional[int] = 200, headers: Optional[Dict] = None
+        self, status_code: int = 500, headers: Optional[Dict] = None
     ):
         self.status_code = status_code
         if headers is None:

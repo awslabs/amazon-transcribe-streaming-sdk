@@ -1,8 +1,14 @@
+import json
 import pytest
+from mock import Mock
 
 from transcribe.request import HeadersDict
 from transcribe.response import Response
-from transcribe.deserialize import TranscribeStreamingResponseParser
+from transcribe.deserialize import (
+    TranscribeStreamingResponseParser,
+    TranscribeStreamingEventParser,
+)
+from transcribe.eventstream import EventStreamMessage
 from transcribe.exceptions import (
     ServiceException,
     BadRequestException,
@@ -107,3 +113,97 @@ def test_handles_bad_body_json(parser):
     response = Response(headers={"x-amzn-ErrorType": "BadRequestException",})
     exception = parser.parse_exception(response, b"not json")
     assert "unknown" in exception.message
+
+
+@pytest.fixture
+def event_parser():
+    return TranscribeStreamingEventParser()
+
+
+def test_parses_transcript_event(event_parser):
+    mock_event = Mock(spec=EventStreamMessage)
+    mock_event.headers = {
+        ":event-type": "TranscriptEvent",
+        ":content-type": "application/json",
+        ":message-type": "event",
+    }
+    json_payload = {
+        "Transcript": {
+            "Results": [
+                {
+                    "Alternatives": [
+                        {
+                            "Items": [
+                                {
+                                    "Content": "Wanted",
+                                    "EndTime": 0.45,
+                                    "StartTime": 0.11,
+                                    "Type": "pronunciation",
+                                    "VocabularyFilterMatch": False,
+                                },
+                                {
+                                    "Content": "Chief",
+                                    "EndTime": 0.86,
+                                    "StartTime": 0.55,
+                                    "Type": "pronunciation",
+                                    "VocabularyFilterMatch": False,
+                                },
+                            ],
+                            "Transcript": "Wanted Chief",
+                        }
+                    ],
+                    "EndTime": 0.86,
+                    "IsPartial": True,
+                    "ResultId": "foobar83-265d-4c95-9056-50d14db14710",
+                    "StartTime": 0.11,
+                }
+            ]
+        }
+    }
+    mock_event.payload = json.dumps(json_payload).encode("utf-8")
+    event = event_parser.parse(mock_event)
+    assert len(event.transcript.results) == 1
+    result = event.transcript.results[0]
+    assert result.end_time == 0.86
+    assert result.start_time == 0.11
+    assert result.is_partial
+    assert result.result_id == "foobar83-265d-4c95-9056-50d14db14710"
+    assert len(result.alternatives) == 1
+    assert len(result.alternatives[0].items) == 2
+    assert result.alternatives[0].transcript == "Wanted Chief"
+    item_one = result.alternatives[0].items[0]
+    assert item_one.content == "Wanted"
+    assert item_one.start_time == 0.11
+    assert item_one.end_time == 0.45
+    assert item_one.item_type == "pronunciation"
+    assert item_one.vocabulary_filter_match == False
+    item_two = result.alternatives[0].items[1]
+    assert item_two.content == "Chief"
+    assert item_two.start_time == 0.55
+    assert item_two.end_time == 0.86
+    assert item_two.item_type == "pronunciation"
+    assert item_two.vocabulary_filter_match == False
+
+
+def test_parses_known_exception(event_parser):
+    mock_event = Mock(spec=EventStreamMessage)
+    mock_event.headers = {
+        ":exception-type": "BadRequestException",
+        ":content-type": "application/json",
+        ":message-type": "exception",
+    }
+    mock_event.payload = b'{"Message": "The request was bad."}'
+    with pytest.raises(BadRequestException):
+        event_parser.parse(mock_event)
+
+
+def test_parses_unknown_exception(event_parser):
+    mock_event = Mock(spec=EventStreamMessage)
+    mock_event.headers = {
+        ":exception-type": "ServerOnFire",
+        ":content-type": "application/json",
+        ":message-type": "exception",
+    }
+    mock_event.payload = b""
+    with pytest.raises(ServiceException):
+        event_parser.parse(mock_event)

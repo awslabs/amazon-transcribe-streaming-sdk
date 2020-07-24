@@ -2,37 +2,32 @@ from io import BytesIO
 import pytest
 
 from transcribe.client import TranscribeStreamingClient
-
-
-async def exhaust_body(response, stream):
-    response_body = BytesIO()
-    while True:
-        chunk = await response.get_chunk()
-        if chunk:
-            response_body.write(chunk)
-        else:
-            break
-    response_body.seek(0)
-    return response_body
+from transcribe.exceptions import BadRequestException
 
 
 class TestClientStreaming:
-    @pytest.mark.asyncio
-    async def test_client_start_transcribe_stream(self):
-        client = TranscribeStreamingClient("us-west-2")
+    @pytest.fixture
+    def client(self):
+        return TranscribeStreamingClient("us-west-2")
 
-        audio_stream, response = await client.start_transcribe_stream(
+    @pytest.mark.asyncio
+    async def test_client_start_transcribe_stream(self, client):
+        stream = await client.start_stream_transcription(
             language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
         )
 
-        await audio_stream.send_audio_event(audio_chunk=b"test")
-        await audio_stream.end_stream()
+        await stream.input_stream.send_audio_event(audio_chunk=b"test")
+        await stream.input_stream.end_stream()
 
-        body = await exhaust_body(response, audio_stream)
-        headers = await response.headers
-        status = await response.status_code
-        assert status == 200
-        assert ("content-type", "application/vnd.amazon.eventstream",) in headers
+        async for event in stream.output_stream:
+            pass
 
-        # The stream should have returned no events and end cleanly
-        assert not body.read()
+    @pytest.mark.asyncio
+    async def test_client_start_transcribe_stream_bad_request(self, client):
+        # The sample rate is too high
+        with pytest.raises(BadRequestException):
+            stream = await client.start_stream_transcription(
+                language_code="en-US",
+                media_sample_rate_hz=9999999,
+                media_encoding="pcm",
+            )

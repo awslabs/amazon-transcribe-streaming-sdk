@@ -30,8 +30,6 @@ from transcribe.eventstream import (
     EventStreamHeaderParser,
     DecodeUtils,
     EventStream,
-    NoInitialResponseError,
-    EventStreamError,
     EventStreamMessageSerializer,
     Int8HeaderValue,
     Int16HeaderValue,
@@ -227,11 +225,9 @@ NEGATIVE_CASES = [
 ]
 
 
-class DummyParser:
-    """TODO: Remove this once we can mock a parser impl"""
-
-    def parse(self, response_dict):
-        return response_dict
+class IdentityParser:
+    def parse(self, event):
+        return event
 
 
 def assert_message_equal(message_a, message_b):
@@ -422,80 +418,32 @@ def test_unpack_prelude():
 def create_mock_raw_stream(*data):
     raw_stream = Mock()
 
-    def generator():
+    async def chunks():
         for chunk in data:
             yield chunk
+        yield b""
 
-    raw_stream.stream = generator
+    raw_stream.chunks = chunks
     return raw_stream
 
 
-def test_event_stream_wrapper_iteration():
+@pytest.mark.asyncio
+async def test_event_stream_wrapper_iteration():
     raw_stream = create_mock_raw_stream(
         b"\x00\x00\x00+\x00\x00\x00\x0e4\x8b\xec{\x08event-id\x04\x00",
         b"\x00\xa0\x0c{'foo':'bar'}\xd3\x89\x02\x85",
     )
 
-    parser = Mock(spec=DummyParser)
+    parser = IdentityParser()
     event_stream = EventStream(raw_stream, parser)
-    events = list(event_stream)
+    events = []
+    async for event in event_stream:
+        events.append(event)
     assert len(events) == 1
+    event = events[0]
 
-    response_dict = {
-        "headers": {"event-id": 0x0000A00C},
-        "body": b"{'foo':'bar'}",
-        "status_code": 200,
-    }
-    parser.parse.assert_called_with(response_dict)
-
-
-def test_eventstream_wrapper_iteration_error():
-    raw_stream = create_mock_raw_stream(ERROR_EVENT_MESSAGE[0])
-    with pytest.raises(EventStreamError):
-        event_stream = EventStream(raw_stream, DummyParser())
-        list(event_stream)
-
-
-def test_event_stream_wrapper_close():
-    raw_stream = Mock()
-    event_stream = EventStream(raw_stream, DummyParser())
-    event_stream.close()
-    raw_stream.close.assert_called_once_with()
-
-
-def test_event_stream_initial_response():
-    raw_stream = create_mock_raw_stream(
-        b"\x00\x00\x00~\x00\x00\x00O\xc5\xa3\xdd\xc6\r:message-type\x07\x00",
-        b"\x05event\x0b:event-type\x07\x00\x10initial-response\r:content-type",
-        b'\x07\x00\ttext/json{"InitialResponse": "sometext"}\xf6\x98$\x83',
-    )
-    event_stream = EventStream(raw_stream, DummyParser())
-    event = event_stream.get_initial_response()
-    headers = {
-        ":message-type": "event",
-        ":event-type": "initial-response",
-        ":content-type": "text/json",
-    }
-    payload = b'{"InitialResponse": "sometext"}'
-    assert event.headers == headers
-    assert event.payload == payload
-
-
-def test_event_stream_initial_response_wrong_type():
-    raw_stream = create_mock_raw_stream(
-        b"\x00\x00\x00+\x00\x00\x00\x0e4\x8b\xec{\x08event-id\x04\x00",
-        b"\x00\xa0\x0c{'foo':'bar'}\xd3\x89\x02\x85",
-    )
-    with pytest.raises(NoInitialResponseError):
-        event_stream = EventStream(raw_stream, DummyParser())
-        event_stream.get_initial_response()
-
-
-def test_event_stream_initial_response_no_event():
-    raw_stream = create_mock_raw_stream(b"")
-    with pytest.raises(NoInitialResponseError):
-        event_stream = EventStream(raw_stream, DummyParser())
-        event_stream.get_initial_response()
+    assert event.headers == {"event-id": 0x0000A00C}
+    assert event.payload == b"{'foo':'bar'}"
 
 
 SERIALIZATION_CASES = [

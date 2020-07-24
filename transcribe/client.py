@@ -16,12 +16,15 @@ from transcribe.model import (
     AudioEvent,
     AudioStream,
     StartStreamTranscriptionRequest,
+    StartStreamTranscriptionResponse,
+    StartStreamTranscriptionEventStream,
 )
 from transcribe.serialize import (
     AudioEventSerializer,
     Serializer,
     TranscribeStreamingRequestSerializer,
 )
+from transcribe.deserialize import TranscribeStreamingResponseParser
 from transcribe.signer import SigV4RequestSigner
 
 
@@ -46,8 +49,9 @@ class TranscribeStreamingClient:
         if credential_resolver is None:
             credential_resolver = AwsCrtCredentialResolver(self._eventloop)
         self._credential_resolver = credential_resolver
+        self._response_parser = TranscribeStreamingResponseParser()
 
-    async def start_transcribe_stream(
+    async def start_stream_transcription(
         self,
         language_code: str = None,
         media_sample_rate_hz: int = None,
@@ -55,7 +59,7 @@ class TranscribeStreamingClient:
         vocabulary_name: str = None,
         session_id: str = None,
         vocab_filter_method: str = None,
-    ):
+    ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream."""
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -83,12 +87,25 @@ class TranscribeStreamingClient:
             headers=signed_request.headers.as_list(),
             body=signed_request.body,
         )
+        resolved_response = await response.resolve_response()
+
+        status_code = resolved_response.status_code
+        if status_code >= 400:
+            # We need to close before we can consume the body or this will hang
+            signed_request.body.close()
+            body_bytes = await response.consume_body()
+            raise self._response_parser.parse_exception(resolved_response, body_bytes)
+        elif status_code != 200:
+            raise RuntimeError("Unexpected status code encountered: %s" % status_code)
+
+        parsed_response = self._response_parser.parse_start_stream_transcription_response(
+            resolved_response, response,
+        )
 
         # The audio stream is returned as output because it requires
         # the signature from the initial HTTP request to be useable
         audio_stream = self._create_audio_stream(signed_request)
-
-        return audio_stream, response
+        return StartStreamTranscriptionEventStream(audio_stream, parsed_response)
 
     def _create_audio_stream(self, signed_request):
         initial_signature = self._extract_signature(signed_request)

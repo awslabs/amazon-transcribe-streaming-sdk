@@ -11,26 +11,17 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-from collections import UserList
-from typing import Dict, Optional, Tuple, Union
 import re
+from typing import Dict, Optional, Tuple, Union, List
 
 from transcribe.exceptions import ValidationException
-from transcribe.eventstream import BaseEvent, BaseStream
+from transcribe.eventstream import BaseEvent, BaseStream, EventStream
 
 
 class Alternative:
     def __init__(self, transcript, items):
-        self.transcript: Transcript = transcript
-        self.items: ItemList = items
-
-
-class AlternativeList(UserList):
-    def __init__(self, alternative_list):
-        self._alternative_list: List[Alternative] = alternative_list
-
-    def __getitem__(self, item):
-        return self._alternative_list[item]
+        self.transcript: str = transcript
+        self.items: List[Item] = items
 
 
 class AudioEvent(BaseEvent):
@@ -55,21 +46,13 @@ class Item:
         end_time=None,
         item_type=None,
         content=None,
-        is_vocabulary_filter_match=None,
+        vocabulary_filter_match=None,
     ):
         self.start_time: Optional[float] = start_time
         self.end_time: Optional[float] = end_time
         self.item_type: Optional[str] = item_type
         self.content: Optional[str] = content
-        self.is_vocabulary_filter_match: Optional[bool] = is_vocabulary_filter_match
-
-
-class ItemList(UserList):
-    def __init__(self, item_list):
-        self._item_list: List[Item] = item_list
-
-    def __getitem__(self, item):
-        return self._item_list[item]
+        self.vocabulary_filter_match: Optional[bool] = vocabulary_filter_match
 
 
 class Result:
@@ -78,15 +61,7 @@ class Result:
         self.start_time: Optional[float] = start_time
         self.end_time: Optional[float] = end_time
         self.is_partial: Optional[bool] = is_partial
-        self.alternatives: Optional[AlternativeList] = alternatives
-
-
-class ResultList(UserList):
-    def __init__(self, result_list):
-        self._result_list: List[Result] = result_list
-
-    def __getitem__(self, item):
-        return self._result_list[item]
+        self.alternatives: Optional[List[Alternative]] = alternatives
 
 
 class StartStreamTranscriptionRequest:
@@ -111,13 +86,13 @@ class StartStreamTranscriptionRequest:
 class StartStreamTranscriptionResponse:
     def __init__(
         self,
+        transcript_result_stream,
         request_id=None,
         language_code=None,
         media_sample_rate_hz=None,
         media_encoding=None,
         vocabulary_name=None,
         session_id=None,
-        transcript_result_stream=None,
         vocab_filter_name=None,
         vocab_filter_method=None,
     ):
@@ -127,24 +102,22 @@ class StartStreamTranscriptionResponse:
         self.media_encoding: Optional[str] = media_encoding
         self.vocabulary_name: Optional[str] = vocabulary_name
         self.session_id: Optional[str] = session_id
-        self.transcript_result_stream: Optional[
-            TranscriptResultStream
-        ] = transcript_result_stream
+        self.transcript_result_stream: TranscriptResultStream = transcript_result_stream
         self.vocab_filter_name: Optional[str] = vocab_filter_name
         self.vocab_filter_method: Optional[str] = vocab_filter_method
 
 
 class Transcript:
-    def __init__(self, result_list):
-        self.result_list: ResultList = result_list
+    def __init__(self, results):
+        self.results: List[Result] = results
 
 
-class TranscriptEvent:
+class TranscriptEvent(BaseEvent):
     def __init__(self, transcript):
         self.transcript: Transcript = transcript
 
 
-class TranscriptResultStream:
+class TranscriptResultStream(EventStream):
     """ Throws::
         "BadRequestException"
         "LimitExceededException"
@@ -153,6 +126,20 @@ class TranscriptResultStream:
         "ServiceUnavailableException"
     """
 
-    def __init__(self, transcript_event, eventstream=None):
-        self.trancript_event: TranscriptEvent = transcript_event
-        self.eventstream: Optional[bool] = eventstream
+
+class StartStreamTranscriptionEventStream:
+    def __init__(self, audio_stream: AudioStream, response):
+        self._response = response
+        self._audio_stream = audio_stream
+
+    @property
+    def response(self) -> StartStreamTranscriptionResponse:
+        return self._response
+
+    @property
+    def input_stream(self) -> AudioStream:
+        return self._audio_stream
+
+    @property
+    def output_stream(self) -> TranscriptResultStream:
+        return self.response.transcript_result_stream
