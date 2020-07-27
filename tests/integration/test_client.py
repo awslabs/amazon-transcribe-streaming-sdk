@@ -11,7 +11,7 @@ from tests.integration import TEST_WAV_PATH
 class TestClientStreaming:
     @pytest.fixture
     def client(self):
-        return TranscribeStreamingClient("us-west-2")
+        return TranscribeStreamingClient(region="us-west-2")
 
     @pytest.fixture
     def wav_bytes(self):

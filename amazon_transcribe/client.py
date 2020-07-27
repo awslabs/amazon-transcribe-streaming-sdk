@@ -14,6 +14,7 @@
 
 import re
 from binascii import unhexlify
+from typing import Optional
 
 from amazon_transcribe import AWSCRTEventLoop
 from amazon_transcribe.auth import AwsCrtCredentialResolver, CredentialResolver
@@ -40,7 +41,7 @@ from amazon_transcribe.signer import SigV4RequestSigner
 
 def create_client(region="us-east-2", endpoint_resolver=None):
     """Helper function for easy default client setup"""
-    return TranscribeStreamingClient(region, endpoint_resolver)
+    return TranscribeStreamingClient(region=region, endpoint_resolver=endpoint_resolver)
 
 
 class TranscribeStreamingClient:
@@ -48,7 +49,7 @@ class TranscribeStreamingClient:
     streams to Amazon TranscribeStreaming service.
     """
 
-    def __init__(self, region, endpoint_resolver=None, credential_resolver=None):
+    def __init__(self, *, region, endpoint_resolver=None, credential_resolver=None):
         if endpoint_resolver is None:
             endpoint_resolver = _TranscribeRegionEndpointResolver()
         self._endpoint_resolver: BaseEndpointResolver = endpoint_resolver
@@ -63,12 +64,13 @@ class TranscribeStreamingClient:
 
     async def start_stream_transcription(
         self,
-        language_code: str = None,
-        media_sample_rate_hz: int = None,
-        media_encoding: str = None,
-        vocabulary_name: str = None,
-        session_id: str = None,
-        vocab_filter_method: str = None,
+        *,
+        language_code: str,
+        media_sample_rate_hz: int,
+        media_encoding: str,
+        vocabulary_name: Optional[str] = None,
+        session_id: Optional[str] = None,
+        vocab_filter_method: Optional[str] = None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream."""
         transcribe_streaming_request = StartStreamTranscriptionRequest(

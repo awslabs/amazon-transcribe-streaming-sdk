@@ -69,7 +69,7 @@ class MyEventHandler(TranscriptResultStreamHandler):
 
 async def basic_transcribe():
     # Setup up our client with our chosen AWS region
-    client = TranscribeStreamingClient("us-west-2")
+    client = TranscribeStreamingClient(region="us-west-2")
 
     # Start transcription to generate our async stream
     stream = await client.start_stream_transcription(

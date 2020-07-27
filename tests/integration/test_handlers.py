@@ -33,7 +33,7 @@ class TestEventHandler:
 
     @pytest.mark.asyncio
     async def test_base_transcribe_handler(self, chunks):
-        client = TranscribeStreamingClient("us-west-2")
+        client = TranscribeStreamingClient(region="us-west-2")
 
         stream = await client.start_stream_transcription(
             language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
@@ -51,7 +51,7 @@ class TestEventHandler:
 
     @pytest.mark.asyncio
     async def test_extended_transcribe_handler(self, chunks):
-        client = TranscribeStreamingClient("us-west-2")
+        client = TranscribeStreamingClient(region="us-west-2")
 
         stream = await client.start_stream_transcription(
             language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
