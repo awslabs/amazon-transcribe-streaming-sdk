@@ -44,10 +44,9 @@ class TestEventHandler:
                 await stream.input_stream.send_audio_event(audio_chunk=chunk)
             await stream.input_stream.end_stream()
 
-        write_task = asyncio.ensure_future(write_chunks())
         handler = TranscriptResultStreamHandler(stream.output_stream)
         with pytest.raises(NotImplementedError):
-            await asyncio.gather(handler.handle_events(), write_task)
+            await asyncio.gather(write_chunks(), handler.handle_events())
 
     @pytest.mark.asyncio
     async def test_extended_transcribe_handler(self, chunks):
@@ -62,7 +61,6 @@ class TestEventHandler:
                 await stream.input_stream.send_audio_event(audio_chunk=chunk)
             await stream.input_stream.end_stream()
 
-        write_task = asyncio.ensure_future(write_chunks())
         handler = self.ExampleStreamHandler(stream.output_stream)
-        await asyncio.gather(handler.handle_events(), write_task)
+        await asyncio.gather(write_chunks(), handler.handle_events())
         assert len(handler.result_holder) > 0
