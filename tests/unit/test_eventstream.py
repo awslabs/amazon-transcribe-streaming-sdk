@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 """Unit tests for the binary event stream decoder. """
 
-from mock import Mock
+from unittest.mock import Mock
 import pytest
 import uuid
 import datetime

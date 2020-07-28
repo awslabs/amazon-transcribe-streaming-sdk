@@ -1,6 +1,6 @@
 import json
 import pytest
-from mock import Mock
+from unittest.mock import Mock
 
 from amazon_transcribe.request import HeadersDict
 from amazon_transcribe.response import Response
