@@ -21,7 +21,6 @@ To install from Github:
 ````bash
 git clone https://github.com/awslabs/amazon-transcribe-streaming-sdk.git
 cd amazon-transcribe-streaming-sdk
-git submodule update --init
 python -m pip install .
 ````
 
@@ -59,7 +58,7 @@ handler will simply print the text out to your interpreter.
 """
 class MyEventHandler(TranscriptResultStreamHandler):
     async def handle_transcript_event(self, transcript_event: TranscriptEvent):
-        # This handler can be implemented to handle audio as needed.
+        # This handler can be implemented to handle transcriptions as needed.
         # Here's an example to get started.
         results = transcript_event.transcript.results
         for result in results:
@@ -69,7 +68,7 @@ class MyEventHandler(TranscriptResultStreamHandler):
 
 async def basic_transcribe():
     # Setup up our client with our chosen AWS region
-    client = TranscribeStreamingClient("us-west-2")
+    client = TranscribeStreamingClient(region="us-west-2")
 
     # Start transcription to generate our async stream
     stream = await client.start_stream_transcription(
@@ -86,11 +85,9 @@ async def basic_transcribe():
                 await stream.input_stream.send_audio_event(audio_chunk=chunk)
         await stream.input_stream.end_stream()
 
-    asyncio.ensure_future(write_chunks())
-
-    # Instantiae our handler and start processing events
+    # Instantiate our handler and start processing events
     handler = MyEventHandler(stream.output_stream)
-    await handler.handle_events()
+    await asyncio.gather(write_chunks(), handler.handle_events())
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(basic_transcribe())

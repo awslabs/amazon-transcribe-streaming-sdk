@@ -3,7 +3,7 @@ from amazon_transcribe.client import TranscribeStreamingClient, create_client
 
 class TestClientSetup:
     def test_basic_client_setup(self):
-        client = TranscribeStreamingClient("us-west-2")
+        client = TranscribeStreamingClient(region="us-west-2")
         assert client.service_name == "transcribe"
         assert client.region == "us-west-2"
         assert client._endpoint_resolver is not None
