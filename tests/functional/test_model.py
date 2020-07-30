@@ -1,6 +1,5 @@
 import pytest
 
-from mock import Mock
 from amazon_transcribe.auth import StaticCredentialResolver
 from amazon_transcribe.model import AudioStream
 from amazon_transcribe.serialize import AudioEventSerializer

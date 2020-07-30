@@ -1,0 +1,7 @@
+[run]
+source =
+    amazon_transcribe
+
+[report]
+exclude_lines =
+    raise NotImplementedError

@@ -1,5 +1,5 @@
 import asyncio
-import mock
+import unittest.mock as mock
 import pytest
 
 from io import BytesIO
