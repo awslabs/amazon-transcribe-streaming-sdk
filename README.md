@@ -35,11 +35,18 @@ libraries themselves.
 
 ## Usage
 
+### Prerequisites
+If you don't already have local credentials setup for your AWS account, you can follow
+this [guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+for configuring using the AWS CLI.
+
+### Quick Start
 Setup for this SDK will require either live or prerecorded audio. Full details
 on the audio input requirements can be found in the [Amazon Transcribe Streaming
 documentation](https://docs.aws.amazon.com/transcribe/latest/dg/streaming.html).
 
-Here's an example to get started:
+
+Here's an example app to get started:
 ```python
 import asyncio
 # This example uses aiofile for asynchronous file reads.
