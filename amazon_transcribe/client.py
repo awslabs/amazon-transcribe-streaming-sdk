@@ -39,11 +39,6 @@ from amazon_transcribe.deserialize import TranscribeStreamingResponseParser
 from amazon_transcribe.signer import SigV4RequestSigner
 
 
-def create_client(region="us-east-2", endpoint_resolver=None):
-    """Helper function for easy default client setup"""
-    return TranscribeStreamingClient(region=region, endpoint_resolver=endpoint_resolver)
-
-
 class TranscribeStreamingClient:
     """High level client for orchestrating setup and transmission of audio
     streams to Amazon TranscribeStreaming service.

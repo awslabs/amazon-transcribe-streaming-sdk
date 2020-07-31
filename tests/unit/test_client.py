@@ -1,4 +1,6 @@
-from amazon_transcribe.client import TranscribeStreamingClient, create_client
+import pytest
+
+from amazon_transcribe.client import TranscribeStreamingClient
 
 
 class TestClientSetup:
@@ -8,14 +10,7 @@ class TestClientSetup:
         assert client.region == "us-west-2"
         assert client._endpoint_resolver is not None
 
-    def test_create_default_client(self):
-        client = create_client()
-        assert client.service_name == "transcribe"
-        assert client.region == "us-east-2"
-        assert client._endpoint_resolver is not None
-
-    def test_create_client_with_region(self):
-        client = create_client("eu-south-1")
-        assert client.service_name == "transcribe"
-        assert client.region == "eu-south-1"
-        assert client._endpoint_resolver is not None
+    def test_client_setup_without_region(self):
+        # The client must take a keyword `region`
+        with pytest.raises(TypeError) as e:
+            client = TranscribeStreamingClient()
