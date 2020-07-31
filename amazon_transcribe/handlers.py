@@ -12,18 +12,24 @@
 # language governing permissions and limitations under the License.
 
 
-from amazon_transcribe.model import TranscriptEvent
+from amazon_transcribe.model import TranscriptEvent, TranscriptResultStream
 
 
 class TranscriptResultStreamHandler:
-    def __init__(self, transcript_result_stream):
+    def __init__(self, transcript_result_stream: TranscriptResultStream):
         self._transcript_result_stream = transcript_result_stream
 
     async def handle_events(self):
+        """Process generic incoming events from Amazon Transcribe
+        and delegate to appropriate sub-handlers.
+        """
         async for event in self._transcript_result_stream:
             if isinstance(event, TranscriptEvent):
                 await self.handle_transcript_event(event)
 
     async def handle_transcript_event(self, transcript_event: TranscriptEvent):
-        """This should be implemented by the end user as needed"""
-        raise NotImplementedError()
+        """Specific handling for TranscriptionEvent responses from Amazon Transcribe.
+
+        This should be implemented by the end user with desired data handling.
+        """
+        raise NotImplementedError

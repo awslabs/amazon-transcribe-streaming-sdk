@@ -42,19 +42,29 @@ from amazon_transcribe.signer import SigV4RequestSigner
 class TranscribeStreamingClient:
     """High level client for orchestrating setup and transmission of audio
     streams to Amazon TranscribeStreaming service.
+
+    :param region: An AWS region to use for Amazon Transcribe (e.g. us-east-2)
+    :param endpoint_resolver: Optional resolver for client endpoints.
+    :param credential_resolver: Optional credential resolver for client.
     """
 
-    def __init__(self, *, region, endpoint_resolver=None, credential_resolver=None):
+    def __init__(
+        self,
+        *,
+        region: str,
+        endpoint_resolver: Optional[BaseEndpointResolver] = None,
+        credential_resolver: Optional[CredentialResolver] = None,
+    ):
         if endpoint_resolver is None:
             endpoint_resolver = _TranscribeRegionEndpointResolver()
-        self._endpoint_resolver: BaseEndpointResolver = endpoint_resolver
-        self.service_name: str = "transcribe"
-        self.region: str = region
-        self._event_signer: EventSigner = EventSigner(self.service_name, self.region)
+        self._endpoint_resolver = endpoint_resolver
+        self.service_name = "transcribe"
+        self.region = region
+        self._event_signer = EventSigner(self.service_name, self.region)
         self._eventloop = AWSCRTEventLoop().bootstrap
         if credential_resolver is None:
             credential_resolver = AwsCrtCredentialResolver(self._eventloop)
-        self._credential_resolver: CredentialResolver = credential_resolver
+        self._credential_resolver = credential_resolver
         self._response_parser = TranscribeStreamingResponseParser()
 
     async def start_stream_transcription(
@@ -67,7 +77,30 @@ class TranscribeStreamingClient:
         session_id: Optional[str] = None,
         vocab_filter_method: Optional[str] = None,
     ) -> StartStreamTranscriptionEventStream:
-        """Coordinate transcription settings and start stream."""
+        """Coordinate transcription settings and start stream.
+
+        Pay careful attention to language_code and media_sample_rate_hz configurations.
+        Incorrect setups may lead to streams hanging indefinitely.
+        More info on constraints can be found here:
+        https://docs.aws.amazon.com/transcribe/latest/dg/streaming.html
+
+        :param language_code:
+            Indicates the source language used in the input audio stream.
+        :param media_sample_rate_hz:
+            The sample rate, in Hertz, of the input audio. We suggest that you
+            use 8000 Hz for low quality audio and 16000 Hz for high quality audio.
+        :param media_encoding:
+            The encoding used for the input audio.
+        :param vocabulary_name:
+            The name of the vocabulary to use when processing the transcription job.
+        :param session_id:
+            A identifier for the transcription session. Use this parameter when you
+            want to retry a session. If you don't provide a session ID,
+            Amazon Transcribe will generate one for you and return it in the response.
+        :param vocab_filter_method:
+            The manner in which you use your vocabulary filter to filter words in
+            your transcript. See Transcribe Streaming API docs for more info.
+        """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
             media_sample_rate_hz,
