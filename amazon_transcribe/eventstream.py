@@ -244,13 +244,24 @@ class EventStreamMessageSerializer:
 
 
 class BaseEvent:
-    def __init__(self, payload, event_payload=None, event=None):
-        self.payload: bytes = payload
-        self.event_payload: Optional[bool] = event_payload
-        self.event: Optional[bool] = event
+    """Base class for typed events sent over event stream with service.
+
+    :param payload: bytes payload to be sent with event
+    :param event_payload: boolean stating if event has a payload
+    """
+
+    def __init__(self, payload: bytes, event_payload: Optional[bool] = None):
+        self.payload = payload
+        self.event_payload = event_payload
+        self.event = True
 
 
 class BaseStream:
+    """Base class for EventStream established between client and Transcribe Service.
+
+    These streams will always be established automatically by the client.
+    """
+
     def __init__(
         self,
         input_stream=None,
@@ -642,7 +653,7 @@ class EventStream:
     """Wrapper class for an event stream body.
 
     This wraps the underlying streaming body, parsing it for individual events
-    and yielding them as they come available through the iterator interface.
+    and yielding them as they come available through the async iterator interface.
     """
 
     def __init__(self, raw_stream, parser):
