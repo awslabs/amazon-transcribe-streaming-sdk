@@ -84,6 +84,13 @@ class TranscribeStreamingClient:
         More info on constraints can be found here:
         https://docs.aws.amazon.com/transcribe/latest/dg/streaming.html
 
+        The service processes audio chunks for this operation in realtime, if
+        the audio chunks provided are not coming from a realtime source (e.g. a
+        pre-recorded file) the audio chunks should be rate limited to match the
+        appropriate realtime bitrate for the stream. Failure to send the audio
+        chunks in realtime can lead to signing issues for audio streams longer
+        than 5 minutes.
+
         :param language_code:
             Indicates the source language used in the input audio stream.
         :param media_sample_rate_hz:
