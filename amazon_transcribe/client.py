@@ -76,6 +76,7 @@ class TranscribeStreamingClient:
         vocabulary_name: Optional[str] = None,
         session_id: Optional[str] = None,
         vocab_filter_method: Optional[str] = None,
+        vocab_filter_name: Optional[str] = None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -107,6 +108,8 @@ class TranscribeStreamingClient:
         :param vocab_filter_method:
             The manner in which you use your vocabulary filter to filter words in
             your transcript. See Transcribe Streaming API docs for more info.
+        :param vocab_filter_name:
+            The name of the vocabulary filter you've created that is unique to your AWS account.
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -115,6 +118,7 @@ class TranscribeStreamingClient:
             vocabulary_name,
             session_id,
             vocab_filter_method,
+            vocab_filter_name,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
         self._serializer: Serializer = TranscribeStreamingRequestSerializer(

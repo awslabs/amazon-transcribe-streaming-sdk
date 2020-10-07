@@ -60,6 +60,7 @@ class TranscribeStreamingRequestSerializer(Serializer):
             "x-amzn-transcribe-vocabulary-name": self.request_shape.vocabulary_name,
             "x-amzn-transcribe-session-id": self.request_shape.session_id,
             "x-amzn-transcribe-vocabulary-filter-method": self.request_shape.vocab_filter_method,
+            "x-amzn-transcribe-vocabulary-filter-name": self.request_shape.vocab_filter_name,
         }
         _add_required_headers(self.endpoint, headers)
 
