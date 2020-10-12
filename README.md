@@ -42,6 +42,14 @@ If you don't already have local credentials setup for your AWS account, you can 
 this [guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 for configuring using the AWS CLI.
 
+In essence you'll need one of these authentication configurations setup in order for
+the SDK to successfully resolve your API keys:
+
+1. Set the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and optionally the
+`AWS_SESSION_TOKEN` environment variables
+2. Set the `AWS_PROFILE` pointing to your AWS profile directory
+3. Configure the `[default]` profile in `~/.aws/credentials`
+
 ### Quick Start
 Setup for this SDK will require either live or prerecorded audio. Full details
 on the audio input requirements can be found in the [Amazon Transcribe Streaming
