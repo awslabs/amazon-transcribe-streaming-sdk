@@ -77,6 +77,9 @@ class TranscribeStreamingClient:
         session_id: Optional[str] = None,
         vocab_filter_method: Optional[str] = None,
         vocab_filter_name: Optional[str] = None,
+        show_speaker_label: Optional[bool] = None,
+        enable_channel_identification: Optional[bool] = None,
+        number_of_channels: Optional[int] = None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -109,7 +112,21 @@ class TranscribeStreamingClient:
             The manner in which you use your vocabulary filter to filter words in
             your transcript. See Transcribe Streaming API docs for more info.
         :param vocab_filter_name:
-            The name of the vocabulary filter you've created that is unique to your AWS account.
+            The name of the vocabulary filter you've created that is unique to
+            your AWS account. Provide the name in this field to successfully
+            use it in a stream.
+        :param show_speaker_label:
+            When true, enables speaker identification in your real-time stream.
+        :param enable_channel_identification:
+            When true, instructs Amazon Transcribe to process each audio channel
+            separately and then merge the transcription output of each channel
+            into a single transcription. Amazon Transcribe also produces a
+            transcription of each item. An item includes the start time, end time,
+            and any alternative transcriptions. You can't set both ShowSpeakerLabel
+            and EnableChannelIdentification in the same request. If you set both,
+            your request returns a BadRequestException.
+        :param number_of_channels:
+            The number of channels that are in your audio stream.
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -119,6 +136,9 @@ class TranscribeStreamingClient:
             session_id,
             vocab_filter_method,
             vocab_filter_name,
+            show_speaker_label,
+            enable_channel_identification,
+            number_of_channels,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
         self._serializer: Serializer = TranscribeStreamingRequestSerializer(

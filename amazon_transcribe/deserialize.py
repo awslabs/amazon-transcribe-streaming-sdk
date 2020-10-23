@@ -33,7 +33,9 @@ from amazon_transcribe.exceptions import (
     LimitExceededException,
     ServiceUnavailableException,
     UnknownServiceException,
+    SerializationException,
 )
+from amazon_transcribe.utils import ensure_boolean
 
 
 class TranscribeStreamingResponseParser:
@@ -77,6 +79,8 @@ class TranscribeStreamingResponseParser:
             return LimitExceededException(error_message)
         elif error_code == "ServiceUnavailableException":
             return ServiceUnavailableException(error_message)
+        elif error_code == "SerializationException":
+            return SerializationException(error_message)
         return UnknownServiceException(
             http_response.status_code, error_code, error_message,
         )
@@ -92,6 +96,15 @@ class TranscribeStreamingResponseParser:
         session_id = headers.get("x-amzn-transcribe-session-id")
         vocab_filter_name = headers.get("x-amzn-transcribe-vocabulary-filter-name")
         vocab_filter_method = headers.get("x-amzn-transcribe-vocabulary-filter-method")
+        show_speaker_label = self._raw_value_to_bool(
+            headers.get("x-amzn-transcribe-show-speaker-label")
+        )
+        enable_channel_identification = self._raw_value_to_bool(
+            headers.get("x-amzn-transcribe-enable-channel-identification")
+        )
+        number_of_channels = self._raw_value_to_int(
+            headers.get("x-amzn-transcribe-number-of-channels")
+        )
         media_sample_rate_hz = self._raw_value_to_int(
             headers.get("x-amzn-transcribe-sample-rate")
         )
@@ -99,6 +112,7 @@ class TranscribeStreamingResponseParser:
         transcript_result_stream = TranscriptResultStream(
             body_stream, TranscribeStreamingEventParser()
         )
+
         parsed_response = StartStreamTranscriptionResponse(
             transcript_result_stream=transcript_result_stream,
             request_id=request_id,
@@ -109,12 +123,20 @@ class TranscribeStreamingResponseParser:
             session_id=session_id,
             vocab_filter_name=vocab_filter_name,
             vocab_filter_method=vocab_filter_method,
+            show_speaker_label=show_speaker_label,
+            enable_channel_identification=enable_channel_identification,
+            number_of_channels=number_of_channels,
         )
         return parsed_response
 
     def _raw_value_to_int(self, value: Optional[str]) -> Optional[int]:
         if value:
             return int(value)
+        return None
+
+    def _raw_value_to_bool(self, value: Optional[str]) -> Optional[bool]:
+        if value is not None:
+            return ensure_boolean(value)
         return None
 
 
@@ -150,6 +172,7 @@ class TranscribeStreamingEventParser:
             end_time=current_node.get("EndTime"),
             is_partial=current_node.get("IsPartial"),
             alternatives=alternatives,
+            channel_id=current_node.get("ChannelId"),
         )
 
     def _parse_alternative_list(self, current_node: Any) -> List[Alternative]:
@@ -171,6 +194,7 @@ class TranscribeStreamingEventParser:
             item_type=current_node.get("Type"),
             content=current_node.get("Content"),
             vocabulary_filter_match=current_node.get("VocabularyFilterMatch"),
+            speaker=current_node.get("Speaker"),
         )
 
     def _parse_event_exception(self, raw_event) -> ServiceException:

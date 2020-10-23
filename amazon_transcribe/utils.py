@@ -33,3 +33,10 @@ def _add_required_headers(endpoint: str, headers: Dict[str, HEADER_VALUE]):
             "host": urlparts.hostname,
         }
     )
+
+
+def ensure_boolean(val):
+    if isinstance(val, bool):
+        return val
+    else:
+        return val.lower() == "true"

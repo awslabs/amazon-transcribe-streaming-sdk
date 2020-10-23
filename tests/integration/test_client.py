@@ -4,7 +4,10 @@ import pytest
 
 from amazon_transcribe.model import TranscriptEvent
 from amazon_transcribe.client import TranscribeStreamingClient
-from amazon_transcribe.exceptions import BadRequestException
+from amazon_transcribe.exceptions import (
+    BadRequestException,
+    SerializationException,
+)
 from tests.integration import TEST_WAV_PATH
 
 
@@ -56,4 +59,15 @@ class TestClientStreaming:
                 language_code="en-US",
                 media_sample_rate_hz=9999999,
                 media_encoding="pcm",
+            )
+
+    @pytest.mark.asyncio
+    async def test_start_transcribe_stream_bad_boolean_show_speaker_lab(self, client):
+        with pytest.raises(SerializationException):
+            stream = await client.start_stream_transcription(
+                language_code="en-US",
+                media_sample_rate_hz=16000,
+                media_encoding="pcm",
+                show_speaker_label="foo",
+                enable_channel_identification=True,
             )
