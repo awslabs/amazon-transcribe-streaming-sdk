@@ -36,6 +36,9 @@ def test_parse_start_stream_transcription_response_basic(parser):
             "x-amzn-transcribe-session-id": "foo_id",
             "x-amzn-transcribe-vocabulary-filter-name": "foo_filter_name",
             "x-amzn-transcribe-vocabulary-filter-method": "foo_filter_method",
+            "x-amzn-transcribe-show-speaker-label": "true",
+            "x-amzn-transcribe-enable-channel-identification": "false",
+            "x-amzn-transcribe-number-of-channels": "0",
         }
     )
     parsed = parser.parse_start_stream_transcription_response(response, None)
@@ -47,6 +50,9 @@ def test_parse_start_stream_transcription_response_basic(parser):
     assert parsed.session_id == "foo_id"
     assert parsed.vocab_filter_name == "foo_filter_name"
     assert parsed.vocab_filter_method == "foo_filter_method"
+    assert parsed.show_speaker_label == True
+    assert parsed.enable_channel_identification == False
+    assert parsed.number_of_channels == 0
 
 
 def test_parse_start_stream_transcription_response_missing_fields(parser):
@@ -60,6 +66,9 @@ def test_parse_start_stream_transcription_response_missing_fields(parser):
     assert parsed.session_id == None
     assert parsed.vocab_filter_name == None
     assert parsed.vocab_filter_method == None
+    assert parsed.show_speaker_label == None
+    assert parsed.enable_channel_identification == None
+    assert parsed.number_of_channels == None
 
 
 @pytest.mark.parametrize(

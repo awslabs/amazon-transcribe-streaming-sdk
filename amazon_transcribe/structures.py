@@ -13,7 +13,13 @@
 
 
 from io import BufferedIOBase
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # We need to import this from _typeshed as this is not publicly exposed and
+    # would otherwise require us to redefine this type to subclass
+    # BufferedIOBase
+    from _typeshed import ReadableBuffer
 
 
 class BufferableByteStream(BufferedIOBase):
@@ -67,7 +73,7 @@ class BufferableByteStream(BufferedIOBase):
 
         return n
 
-    def write(self, b: bytes) -> int:
+    def write(self, b: "ReadableBuffer") -> int:
         if not isinstance(b, bytes):
             type_ = type(b)
             raise ValueError(

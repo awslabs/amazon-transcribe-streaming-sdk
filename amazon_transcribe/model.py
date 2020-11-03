@@ -82,6 +82,10 @@ class Item:
         Indicates whether a word in the item matches a word in the vocabulary
         filter you've chosen for your real-time stream. If True then a word
         in the item matches your vocabulary filter.
+
+    :param speaker:
+        If speaker identification is enabled, shows the speakers identified
+        in the real-time stream.
     """
 
     def __init__(
@@ -91,12 +95,14 @@ class Item:
         item_type: Optional[str] = None,
         content: Optional[str] = None,
         vocabulary_filter_match: Optional[bool] = None,
+        speaker: Optional[str] = None,
     ):
         self.start_time = start_time
         self.end_time = end_time
         self.item_type = item_type
         self.content = content
         self.vocabulary_filter_match = vocabulary_filter_match
+        self.speaker = speaker
 
 
 class Result:
@@ -122,6 +128,12 @@ class Result:
     :param alternatives:
         A list of possible transcriptions for the audio. Each alternative
         typically contains one Item that contains the result of the transcription.
+
+    :param channel_id:
+        When channel identification is enabled, Amazon Transcribe transcribes
+        the speech from each audio channel separately. You can use ChannelId
+        to retrieve the transcription results for a single channel in your
+        audio stream.
     """
 
     def __init__(
@@ -131,12 +143,14 @@ class Result:
         end_time: Optional[float] = None,
         is_partial: Optional[bool] = None,
         alternatives: Optional[List[Alternative]] = None,
+        channel_id: Optional[str] = None,
     ):
         self.result_id = result_id
         self.start_time = start_time
         self.end_time = end_time
         self.is_partial = is_partial
         self.alternatives = alternatives
+        self.channel_id = channel_id
 
 
 class StartStreamTranscriptionRequest:
@@ -165,7 +179,24 @@ class StartStreamTranscriptionRequest:
         your transcript.
 
     :param vocab_filter_name:
-        The name of the vocabulary filter you've created that is unique to your AWS account.
+        The name of the vocabulary filter you've created that is unique to
+        your AWS account. Provide the name in this field to successfully
+        use it in a stream.
+
+    :param show_speaker_label:
+        When true, enables speaker identification in your real-time stream.
+
+    :param enable_channel_identification:
+        When true, instructs Amazon Transcribe to process each audio channel
+        separately and then merge the transcription output of each channel
+        into a single transcription. Amazon Transcribe also produces a
+        transcription of each item. An item includes the start time, end time,
+        and any alternative transcriptions. You can't set both ShowSpeakerLabel
+        and EnableChannelIdentification in the same request. If you set both,
+        your request returns a BadRequestException.
+
+    :param number_of_channels:
+        The number of channels that are in your audio stream.
     """
 
     def __init__(
@@ -177,6 +208,9 @@ class StartStreamTranscriptionRequest:
         session_id=None,
         vocab_filter_method=None,
         vocab_filter_name=None,
+        show_speaker_label=None,
+        enable_channel_identification=None,
+        number_of_channels=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -186,6 +220,11 @@ class StartStreamTranscriptionRequest:
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method
         self.vocab_filter_name: Optional[str] = vocab_filter_name
+        self.show_speaker_label: Optional[bool] = show_speaker_label
+        self.enable_channel_identification: Optional[
+            bool
+        ] = enable_channel_identification
+        self.number_of_channels: Optional[int] = number_of_channels
 
 
 class StartStreamTranscriptionResponse:
@@ -218,6 +257,15 @@ class StartStreamTranscriptionResponse:
     :param vocab_filter_method:
         The manner in which you use your vocabulary filter to filter words in
         your transcript.
+
+    :param show_speaker_label:
+        Shows whether speaker identification was enabled in the stream.
+
+    :param enable_channel_identification:
+        Shows whether channel identification has been enabled in the stream.
+
+    :param number_of_channels:
+        The number of channels identified in the stream.
     """
 
     def __init__(
@@ -231,6 +279,9 @@ class StartStreamTranscriptionResponse:
         session_id=None,
         vocab_filter_name=None,
         vocab_filter_method=None,
+        show_speaker_label=None,
+        enable_channel_identification=None,
+        number_of_channels=None,
     ):
         self.request_id: Optional[str] = request_id
         self.language_code: Optional[str] = language_code
@@ -241,6 +292,11 @@ class StartStreamTranscriptionResponse:
         self.transcript_result_stream: TranscriptResultStream = transcript_result_stream
         self.vocab_filter_name: Optional[str] = vocab_filter_name
         self.vocab_filter_method: Optional[str] = vocab_filter_method
+        self.show_speaker_label: Optional[bool] = show_speaker_label
+        self.enable_channel_identification: Optional[
+            bool
+        ] = enable_channel_identification
+        self.number_of_channels: Optional[int] = number_of_channels
 
 
 class Transcript:

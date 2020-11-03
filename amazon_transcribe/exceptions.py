@@ -61,12 +61,18 @@ class ServiceUnavailableException(ServiceException):
         self.status_code: int = 503
 
 
+class SerializationException(ServiceException):
+    def __init__(self, message):
+        self.message: str = message
+        self.status_code: int = 400
+
+
+class SerializerException(SDKError):
+    """Encountered an issue when seralizing a request or event"""
+
+
 class ValidationException(SDKError):
     """Encountered an issue validating a given value"""
-
-
-class SerializationException(SDKError):
-    """Encountered an issue when seralizing a request or event"""
 
 
 class CredentialsException(SDKError):
