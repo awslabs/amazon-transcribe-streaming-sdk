@@ -163,6 +163,9 @@ class StartStreamTranscriptionRequest:
     :param vocab_filter_method:
         The manner in which you use your vocabulary filter to filter words in
         your transcript.
+
+    :param vocab_filter_name:
+        The name of the vocabulary filter you've created that is unique to your AWS account.
     """
 
     def __init__(
@@ -173,6 +176,7 @@ class StartStreamTranscriptionRequest:
         vocabulary_name=None,
         session_id=None,
         vocab_filter_method=None,
+        vocab_filter_name=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -181,6 +185,7 @@ class StartStreamTranscriptionRequest:
         self.vocabulary_name: Optional[str] = vocabulary_name
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method
+        self.vocab_filter_name: Optional[str] = vocab_filter_name
 
 
 class StartStreamTranscriptionResponse:
