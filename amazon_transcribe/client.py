@@ -32,8 +32,7 @@ from amazon_transcribe.model import (
 )
 from amazon_transcribe.serialize import (
     AudioEventSerializer,
-    Serializer,
-    TranscribeStreamingRequestSerializer,
+    TranscribeStreamingSerializer,
 )
 from amazon_transcribe.deserialize import TranscribeStreamingResponseParser
 from amazon_transcribe.signer import SigV4RequestSigner
@@ -66,6 +65,7 @@ class TranscribeStreamingClient:
             credential_resolver = AwsCrtCredentialResolver(self._eventloop)
         self._credential_resolver = credential_resolver
         self._response_parser = TranscribeStreamingResponseParser()
+        self._serializer = TranscribeStreamingSerializer()
 
     async def start_stream_transcription(
         self,
@@ -141,10 +141,10 @@ class TranscribeStreamingClient:
             number_of_channels,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
-        self._serializer: Serializer = TranscribeStreamingRequestSerializer(
-            endpoint=endpoint, transcribe_request=transcribe_streaming_request,
-        )
-        request = self._serializer.serialize_to_request()
+
+        request = self._serializer.serialize_start_stream_transcription_request(
+            endpoint=endpoint, request_shape=transcribe_streaming_request,
+        ).prepare()
 
         creds = await self._credential_resolver.get_credentials()
         signer = SigV4RequestSigner("transcribe", self.region)

@@ -12,10 +12,9 @@
 # language governing permissions and limitations under the License.
 
 
-from io import BufferedIOBase
-from typing import Dict, Tuple, Union
+from typing import Any, Dict, Tuple, Optional
 
-from amazon_transcribe.request import PreparedRequest, Request
+from amazon_transcribe.request import Request
 from amazon_transcribe.structures import BufferableByteStream
 from amazon_transcribe.utils import _add_required_headers
 from amazon_transcribe.exceptions import SerializerException
@@ -25,62 +24,99 @@ from amazon_transcribe.model import (
     BaseEvent,
 )
 
-HEADER_VALUE = Union[int, None, str]
 
-
-class Serializer:
-    def __init__(self):
-        raise NotImplementedError("Serializer")
-
-    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BufferedIOBase]:
-        """Serialize out to payload and headers."""
-        raise NotImplementedError("serialize")
-
-    def serialize_to_request(self) -> PreparedRequest:
-        """Serialize parameters into an HTTP request."""
-        raise NotImplementedError("serialize_to_request")
-
-
-class TranscribeStreamingRequestSerializer(Serializer):
+class TranscribeStreamingSerializer:
     """Convert StartStreamTranscriptionRequest into a
     Request object for streaming to the Transcribe service.
     """
 
-    def __init__(self, endpoint, transcribe_request):
-        self.endpoint: str = endpoint
-        self.method: str = "POST"
-        self.request_uri: str = "/stream-transcription"
-        self.request_shape: StartStreamTranscriptionRequest = transcribe_request
+    def _serialize_header(
+        self, header: str, value: Any, prefix: str = "x-amzn-transcribe-",
+    ) -> Dict[str, str]:
+        if value is None:
+            return {}
+        else:
+            return {f"{prefix}{header}": str(value)}
 
-    def serialize(self) -> Tuple[Dict[str, HEADER_VALUE], BufferedIOBase]:
-        headers = {
-            "x-amzn-transcribe-language-code": self.request_shape.language_code,
-            "x-amzn-transcribe-sample-rate": self.request_shape.media_sample_rate_hz,
-            "x-amzn-transcribe-media-encoding": self.request_shape.media_encoding,
-            "x-amzn-transcribe-vocabulary-name": self.request_shape.vocabulary_name,
-            "x-amzn-transcribe-session-id": self.request_shape.session_id,
-            "x-amzn-transcribe-vocabulary-filter-method": self.request_shape.vocab_filter_method,
-            "x-amzn-transcribe-vocabulary-filter-name": self.request_shape.vocab_filter_name,
-            "x-amzn-transcribe-show-speaker-label": self.request_shape.show_speaker_label,
-            "x-amzn-transcribe-enable-channel-identification": self.request_shape.enable_channel_identification,
-            "x-amzn-transcribe-number-of-channels": self.request_shape.number_of_channels,
-        }
+    def _serialize_str_header(
+        self, header: str, value: Optional[str]
+    ) -> Dict[str, str]:
+        return self._serialize_header(header, value)
 
-        _add_required_headers(self.endpoint, headers)
+    def _serialize_int_header(
+        self, header: str, value: Optional[int]
+    ) -> Dict[str, str]:
+        return self._serialize_header(header, value)
+
+    def _serialize_bool_header(
+        self, header: str, value: Optional[bool]
+    ) -> Dict[str, str]:
+        return self._serialize_header(header, value)
+
+    def serialize_start_stream_transcription_request(
+        self, endpoint: str, request_shape: StartStreamTranscriptionRequest
+    ) -> Request:
+
+        method = "POST"
+        request_uri = "/stream-transcription"
+
+        headers: Dict[str, str] = {}
+        headers.update(
+            self._serialize_str_header("language-code", request_shape.language_code)
+        )
+        headers.update(
+            self._serialize_int_header(
+                "sample-rate", request_shape.media_sample_rate_hz
+            )
+        )
+        headers.update(
+            self._serialize_str_header("media-encoding", request_shape.media_encoding)
+        )
+        headers.update(
+            self._serialize_str_header("vocabulary-name", request_shape.vocabulary_name)
+        )
+        headers.update(
+            self._serialize_str_header("session-id", request_shape.session_id)
+        )
+        headers.update(
+            self._serialize_str_header(
+                "vocabulary-filter-method", request_shape.vocab_filter_method,
+            )
+        )
+        headers.update(
+            self._serialize_str_header(
+                "vocabulary-filter-name", request_shape.vocab_filter_name,
+            )
+        )
+        headers.update(
+            self._serialize_bool_header(
+                "show-speaker-label", request_shape.show_speaker_label,
+            )
+        )
+        headers.update(
+            self._serialize_bool_header(
+                "enable-channel-identification",
+                request_shape.enable_channel_identification,
+            )
+        )
+        headers.update(
+            self._serialize_int_header(
+                "number-of-channels", request_shape.number_of_channels,
+            )
+        )
+
+        _add_required_headers(endpoint, headers)
 
         body = BufferableByteStream()
-        return headers, body
 
-    def serialize_to_request(self) -> PreparedRequest:
-        headers, body = self.serialize()
         request = Request(
-            endpoint=self.endpoint,
-            path=self.request_uri,
-            method=self.method,
+            endpoint=endpoint,
+            path=request_uri,
+            method=method,
             headers=headers,
             body=body,
         )
-        return request.prepare()
+        return request
 
 
 SERIALIZED_EVENT = Tuple[Dict, bytes]
