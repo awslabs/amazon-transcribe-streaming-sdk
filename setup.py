@@ -21,7 +21,7 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
-requires = ["awscrt==0.6.1"]
+requires = ["awscrt==0.11.11"]
 
 setup(
     name="amazon-transcribe",
