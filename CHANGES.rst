@@ -1,6 +1,11 @@
 Changes
 =======
 
+dev
+---
+
+* The required version of awscrt has been upgraded to 0.11.11
+
 0.2.0 (2020-11-13)
 -----------------
 

@@ -20,7 +20,7 @@ from awscrt.auth import (
     AwsSigningAlgorithm,
     AwsSigningConfig,
     AwsSignatureType,
-    AwsSignedBodyValueType,
+    AwsSignedBodyValue,
     AwsSignedBodyHeaderType,
     aws_sign_request,
 )
@@ -58,7 +58,7 @@ class RequestSigner:
             credentials_provider=credential_provider,
             region=self.region,
             service=self.service_name,
-            signed_body_value_type=AwsSignedBodyValueType.EMPTY,
+            signed_body_value=AwsSignedBodyValue.UNSIGNED_PAYLOAD,
             signed_body_header_type=AwsSignedBodyHeaderType.NONE,
         )
         crt_request = _convert_request(request)
