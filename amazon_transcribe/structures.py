@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 
 
 class BufferableByteStream(BufferedIOBase):
+    """ BufferableByteStream will always be in non-blocking mode """
+
     def __init__(self):
         self._byte_chunks: list = []
         self.__done: bool = False
@@ -30,9 +32,7 @@ class BufferableByteStream(BufferedIOBase):
 
     def read(self, size=-1) -> Optional[bytes]:  # type: ignore
         if len(self._byte_chunks) < 1 and not self.__done:
-            # This behavior is a quirk of CRT where we have
-            # an open stream but no data to be read.
-            return None
+            raise BlockingIOError("read")
         elif (self.__done and not self._byte_chunks) or self.closed:
             return b""
 
@@ -65,7 +65,7 @@ class BufferableByteStream(BufferedIOBase):
             data = self.read(len(b))
 
         if data is None:
-            return None
+            raise BlockingIOError("readinto")
 
         n = len(data)
 

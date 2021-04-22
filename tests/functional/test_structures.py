@@ -43,7 +43,8 @@ class TestBufferableByteStream:
     def test_byte_stream_write_empty_bytes(self, byte_stream):
         size = byte_stream.write(b"")
         assert size == 0
-        assert byte_stream.read() is None
+        with pytest.raises(BlockingIOError):
+            byte_stream.read()
 
     def test_byte_stream_read(self, byte_stream):
         byte_stream.write(b"test")
@@ -56,7 +57,8 @@ class TestBufferableByteStream:
         assert byte_stream.read(100) == b"te chunk"
 
     def test_byte_stream_read_empty(self, byte_stream):
-        assert byte_stream.read() is None
+        with pytest.raises(BlockingIOError):
+            byte_stream.read()
 
     def test_byte_stream_read_closed(self, byte_stream):
         byte_stream.close()
@@ -99,6 +101,7 @@ class TestBufferableByteStream:
         assert byte_stream.read() == b"test"
         byte_stream.write(b"chunk")
         assert byte_stream.read() == b"chunk"
-        assert byte_stream.read() is None
+        with pytest.raises(BlockingIOError):
+            byte_stream.read()
         byte_stream.write(b"next")
         assert byte_stream.read() == b"next"
