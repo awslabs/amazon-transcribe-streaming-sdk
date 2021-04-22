@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 from awscrt.io import ClientBootstrap, DefaultHostResolver, EventLoopGroup
 
