@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 RELEASE_VERSION=$1
 if [ -z $RELEASE_VERSION ]; then
     echo "Release version is required as an argument. e.g. 0.3.0"
@@ -55,7 +58,7 @@ unzip -l $BDIST
 echo "Archive: $SDIST"
 tar -tvf $SDIST
 read -p "Does this look ok? (y/n) "
-if [ $REPLY != 'y' ]; then
+if [ "$REPLY" != 'y' ]; then
     echo "Reply ($REPLY) does not match 'y', exiting..."
     exit 1
 fi
