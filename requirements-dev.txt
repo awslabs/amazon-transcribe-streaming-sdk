@@ -4,3 +4,4 @@ mypy<1.0
 pytest<5.5
 pytest-asyncio<0.15.0
 pytest-cov<2.11
+tox>2.0
