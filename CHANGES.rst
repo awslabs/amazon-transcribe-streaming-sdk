@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.4.0 (2021-05-11)
+------------------
+
+* The required version of awscrt has been upgraded to 0.11.15
+
+
 0.3.0 (2021-04-22)
 ------------------
 
