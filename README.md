@@ -7,7 +7,9 @@ without needing anything more than a stream of audio bytes and a basic handler.
 
 This project is still in early alpha so the interface is still subject to change
 and may see rapid iteration. It's highly advised to pin to strict dependencies
-if using this outside of local testing.
+if using this outside of local testing. Please note awscrt is a dependency shared
+with botocore (the core module of AWS CLI and boto3). You may need to keep
+amazon-transcribe at the latest version when installed in the same environment.
 
 
 ## Installation
