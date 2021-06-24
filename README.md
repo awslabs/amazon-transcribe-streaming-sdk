@@ -40,7 +40,22 @@ libraries themselves.
 ### Prerequisites
 If you don't already have local credentials setup for your AWS account, you can follow
 this [guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
-for configuring using the AWS CLI.
+for configuring them using the AWS CLI.
+
+In essence you'll need one of these authentication configurations setup in order for
+the SDK to successfully resolve your API keys:
+
+1. Set the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and optionally the
+`AWS_SESSION_TOKEN` environment variables
+2. Set the `AWS_PROFILE` pointing to your AWS profile directory
+3. Configure the `[default]` profile in `~/.aws/credentials`
+
+For more details on the AWS shared configuration file and credential provider
+usage, check the following developer guides:
+
+* [Shared Config Overview](https://docs.aws.amazon.com/sdkref/latest/guide/creds-config-files.html)
+* [Shared Config Format](https://docs.aws.amazon.com/sdkref/latest/guide/file-format.html)
+* [Example Credential Setups](https://docs.aws.amazon.com/sdkref/latest/guide/usage-examples.html)
 
 ### Quick Start
 Setup for this SDK will require either live or prerecorded audio. Full details
