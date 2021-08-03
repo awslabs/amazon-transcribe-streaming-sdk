@@ -195,6 +195,7 @@ class TranscribeStreamingEventParser:
             content=current_node.get("Content"),
             vocabulary_filter_match=current_node.get("VocabularyFilterMatch"),
             speaker=current_node.get("Speaker"),
+            confidence=current_node.get("Confidence"),
         )
 
     def _parse_event_exception(self, raw_event) -> ServiceException:

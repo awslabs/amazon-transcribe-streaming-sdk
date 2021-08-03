@@ -96,6 +96,7 @@ class Item:
         content: Optional[str] = None,
         vocabulary_filter_match: Optional[bool] = None,
         speaker: Optional[str] = None,
+        confidence: Optional[float] = None,
     ):
         self.start_time = start_time
         self.end_time = end_time
@@ -103,6 +104,7 @@ class Item:
         self.content = content
         self.vocabulary_filter_match = vocabulary_filter_match
         self.speaker = speaker
+        self.confidence = confidence
 
 
 class Result:
