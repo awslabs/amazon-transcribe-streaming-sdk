@@ -149,6 +149,7 @@ def test_parses_transcript_event(event_parser):
                                     "StartTime": 0.11,
                                     "Type": "pronunciation",
                                     "VocabularyFilterMatch": False,
+                                    "Confidence": 0.82,
                                 },
                                 {
                                     "Content": "Chief",
@@ -156,6 +157,7 @@ def test_parses_transcript_event(event_parser):
                                     "StartTime": 0.55,
                                     "Type": "pronunciation",
                                     "VocabularyFilterMatch": False,
+                                    "Confidence": 0.9,
                                 },
                             ],
                             "Transcript": "Wanted Chief",
@@ -186,12 +188,14 @@ def test_parses_transcript_event(event_parser):
     assert item_one.end_time == 0.45
     assert item_one.item_type == "pronunciation"
     assert item_one.vocabulary_filter_match == False
+    assert item_one.confidence == 0.82
     item_two = result.alternatives[0].items[1]
     assert item_two.content == "Chief"
     assert item_two.start_time == 0.55
     assert item_two.end_time == 0.86
     assert item_two.item_type == "pronunciation"
     assert item_two.vocabulary_filter_match == False
+    assert item_two.confidence == 0.9
 
 
 def test_parses_known_exception(event_parser):
