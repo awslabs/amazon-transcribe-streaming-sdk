@@ -86,6 +86,10 @@ class Item:
     :param speaker:
         If speaker identification is enabled, shows the speakers identified
         in the real-time stream.
+
+    :param confidence:
+        A value between 0 and 1 for an item that is a confidence score that
+        Amazon Transcribe assigns to each word or phrase that it transcribes.
     """
 
     def __init__(
