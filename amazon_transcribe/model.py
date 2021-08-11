@@ -32,8 +32,8 @@ class AudioEvent(BaseEvent):
     """Provides a wrapper for the audio chunks that you are sending.
 
     :param audio_chunk:
-        A blob of audio from your application. You audio stream
-        consists of one or more audio events.
+        A blob of audio from your application. You audio stream consists
+        of one or more audio events. The maximum audio chunk size is 32 KB.
     """
 
     def __init__(self, audio_chunk: Optional[bytes]):
@@ -57,13 +57,14 @@ class AudioStream(BaseStream):
         """Enqueue audio bytes to be sent for transcription.
 
         :param audio_chunk: byte-string chunk of audio input.
+            The maximum audio chunk size is 32 KB.
         """
         audio_event = AudioEvent(audio_chunk)
         await super().send_event(audio_event)
 
 
 class Item:
-    """A word or phrase transcribed from the input audio.
+    """A word, phrase, or punctuation mark that is transcribed from the input audio.
 
     :param start_time:
         The offset from the beginning of the audio stream to the beginning
@@ -90,6 +91,11 @@ class Item:
     :param confidence:
         A value between 0 and 1 for an item that is a confidence score that
         Amazon Transcribe assigns to each word or phrase that it transcribes.
+
+    :param stable:
+       If partial result stabilization has been enabled, indicates whether the
+       word or phrase in the item is stable. If Stable is true,
+       the result is stable.
     """
 
     def __init__(
@@ -101,6 +107,7 @@ class Item:
         vocabulary_filter_match: Optional[bool] = None,
         speaker: Optional[str] = None,
         confidence: Optional[float] = None,
+        stable: Optional[bool] = None,
     ):
         self.start_time = start_time
         self.end_time = end_time
@@ -109,6 +116,7 @@ class Item:
         self.vocabulary_filter_match = vocabulary_filter_match
         self.speaker = speaker
         self.confidence = confidence
+        self.stable = stable
 
 
 class Result:
@@ -203,6 +211,19 @@ class StartStreamTranscriptionRequest:
 
     :param number_of_channels:
         The number of channels that are in your audio stream.
+
+    :param enable_partial_results_stabilization:
+        When true, instructs Amazon Transcribe to present transcription results
+        that have the partial results stabilized. Normally, any word or phrase
+        from one partial result can change in a subsequent partial result. With
+        partial results stabilization enabled, only the last few words of one
+        partial result can change in another partial result.
+
+    :param partial_results_stability:
+        You can use this field to set the stability level of the transcription
+        results. A higher stability level means that the transcription results
+        are less likely to change. Higher stability levels can come with lower
+        overall transcription accuracy.
     """
 
     def __init__(
@@ -217,6 +238,8 @@ class StartStreamTranscriptionRequest:
         show_speaker_label=None,
         enable_channel_identification=None,
         number_of_channels=None,
+        enable_partial_results_stabilization=None,
+        partial_results_stability=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -231,6 +254,10 @@ class StartStreamTranscriptionRequest:
             bool
         ] = enable_channel_identification
         self.number_of_channels: Optional[int] = number_of_channels
+        self.enable_partial_results_stabilization: Optional[
+            bool
+        ] = enable_partial_results_stabilization
+        self.partial_results_stability: Optional[str] = partial_results_stability
 
 
 class StartStreamTranscriptionResponse:
@@ -272,6 +299,14 @@ class StartStreamTranscriptionResponse:
 
     :param number_of_channels:
         The number of channels identified in the stream.
+
+    :param enable_partial_results_stabilization:
+        Shows whether partial results stabilization has been enabled in the
+        stream.
+
+    :param partial_results_stability:
+        If partial results stabilization has been enabled in the stream,
+        shows the stability level.
     """
 
     def __init__(
@@ -288,6 +323,8 @@ class StartStreamTranscriptionResponse:
         show_speaker_label=None,
         enable_channel_identification=None,
         number_of_channels=None,
+        enable_partial_results_stabilization=None,
+        partial_results_stability=None,
     ):
         self.request_id: Optional[str] = request_id
         self.language_code: Optional[str] = language_code
@@ -303,6 +340,10 @@ class StartStreamTranscriptionResponse:
             bool
         ] = enable_channel_identification
         self.number_of_channels: Optional[int] = number_of_channels
+        self.enable_partial_results_stabilization: Optional[
+            bool
+        ] = enable_partial_results_stabilization
+        self.partial_results_stability: Optional[str] = partial_results_stability
 
 
 class Transcript:

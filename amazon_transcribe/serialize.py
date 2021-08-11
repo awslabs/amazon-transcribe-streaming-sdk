@@ -104,6 +104,17 @@ class TranscribeStreamingSerializer:
                 "number-of-channels", request_shape.number_of_channels,
             )
         )
+        headers.update(
+            self._serialize_bool_header(
+                "enable-partial-results-stabilization",
+                request_shape.enable_partial_results_stabilization,
+            )
+        )
+        headers.update(
+            self._serialize_str_header(
+                "partial-results-stability", request_shape.partial_results_stability,
+            )
+        )
 
         _add_required_headers(endpoint, headers)
 
