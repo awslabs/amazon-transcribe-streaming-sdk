@@ -108,6 +108,12 @@ class TranscribeStreamingResponseParser:
         media_sample_rate_hz = self._raw_value_to_int(
             headers.get("x-amzn-transcribe-sample-rate")
         )
+        enable_partial_results_stabilization = self._raw_value_to_bool(
+            headers.get("x-amzn-transcribe-enable-partial-results-stabilization")
+        )
+        partial_results_stability = headers.get(
+            "x-amzn-transcribe-partial-results-stability"
+        )
 
         transcript_result_stream = TranscriptResultStream(
             body_stream, TranscribeStreamingEventParser()
@@ -126,6 +132,8 @@ class TranscribeStreamingResponseParser:
             show_speaker_label=show_speaker_label,
             enable_channel_identification=enable_channel_identification,
             number_of_channels=number_of_channels,
+            enable_partial_results_stabilization=enable_partial_results_stabilization,
+            partial_results_stability=partial_results_stability,
         )
         return parsed_response
 
@@ -196,6 +204,7 @@ class TranscribeStreamingEventParser:
             vocabulary_filter_match=current_node.get("VocabularyFilterMatch"),
             speaker=current_node.get("Speaker"),
             confidence=current_node.get("Confidence"),
+            stable=current_node.get("Stable"),
         )
 
     def _parse_event_exception(self, raw_event) -> ServiceException:

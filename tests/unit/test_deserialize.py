@@ -39,6 +39,8 @@ def test_parse_start_stream_transcription_response_basic(parser):
             "x-amzn-transcribe-show-speaker-label": "true",
             "x-amzn-transcribe-enable-channel-identification": "false",
             "x-amzn-transcribe-number-of-channels": "0",
+            "x-amzn-transcribe-enable-partial-results-stabilization": "true",
+            "x-amzn-transcribe-partial-results-stability": "high",
         }
     )
     parsed = parser.parse_start_stream_transcription_response(response, None)
@@ -50,25 +52,29 @@ def test_parse_start_stream_transcription_response_basic(parser):
     assert parsed.session_id == "foo_id"
     assert parsed.vocab_filter_name == "foo_filter_name"
     assert parsed.vocab_filter_method == "foo_filter_method"
-    assert parsed.show_speaker_label == True
-    assert parsed.enable_channel_identification == False
+    assert parsed.show_speaker_label is True
+    assert parsed.enable_channel_identification is False
     assert parsed.number_of_channels == 0
+    assert parsed.enable_partial_results_stabilization is True
+    assert parsed.partial_results_stability == "high"
 
 
 def test_parse_start_stream_transcription_response_missing_fields(parser):
     response = Response(headers={})
     parsed = parser.parse_start_stream_transcription_response(response, None)
-    assert parsed.request_id == None
-    assert parsed.language_code == None
-    assert parsed.media_sample_rate_hz == None
-    assert parsed.media_encoding == None
-    assert parsed.vocabulary_name == None
-    assert parsed.session_id == None
-    assert parsed.vocab_filter_name == None
-    assert parsed.vocab_filter_method == None
-    assert parsed.show_speaker_label == None
-    assert parsed.enable_channel_identification == None
-    assert parsed.number_of_channels == None
+    assert parsed.request_id is None
+    assert parsed.language_code is None
+    assert parsed.media_sample_rate_hz is None
+    assert parsed.media_encoding is None
+    assert parsed.vocabulary_name is None
+    assert parsed.session_id is None
+    assert parsed.vocab_filter_name is None
+    assert parsed.vocab_filter_method is None
+    assert parsed.show_speaker_label is None
+    assert parsed.enable_channel_identification is None
+    assert parsed.number_of_channels is None
+    assert parsed.enable_partial_results_stabilization is None
+    assert parsed.partial_results_stability is None
 
 
 @pytest.mark.parametrize(
@@ -150,6 +156,7 @@ def test_parses_transcript_event(event_parser):
                                     "Type": "pronunciation",
                                     "VocabularyFilterMatch": False,
                                     "Confidence": 0.82,
+                                    "Stable": False,
                                 },
                                 {
                                     "Content": "Chief",
@@ -158,6 +165,7 @@ def test_parses_transcript_event(event_parser):
                                     "Type": "pronunciation",
                                     "VocabularyFilterMatch": False,
                                     "Confidence": 0.9,
+                                    "Stable": True,
                                 },
                             ],
                             "Transcript": "Wanted Chief",
@@ -187,15 +195,17 @@ def test_parses_transcript_event(event_parser):
     assert item_one.start_time == 0.11
     assert item_one.end_time == 0.45
     assert item_one.item_type == "pronunciation"
-    assert item_one.vocabulary_filter_match == False
+    assert item_one.vocabulary_filter_match is False
     assert item_one.confidence == 0.82
+    assert item_one.stable is False
     item_two = result.alternatives[0].items[1]
     assert item_two.content == "Chief"
     assert item_two.start_time == 0.55
     assert item_two.end_time == 0.86
     assert item_two.item_type == "pronunciation"
-    assert item_two.vocabulary_filter_match == False
+    assert item_two.vocabulary_filter_match is False
     assert item_two.confidence == 0.9
+    assert item_two.stable is True
 
 
 def test_parses_known_exception(event_parser):
