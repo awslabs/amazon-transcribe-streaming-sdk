@@ -38,7 +38,7 @@ fi
 python setup.py sdist bdist_wheel
 
 SDIST="dist/amazon-transcribe-$RELEASE_VERSION.tar.gz"
-BDIST="dist/amazon_transcribe-$RELEASE_VERSION-py2.py3-none-any.whl"
+BDIST="dist/amazon_transcribe-$RELEASE_VERSION-py3-none-any.whl"
 
 if [ ! -f $SDIST ] || [ ! -f $BDIST ]; then
     echo "Packages weren't generated."
