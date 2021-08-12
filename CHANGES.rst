@@ -1,6 +1,19 @@
 Changes
 =======
 
+0.5.0 (2021-08-12)
+------------------
+
+* The required version of awscrt has been upgraded to 0.11.24 (#47)
+
+* Added official support for Python 3.9 (#46)
+
+* Added `confidence` score to the `Item` class. (#45)
+
+* Added stabilization features with `enable_partial_results_stabilization`,
+  `partial_results_stability` and `Item.stable`. (#48)
+
+
 0.4.0 (2021-05-11)
 ------------------
 
