@@ -80,6 +80,8 @@ class TranscribeStreamingClient:
         show_speaker_label: Optional[bool] = None,
         enable_channel_identification: Optional[bool] = None,
         number_of_channels: Optional[int] = None,
+        enable_partial_results_stabilization: Optional[bool] = None,
+        partial_results_stability: Optional[str] = None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -127,6 +129,17 @@ class TranscribeStreamingClient:
             your request returns a BadRequestException.
         :param number_of_channels:
             The number of channels that are in your audio stream.
+        :param enable_partial_results_stabilization:
+            When true, instructs Amazon Transcribe to present transcription results
+            that have the partial results stabilized. Normally, any word or phrase
+            from one partial result can change in a subsequent partial result. With
+            partial results stabilization enabled, only the last few words of one
+            partial result can change in another partial result.
+        :param partial_results_stability
+            You can use this field to set the stability level of the transcription
+            results. A higher stability level means that the transcription results
+            are less likely to change. Higher stability levels can come with lower
+            overall transcription accuracy. Defaults to "high" if not set explicitly.
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -139,6 +152,8 @@ class TranscribeStreamingClient:
             show_speaker_label,
             enable_channel_identification,
             number_of_channels,
+            enable_partial_results_stabilization,
+            partial_results_stability,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
 
