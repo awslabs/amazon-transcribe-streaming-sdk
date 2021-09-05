@@ -23,13 +23,14 @@ reported the issue. Please try to include as much information as you can. Detail
 ## Contributing via Pull Requests
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
-1. You are working against the latest source on the *master* branch.
+1. You are working against the latest source on the *develop* branch.
 2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
 3. You open an issue to discuss any significant work - we would hate for your time to be wasted.
 
 To send us a pull request, please:
 
 1. Fork the repository.
+2. Follow our [developer setup guide](#developer-setup-guide). (Optional but enouraged)
 2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
 3. Ensure local tests pass.
 4. Commit to your fork using clear commit messages.
@@ -59,3 +60,16 @@ If you discover a potential security issue in this project we ask that you notif
 See the [LICENSE](LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
 
 We may ask you to sign a [Contributor License Agreement (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) for larger changes.
+
+
+## Developer Setup Guide
+
+To reduce churn in the Pull Request process, we've adopted some tools to help streamline things. You'll find a number of dependencies in our `requirement-dev.txt` which should be installed before adding code. This will add a linter, type checker, and test runner to your environment, along with a tool (pre-commit) to auto run sanity checks before committing.
+
+To enable pre-commit, you can follow these steps:
+
+0. Ensure you're working in a virtual environment (Optional but encouraged)
+1. ``python -m pip install -r requirements-dev.txt``
+2. ``pre-commit install`` (This may take a minute)
+
+This should add a hook to the repositories `.git` directory which will automatically run all of our checks before a commit can be made. This feature will only be enabled for the `amazon-transcribe-streaming-sdk` repository. Once activated, it will help catch simple mistakes and prevent having to wait until the Pull Request is opened to find issues.
