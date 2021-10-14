@@ -1,6 +1,16 @@
 Changes
 =======
 
+Next (TBD)
+------------------
+
+* The required version of awscrt has been upgraded to 0.12.5 (#58)
+
+* Added official support for Python 3.10 (#58)
+
+* Allow partial results stabilization options (#54)
+
+
 0.5.0 (2021-08-12)
 ------------------
 
