@@ -1,7 +1,7 @@
 Changes
 =======
 
-Next (TBD)
+0.5.1 (2021-10-18)
 ------------------
 
 * The required version of awscrt has been upgraded to 0.12.5 (#58)
