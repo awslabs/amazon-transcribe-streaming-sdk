@@ -1,6 +1,14 @@
 Changes
 =======
 
+0.5.2 (2022-03-15)
+------------------
+
+* The required version of awscrt has been upgraded to 0.13.5 (#65)
+
+* NOTICE: This will be the last version with Python 3.6 support
+
+
 0.5.1 (2021-10-18)
 ------------------
 
