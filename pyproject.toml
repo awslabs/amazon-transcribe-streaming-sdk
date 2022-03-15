@@ -1,0 +1,4 @@
+[tool.isort]
+profile = "black"
+honor_noqa = true
+src_paths = ["amazon_transcribe", "tests"]

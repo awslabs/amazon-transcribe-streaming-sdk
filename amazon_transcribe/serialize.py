@@ -12,17 +12,17 @@
 # language governing permissions and limitations under the License.
 
 
-from typing import Any, Dict, Tuple, Optional
+from typing import Any, Dict, Optional, Tuple
 
-from amazon_transcribe.request import Request
-from amazon_transcribe.structures import BufferableByteStream
-from amazon_transcribe.utils import _add_required_headers
 from amazon_transcribe.exceptions import SerializerException
 from amazon_transcribe.model import (
     AudioEvent,
-    StartStreamTranscriptionRequest,
     BaseEvent,
+    StartStreamTranscriptionRequest,
 )
+from amazon_transcribe.request import Request
+from amazon_transcribe.structures import BufferableByteStream
+from amazon_transcribe.utils import _add_required_headers
 
 
 class TranscribeStreamingSerializer:
@@ -31,7 +31,10 @@ class TranscribeStreamingSerializer:
     """
 
     def _serialize_header(
-        self, header: str, value: Any, prefix: str = "x-amzn-transcribe-",
+        self,
+        header: str,
+        value: Any,
+        prefix: str = "x-amzn-transcribe-",
     ) -> Dict[str, str]:
         if value is None:
             return {}
@@ -80,17 +83,20 @@ class TranscribeStreamingSerializer:
         )
         headers.update(
             self._serialize_str_header(
-                "vocabulary-filter-method", request_shape.vocab_filter_method,
+                "vocabulary-filter-method",
+                request_shape.vocab_filter_method,
             )
         )
         headers.update(
             self._serialize_str_header(
-                "vocabulary-filter-name", request_shape.vocab_filter_name,
+                "vocabulary-filter-name",
+                request_shape.vocab_filter_name,
             )
         )
         headers.update(
             self._serialize_bool_header(
-                "show-speaker-label", request_shape.show_speaker_label,
+                "show-speaker-label",
+                request_shape.show_speaker_label,
             )
         )
         headers.update(
@@ -101,7 +107,8 @@ class TranscribeStreamingSerializer:
         )
         headers.update(
             self._serialize_int_header(
-                "number-of-channels", request_shape.number_of_channels,
+                "number-of-channels",
+                request_shape.number_of_channels,
             )
         )
         headers.update(
@@ -112,7 +119,8 @@ class TranscribeStreamingSerializer:
         )
         headers.update(
             self._serialize_str_header(
-                "partial-results-stability", request_shape.partial_results_stability,
+                "partial-results-stability",
+                request_shape.partial_results_stability,
             )
         )
 

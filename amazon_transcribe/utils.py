@@ -12,8 +12,8 @@
 # language governing permissions and limitations under the License.
 
 
-from urllib.parse import urlsplit
 from typing import Dict
+from urllib.parse import urlsplit
 
 from amazon_transcribe import __version__ as version
 from amazon_transcribe.exceptions import ValidationException

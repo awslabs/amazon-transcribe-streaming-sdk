@@ -1,8 +1,8 @@
-import asyncio
 import json
+from io import BytesIO
+
 import pytest
 
-from io import BytesIO
 from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
 
 
@@ -29,7 +29,10 @@ async def test_make_request(default_eventloop):
     ]
     body = BytesIO(b"foo body")
     response = await session.make_request(
-        url, method="PUT", headers=headers, body=body,
+        url,
+        method="PUT",
+        headers=headers,
+        body=body,
     )
     assert await response.status_code == 200
     assert await response.headers

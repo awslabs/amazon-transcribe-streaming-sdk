@@ -3,8 +3,7 @@ import codecs
 import os.path
 import re
 
-from setuptools import setup, find_packages
-
+from setuptools import find_packages, setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -27,8 +26,8 @@ setup(
     name="amazon-transcribe",
     version=find_version("amazon_transcribe", "__init__.py"),
     description="Async Python SDK for Amazon Transcribe Streaming",
-    long_description=open("README.md", "r", encoding="utf-8").read(),
-    long_description_content_type='text/markdown',
+    long_description=open("README.md", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
     author="Amazon Web Services",
     url="https://github.com/awslabs/amazon-transcribe-streaming-sdk",
     scripts=[],

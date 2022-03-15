@@ -11,30 +11,30 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 import json
-from typing import Optional, Type, Any, List
+from typing import Any, List, Optional, Type
 
 import amazon_transcribe.exceptions as transcribe_exceptions
 from amazon_transcribe.eventstream import BaseEvent
-from amazon_transcribe.model import (
-    StartStreamTranscriptionResponse,
-    TranscriptResultStream,
-    TranscriptEvent,
-    Transcript,
-    Result,
-    Alternative,
-    Item,
-)
-from amazon_transcribe.response import Response
 from amazon_transcribe.exceptions import (
-    ServiceException,
     BadRequestException,
     ConflictException,
     InternalFailureException,
     LimitExceededException,
+    SerializationException,
+    ServiceException,
     ServiceUnavailableException,
     UnknownServiceException,
-    SerializationException,
 )
+from amazon_transcribe.model import (
+    Alternative,
+    Item,
+    Result,
+    StartStreamTranscriptionResponse,
+    Transcript,
+    TranscriptEvent,
+    TranscriptResultStream,
+)
+from amazon_transcribe.response import Response
 from amazon_transcribe.utils import ensure_boolean
 
 
@@ -82,11 +82,15 @@ class TranscribeStreamingResponseParser:
         elif error_code == "SerializationException":
             return SerializationException(error_message)
         return UnknownServiceException(
-            http_response.status_code, error_code, error_message,
+            http_response.status_code,
+            error_code,
+            error_message,
         )
 
     def parse_start_stream_transcription_response(
-        self, http_response: Response, body_stream: Any,
+        self,
+        http_response: Response,
+        body_stream: Any,
     ) -> StartStreamTranscriptionResponse:
         headers = http_response.headers
         request_id = headers.get("x-amzn-request-id")

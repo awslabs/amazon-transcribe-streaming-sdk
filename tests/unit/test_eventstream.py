@@ -12,39 +12,44 @@
 # language governing permissions and limitations under the License.
 """Unit tests for the binary event stream decoder. """
 
-from unittest.mock import Mock
-import pytest
-import uuid
 import datetime
+import uuid
+from unittest.mock import Mock
+
+import pytest
 
 from amazon_transcribe.auth import Credentials
 from amazon_transcribe.eventstream import (
-    EventSigner,
-    EventStreamMessage,
-    MessagePrelude,
-    EventStreamBuffer,
     ChecksumMismatch,
-    InvalidPayloadLength,
-    InvalidHeadersLength,
-    DuplicateHeader,
-    EventStreamHeaderParser,
     DecodeUtils,
+    DuplicateHeader,
+    EventSigner,
     EventStream,
+    EventStreamBuffer,
+    EventStreamHeaderParser,
+    EventStreamMessage,
     EventStreamMessageSerializer,
+    HeaderBytesExceedMaxLength,
+    HeaderValueBytesExceedMaxLength,
     Int8HeaderValue,
     Int16HeaderValue,
     Int32HeaderValue,
     Int64HeaderValue,
+    InvalidHeadersLength,
     InvalidHeaderValue,
-    HeaderBytesExceedMaxLength,
+    InvalidPayloadLength,
+    MessagePrelude,
     PayloadBytesExceedMaxLength,
-    HeaderValueBytesExceedMaxLength,
 )
 
 EMPTY_MESSAGE = (
     b"\x00\x00\x00\x10\x00\x00\x00\x00\x05\xc2H\xeb}\x98\xc8\xff",
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x10, headers_length=0, crc=0x05C248EB,),
+        prelude=MessagePrelude(
+            total_length=0x10,
+            headers_length=0,
+            crc=0x05C248EB,
+        ),
         headers={},
         payload=b"",
         crc=0x7D98C8FF,
@@ -54,7 +59,11 @@ EMPTY_MESSAGE = (
 INT8_HEADER = (
     (b"\x00\x00\x00\x17\x00\x00\x00\x07)\x86\x01X\x04" b"byte\x02\xff\xc2\xf8i\xdc"),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x17, headers_length=0x7, crc=0x29860158,),
+        prelude=MessagePrelude(
+            total_length=0x17,
+            headers_length=0x7,
+            crc=0x29860158,
+        ),
         headers={"byte": -1},
         payload=b"",
         crc=0xC2F869DC,
@@ -64,7 +73,11 @@ INT8_HEADER = (
 INT16_HEADER = (
     (b"\x00\x00\x00\x19\x00\x00\x00\tq\x0e\x92>\x05" b"short\x03\xff\xff\xb2|\xb6\xcc"),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x19, headers_length=0x9, crc=0x710E923E,),
+        prelude=MessagePrelude(
+            total_length=0x19,
+            headers_length=0x9,
+            crc=0x710E923E,
+        ),
         headers={"short": -1},
         payload=b"",
         crc=0xB27CB6CC,
@@ -77,7 +90,11 @@ INT32_HEADER = (
         b"integer\x04\xff\xff\xff\xff\x8b\x8e\x12\xeb"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x1D, headers_length=0xD, crc=0x83E3F0E7,),
+        prelude=MessagePrelude(
+            total_length=0x1D,
+            headers_length=0xD,
+            crc=0x83E3F0E7,
+        ),
         headers={"integer": -1},
         payload=b"",
         crc=0x8B8E12EB,
@@ -90,7 +107,11 @@ INT64_HEADER = (
         b"long\x05\xff\xff\xff\xff\xff\xff\xff\xffK\xc22\xda"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x1E, headers_length=0xE, crc=0x5D4ADB8D,),
+        prelude=MessagePrelude(
+            total_length=0x1E,
+            headers_length=0xE,
+            crc=0x5D4ADB8D,
+        ),
         headers={"long": -1},
         payload=b"",
         crc=0x4BC232DA,
@@ -100,7 +121,11 @@ INT64_HEADER = (
 PAYLOAD_NO_HEADERS = (
     b"\x00\x00\x00\x1d\x00\x00\x00\x00\xfdR\x8cZ{'foo':'bar'}\xc3e96",
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x1D, headers_length=0, crc=0xFD528C5A,),
+        prelude=MessagePrelude(
+            total_length=0x1D,
+            headers_length=0,
+            crc=0xFD528C5A,
+        ),
         headers={},
         payload=b"{'foo':'bar'}",
         crc=0xC3653936,
@@ -113,7 +138,11 @@ PAYLOAD_ONE_STR_HEADER = (
         b"application/json{'foo':'bar'}\x8d\x9c\x08\xb1"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x3D, headers_length=0x20, crc=0x07FD8396,),
+        prelude=MessagePrelude(
+            total_length=0x3D,
+            headers_length=0x20,
+            crc=0x07FD8396,
+        ),
         headers={"content-type": "application/json"},
         payload=b"{'foo':'bar'}",
         crc=0x8D9C08B1,
@@ -130,7 +159,11 @@ ALL_HEADERS_TYPES = (
         b"\x63\x35\x36\x71"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x62, headers_length=0x52, crc=0x03B5CB9C,),
+        prelude=MessagePrelude(
+            total_length=0x62,
+            headers_length=0x52,
+            crc=0x03B5CB9C,
+        ),
         headers={
             "0": True,
             "1": False,
@@ -139,7 +172,7 @@ ALL_HEADERS_TYPES = (
             "4": 0x04,
             "5": 0x05,
             "6": b"bytes",
-            "7": u"utf8",
+            "7": "utf8",
             "8": 0x08,
             "9": b"0123456789abcdef",
         },
@@ -157,7 +190,11 @@ ERROR_EVENT_MESSAGE = (
         b"\x6b\x6c\xea\x3d"
     ),
     EventStreamMessage(
-        prelude=MessagePrelude(total_length=0x52, headers_length=0x42, crc=0xBF23637E,),
+        prelude=MessagePrelude(
+            total_length=0x52,
+            headers_length=0x42,
+            crc=0xBF23637E,
+        ),
         headers={
             ":message-type": "error",
             ":error-code": "code",
@@ -231,7 +268,7 @@ class IdentityParser:
 
 
 def assert_message_equal(message_a, message_b):
-    """Asserts all fields for two messages are equal. """
+    """Asserts all fields for two messages are equal."""
     assert message_a.prelude.total_length == message_b.prelude.total_length
     assert message_a.prelude.headers_length == message_b.prelude.headers_length
     assert message_a.prelude.crc == message_b.prelude.crc
@@ -241,7 +278,7 @@ def assert_message_equal(message_a, message_b):
 
 
 def test_partial_message():
-    """ Ensure that we can receive partial payloads. """
+    """Ensure that we can receive partial payloads."""
     data = EMPTY_MESSAGE[0]
     event_buffer = EventStreamBuffer()
     # This mid point is an arbitrary break in the middle of the headers
@@ -256,7 +293,7 @@ def test_partial_message():
 
 
 def check_message_decodes(encoded, decoded):
-    """ Ensure the message decodes to what we expect. """
+    """Ensure the message decodes to what we expect."""
     event_buffer = EventStreamBuffer()
     event_buffer.add_data(encoded)
     messages = list(event_buffer)
@@ -266,12 +303,12 @@ def check_message_decodes(encoded, decoded):
 
 @pytest.mark.parametrize("encoded,decoded", POSITIVE_CASES)
 def test_positive_cases(encoded, decoded):
-    """Test that all positive cases decode how we expect. """
+    """Test that all positive cases decode how we expect."""
     check_message_decodes(encoded, decoded)
 
 
 def test_all_positive_cases():
-    """Test all positive cases can be decoded on the same buffer. """
+    """Test all positive cases can be decoded on the same buffer."""
     event_buffer = EventStreamBuffer()
     # add all positive test cases to the same buffer
     for (encoded, _) in POSITIVE_CASES:
@@ -287,13 +324,13 @@ def test_all_positive_cases():
 
 @pytest.mark.parametrize("encoded,exception", NEGATIVE_CASES)
 def test_negative_cases(encoded, exception):
-    """Test that all negative cases raise the expected exception. """
+    """Test that all negative cases raise the expected exception."""
     with pytest.raises(exception):
         check_message_decodes(encoded, None)
 
 
 def test_header_parser():
-    """Test that the header parser supports all header types. """
+    """Test that the header parser supports all header types."""
     headers_data = (
         b"\x010\x00\x011\x01\x012\x02\x02\x013\x03\x00\x03"
         b"\x014\x04\x00\x00\x00\x04\x015\x05\x00\x00\x00\x00\x00\x00\x00\x05"
@@ -309,7 +346,7 @@ def test_header_parser():
         "4": 0x04,
         "5": 0x05,
         "6": b"bytes",
-        "7": u"utf8",
+        "7": "utf8",
         "8": 0x08,
         "9": b"0123456789abcdef",
     }
@@ -320,7 +357,7 @@ def test_header_parser():
 
 
 def test_message_prelude_properties():
-    """Test that calculated properties from the payload are correct. """
+    """Test that calculated properties from the payload are correct."""
     # Total length: 40, Headers Length: 15, random crc
     prelude = MessagePrelude(40, 15, 0x00000000)
     assert prelude.payload_length == 9
@@ -563,7 +600,7 @@ class TestEventStreamMessageSerializer:
         # Str header value len are stored in a uint16 but cannot be larger
         # than 2 ** 15 - 1
         headers = {
-            "foo": "a" * (2 ** 16 - 1),
+            "foo": "a" * (2**16 - 1),
         }
         with pytest.raises(HeaderValueBytesExceedMaxLength):
             serializer.serialize(headers, b"")
@@ -572,7 +609,7 @@ class TestEventStreamMessageSerializer:
         # Bytes header value len are stored in a uint16 but cannot be larger
         # than 2 ** 15 - 1
         headers = {
-            "foo": b"a" * (2 ** 16 - 1),
+            "foo": b"a" * (2**16 - 1),
         }
         with pytest.raises(HeaderValueBytesExceedMaxLength):
             serializer.serialize(headers, b"")
@@ -592,7 +629,7 @@ class TestEventStreamMessageSerializer:
 
     def test_payload_too_long(self, serializer):
         # 18 MiB payaload, larger than the max of 16 MiB
-        payload = b"abcdefghijklmnopqr" * (1024 ** 2)
+        payload = b"abcdefghijklmnopqr" * (1024**2)
         with pytest.raises(PayloadBytesExceedMaxLength):
             serializer.serialize({}, payload)
 
@@ -604,7 +641,11 @@ class TestEventSigner:
 
     @pytest.fixture
     def event_signer(self):
-        return EventSigner("signing-name", "region-name", utc_now=self.utc_now,)
+        return EventSigner(
+            "signing-name",
+            "region-name",
+            utc_now=self.utc_now,
+        )
 
     def utc_now(self):
         return datetime.datetime(

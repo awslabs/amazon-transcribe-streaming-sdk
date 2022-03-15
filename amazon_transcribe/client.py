@@ -18,23 +18,22 @@ from typing import Optional
 
 from amazon_transcribe import AWSCRTEventLoop
 from amazon_transcribe.auth import AwsCrtCredentialResolver, CredentialResolver
+from amazon_transcribe.deserialize import TranscribeStreamingResponseParser
 from amazon_transcribe.endpoints import (
     BaseEndpointResolver,
     _TranscribeRegionEndpointResolver,
 )
-from amazon_transcribe.eventstream import EventStreamMessageSerializer
-from amazon_transcribe.eventstream import EventSigner
+from amazon_transcribe.eventstream import EventSigner, EventStreamMessageSerializer
 from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
 from amazon_transcribe.model import (
     AudioStream,
-    StartStreamTranscriptionRequest,
     StartStreamTranscriptionEventStream,
+    StartStreamTranscriptionRequest,
 )
 from amazon_transcribe.serialize import (
     AudioEventSerializer,
     TranscribeStreamingSerializer,
 )
-from amazon_transcribe.deserialize import TranscribeStreamingResponseParser
 from amazon_transcribe.signer import SigV4RequestSigner
 
 
@@ -158,7 +157,8 @@ class TranscribeStreamingClient:
         endpoint = await self._endpoint_resolver.resolve(self.region)
 
         request = self._serializer.serialize_start_stream_transcription_request(
-            endpoint=endpoint, request_shape=transcribe_streaming_request,
+            endpoint=endpoint,
+            request_shape=transcribe_streaming_request,
         ).prepare()
 
         creds = await self._credential_resolver.get_credentials()
@@ -184,8 +184,11 @@ class TranscribeStreamingClient:
         elif status_code != 200:
             raise RuntimeError("Unexpected status code encountered: %s" % status_code)
 
-        parsed_response = self._response_parser.parse_start_stream_transcription_response(
-            resolved_response, response,
+        parsed_response = (
+            self._response_parser.parse_start_stream_transcription_response(
+                resolved_response,
+                response,
+            )
         )
 
         # The audio stream is returned as output because it requires

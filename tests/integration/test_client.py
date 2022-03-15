@@ -1,13 +1,10 @@
-from io import BytesIO
 import asyncio
+
 import pytest
 
-from amazon_transcribe.model import TranscriptEvent
 from amazon_transcribe.client import TranscribeStreamingClient
-from amazon_transcribe.exceptions import (
-    BadRequestException,
-    SerializationException,
-)
+from amazon_transcribe.exceptions import BadRequestException, SerializationException
+from amazon_transcribe.model import TranscriptEvent
 from tests.integration import TEST_WAV_PATH
 
 
@@ -22,6 +19,7 @@ class TestClientStreaming:
             raw_bytes = f.read()
         # This simulates reading bytes from some asynchronous source
         # This could be coming from an async file, microphone, etc
+
         async def byte_generator():
             chunk_size = 1024 * 4
             for i in range(0, len(raw_bytes), chunk_size):
@@ -33,7 +31,9 @@ class TestClientStreaming:
     @pytest.mark.asyncio
     async def test_client_start_transcribe_stream(self, client, wav_bytes):
         stream = await client.start_stream_transcription(
-            language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
+            language_code="en-US",
+            media_sample_rate_hz=16000,
+            media_encoding="pcm",
         )
 
         async for chunk in wav_bytes():
@@ -55,7 +55,7 @@ class TestClientStreaming:
     async def test_client_start_transcribe_stream_bad_request(self, client):
         # The sample rate is too high
         with pytest.raises(BadRequestException):
-            stream = await client.start_stream_transcription(
+            await client.start_stream_transcription(
                 language_code="en-US",
                 media_sample_rate_hz=9999999,
                 media_encoding="pcm",
@@ -64,7 +64,7 @@ class TestClientStreaming:
     @pytest.mark.asyncio
     async def test_start_transcribe_stream_bad_boolean_show_speaker_lab(self, client):
         with pytest.raises(SerializationException):
-            stream = await client.start_stream_transcription(
+            await client.start_stream_transcription(
                 language_code="en-US",
                 media_sample_rate_hz=16000,
                 media_encoding="pcm",

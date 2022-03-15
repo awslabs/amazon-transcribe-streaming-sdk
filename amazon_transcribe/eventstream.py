@@ -11,29 +11,25 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 """Binary Event Stream Decoding """
-import uuid
 import datetime
-from typing import Any, Callable, Dict, AsyncGenerator, Optional, Tuple, Union, Type
-
-from binascii import crc32
-from struct import unpack, pack
-
-from amazon_transcribe.structures import BufferableByteStream
-
 
 # TODO: move this to another module when we fix structure
 # These are needed for event signing
 import hmac
+import uuid
+from binascii import crc32, hexlify
 from hashlib import sha256
-from binascii import hexlify
-from amazon_transcribe.auth import Credentials
+from struct import pack, unpack
+from typing import Any, AsyncGenerator, Callable, Dict, Optional, Tuple, Type, Union
 
+from amazon_transcribe.auth import Credentials
+from amazon_transcribe.structures import BufferableByteStream
 
 # byte length of the prelude (total_length + header_length + prelude_crc)
 _PRELUDE_LENGTH = 12
 _MAX_HEADERS_LENGTH = 128 * 1024  # 128 Kb
 _MAX_HEADER_VALUE_BYTE_LENGTH = 32 * 1024 - 1
-_MAX_PAYLOAD_LENGTH = 16 * 1024 ** 2  # 16 Mb
+_MAX_PAYLOAD_LENGTH = 16 * 1024**2  # 16 Mb
 
 HEADER_VALUE = Union[bool, bytes, int, str]
 
@@ -47,14 +43,14 @@ class DuplicateHeader(ParserError):
 
     def __init__(self, header: str):
         message = 'Duplicate header present: "%s"' % header
-        super(DuplicateHeader, self).__init__(message)
+        super().__init__(message)
 
 
 class InvalidHeadersLength(ParserError):
     """Headers length is longer than the maximum."""
 
     def __init__(self, length: int):
-        message = "Header length of %s exceeded the maximum of %s" % (
+        message = "Header length of {} exceeded the maximum of {}".format(
             length,
             _MAX_HEADERS_LENGTH,
         )
@@ -65,7 +61,7 @@ class InvalidPayloadLength(ParserError):
     """Payload length is longer than the maximum."""
 
     def __init__(self, length: int):
-        message = "Payload length of %s exceeded the maximum of %s" % (
+        message = "Payload length of {} exceeded the maximum of {}".format(
             length,
             _MAX_PAYLOAD_LENGTH,
         )
@@ -76,7 +72,7 @@ class ChecksumMismatch(ParserError):
     """Calculated checksum did not match the expected checksum."""
 
     def __init__(self, expected: int, calculated: int):
-        message = "Checksum mismatch: expected 0x%08x, calculated 0x%08x" % (
+        message = "Checksum mismatch: expected 0x{:08x}, calculated 0x{:08x}".format(
             expected,
             calculated,
         )
@@ -90,7 +86,7 @@ class SerializationError(Exception):
 class InvalidHeaderValue(SerializationError):
     def __init__(self, value):
         message = f"Invalid header value type: {type(value)}"
-        super(InvalidHeaderValue, self).__init__(message)
+        super().__init__(message)
         self.value = value
 
 
@@ -100,7 +96,7 @@ class HeaderBytesExceedMaxLength(SerializationError):
             f"Headers exceeded max serialization "
             f"length of 128 KiB at {length} bytes"
         )
-        super(HeaderBytesExceedMaxLength, self).__init__(message)
+        super().__init__(message)
 
 
 class HeaderValueBytesExceedMaxLength(SerializationError):
@@ -109,7 +105,7 @@ class HeaderValueBytesExceedMaxLength(SerializationError):
             f"Header bytes value exceeds max serialization "
             f"length of (32 KiB - 1) at {length} bytes"
         )
-        super(HeaderValueBytesExceedMaxLength, self).__init__(message)
+        super().__init__(message)
 
 
 class PayloadBytesExceedMaxLength(SerializationError):
@@ -117,7 +113,7 @@ class PayloadBytesExceedMaxLength(SerializationError):
         message = (
             f"Payload exceeded max serialization " f"length of 16 MiB at {length} bytes"
         )
-        super(PayloadBytesExceedMaxLength, self).__init__(message)
+        super().__init__(message)
 
 
 class HeaderValue:
@@ -433,7 +429,7 @@ def _validate_checksum(data: bytes, checksum: int, crc=0):
 
 
 class MessagePrelude:
-    """Represents the prelude of an event stream message. """
+    """Represents the prelude of an event stream message."""
 
     def __init__(self, total_length: int, headers_length: int, crc: int):
         self.total_length = total_length
@@ -463,7 +459,7 @@ class MessagePrelude:
 
 
 class EventStreamMessage:
-    """Represents an event stream message. """
+    """Represents an event stream message."""
 
     def __init__(self, prelude, headers, payload, crc):
         self.prelude: MessagePrelude = prelude
@@ -483,7 +479,7 @@ class EventStreamMessage:
 
 
 class EventStreamHeaderParser:
-    """ Parses the event headers from an event stream message.
+    """Parses the event headers from an event stream message.
 
     Expects all of the header data upfront and creates a dictionary of headers
     to return. This object can be reused multiple times to parse the headers
@@ -683,7 +679,10 @@ class EventSigner:
     _NOW_TYPE = Optional[Callable[[], datetime.datetime]]
 
     def __init__(
-        self, signing_name: str, region: str, utc_now: _NOW_TYPE = None,
+        self,
+        signing_name: str,
+        region: str,
+        utc_now: _NOW_TYPE = None,
     ):
         self.signing_name = signing_name
         self.region = region

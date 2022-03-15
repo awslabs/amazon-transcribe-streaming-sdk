@@ -14,19 +14,20 @@
 
 from typing import Optional
 
-from awscrt.http import HttpHeaders, HttpRequest
 from awscrt.auth import (
     AwsCredentialsProvider,
+    AwsSignatureType,
+    AwsSignedBodyHeaderType,
+    AwsSignedBodyValue,
     AwsSigningAlgorithm,
     AwsSigningConfig,
-    AwsSignatureType,
-    AwsSignedBodyValue,
-    AwsSignedBodyHeaderType,
     aws_sign_request,
 )
+from awscrt.http import HttpHeaders, HttpRequest
+
 from amazon_transcribe.auth import Credentials
-from amazon_transcribe.request import PreparedRequest, HeadersDict
 from amazon_transcribe.exceptions import CredentialsException
+from amazon_transcribe.request import HeadersDict, PreparedRequest
 
 
 class RequestSigner:

@@ -24,4 +24,7 @@ class AWSCRTEventLoop:
     def _initialize_default_loop(self):
         event_loop_group = EventLoopGroup(1)
         host_resolver = DefaultHostResolver(event_loop_group)
-        return ClientBootstrap(event_loop_group, host_resolver,)
+        return ClientBootstrap(
+            event_loop_group,
+            host_resolver,
+        )

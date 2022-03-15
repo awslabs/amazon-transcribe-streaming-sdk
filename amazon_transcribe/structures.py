@@ -13,7 +13,7 @@
 
 
 from io import BufferedIOBase
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     # We need to import this from _typeshed as this is not publicly exposed and
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class BufferableByteStream(BufferedIOBase):
-    """ BufferableByteStream will always be in non-blocking mode """
+    """BufferableByteStream will always be in non-blocking mode"""
 
     def __init__(self):
         self._byte_chunks: list = []
@@ -82,7 +82,7 @@ class BufferableByteStream(BufferedIOBase):
             )
 
         if self.closed or self.__done:
-            raise IOError("Stream is completed and doesn't support further writes.")
+            raise OSError("Stream is completed and doesn't support further writes.")
 
         if b:
             self._byte_chunks.append(b)

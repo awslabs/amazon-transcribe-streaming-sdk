@@ -18,7 +18,6 @@ from typing import Dict, List, Tuple, Union
 
 from amazon_transcribe.exceptions import ValidationException
 
-
 LIST_TYPE = Union[Tuple[str, ...], List[str]]
 HEADER_VALUE_TYPE = Union[str, LIST_TYPE]
 BODY_TYPE = Union[BytesIO, BufferedIOBase]
@@ -102,7 +101,13 @@ class HeadersDict(MutableMapping):
 
 class Request:
     def __init__(
-        self, endpoint, path="/", method="GET", headers=None, body=None, params=None,
+        self,
+        endpoint,
+        path="/",
+        method="GET",
+        headers=None,
+        body=None,
+        params=None,
     ):
         self.endpoint: str = endpoint
         self.path: str = path

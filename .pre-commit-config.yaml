@@ -12,14 +12,14 @@ repos:
       - id: pyupgrade
         args:
           - '--py36-plus'
-  - repo: 'https://github.com/PyCQA/isort'
-    rev: 5.9.3
-    hooks:
-      - id: isort
   - repo: https://github.com/psf/black
     rev: 22.1.0
     hooks:
     - id: black
+  - repo: 'https://github.com/PyCQA/isort'
+    rev: 5.9.3
+    hooks:
+      - id: isort
   - repo: https://github.com/pycqa/flake8
     rev: 3.9.2
     hooks:
@@ -29,4 +29,4 @@ repos:
     hooks:
     - id: mypy
       args: ["--ignore-missing-imports"]
-      exclude: ^(tests/)
+      exclude: ^(tests/|examples)

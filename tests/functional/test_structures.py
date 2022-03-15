@@ -24,7 +24,8 @@ class TestBufferableByteStream:
         ]
 
     @pytest.mark.parametrize(
-        "test_input", [None, "test", BytesIO(b"test"), {"test": "chunk"}, ["test"]],
+        "test_input",
+        [None, "test", BytesIO(b"test"), {"test": "chunk"}, ["test"]],
     )
     def test_byte_stream_write_nonbytes(self, test_input, byte_stream):
         with pytest.raises(ValueError):
