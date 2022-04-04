@@ -82,11 +82,15 @@ class TranscribeStreamingResponseParser:
         elif error_code == "SerializationException":
             return SerializationException(error_message)
         return UnknownServiceException(
-            http_response.status_code, error_code, error_message,
+            http_response.status_code,
+            error_code,
+            error_message,
         )
 
     def parse_start_stream_transcription_response(
-        self, http_response: Response, body_stream: Any,
+        self,
+        http_response: Response,
+        body_stream: Any,
     ) -> StartStreamTranscriptionResponse:
         headers = http_response.headers
         request_id = headers.get("x-amzn-request-id")

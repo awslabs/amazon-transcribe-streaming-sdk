@@ -38,7 +38,8 @@ class AwsCrtHttpResponse:
 
     async def resolve_response(self) -> Response:
         return Response(
-            status_code=await self.status_code, headers=dict(await self.headers),
+            status_code=await self.status_code,
+            headers=dict(await self.headers),
         )
 
     async def consume_body(self) -> bytes:
@@ -148,7 +149,8 @@ class AwsCrtHttpSessionManager:
         return connection
 
     async def _get_connection(
-        self, parsed_url: ParseResult,
+        self,
+        parsed_url: ParseResult,
     ) -> http.HttpClientConnection:
         # TODO: Use CRT connection pooling instead of this basic kind
         if not parsed_url.hostname:
@@ -195,6 +197,10 @@ class AwsCrtHttpSessionManager:
 
         connection = await self._get_connection(parsed_url)
         response = AwsCrtHttpResponse()
-        stream = connection.request(request, response._on_headers, response._on_body,)
+        stream = connection.request(
+            request,
+            response._on_headers,
+            response._on_body,
+        )
         response._set_stream(stream)
         return response

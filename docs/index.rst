@@ -105,7 +105,7 @@ Here's an example to get started:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(basic_transcribe())
     loop.close()
-    
+
 Security
 ==========
 

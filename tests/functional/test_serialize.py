@@ -15,7 +15,9 @@ from amazon_transcribe.structures import BufferableByteStream
 @pytest.fixture
 def request_shape():
     return StartStreamTranscriptionRequest(
-        language_code="en-US", media_sample_rate_hz=9000, media_encoding="pcm",
+        language_code="en-US",
+        media_sample_rate_hz=9000,
+        media_encoding="pcm",
     )
 
 
@@ -23,7 +25,8 @@ class TestStartStreamTransactionRequest:
     def test_serialization(self, request_shape):
         request_serializer = TranscribeStreamingSerializer()
         request = request_serializer.serialize_start_stream_transcription_request(
-            endpoint="https://transcribe.aws.com", request_shape=request_shape,
+            endpoint="https://transcribe.aws.com",
+            request_shape=request_shape,
         ).prepare()
 
         assert request.headers["x-amzn-transcribe-language-code"] == "en-US"
@@ -37,7 +40,8 @@ class TestStartStreamTransactionRequest:
         request_serializer = TranscribeStreamingSerializer()
         with pytest.raises(ValidationException):
             request_serializer.serialize_start_stream_transcription_request(
-                endpoint=None, request_shape=request_shape,
+                endpoint=None,
+                request_shape=request_shape,
             )
 
 

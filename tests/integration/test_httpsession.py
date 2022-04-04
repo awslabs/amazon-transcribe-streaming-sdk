@@ -1,4 +1,3 @@
-import asyncio
 import json
 import pytest
 
@@ -29,7 +28,10 @@ async def test_make_request(default_eventloop):
     ]
     body = BytesIO(b"foo body")
     response = await session.make_request(
-        url, method="PUT", headers=headers, body=body,
+        url,
+        method="PUT",
+        headers=headers,
+        body=body,
     )
     assert await response.status_code == 200
     assert await response.headers
