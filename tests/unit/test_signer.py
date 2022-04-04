@@ -1,12 +1,11 @@
 from io import BytesIO
 
 from awscrt.auth import (
-    AwsCredentialsProvider,
     AwsSigningAlgorithm,
     AwsSignatureType,
 )
 
-from awscrt.http import HttpRequest, HttpHeaders
+from awscrt.http import HttpRequest
 import pytest
 
 from amazon_transcribe.auth import StaticCredentialResolver
@@ -83,6 +82,8 @@ def test_sigv4_request_signer(default_credential_resolver):
 
 def test_sigv4_request_signer_handles_no_credentials():
     signer = SigV4RequestSigner("transcribe", "us-west-2")
-    request = Request(endpoint="https://transcribestreaming.amazonaws.com",).prepare()
+    request = Request(
+        endpoint="https://transcribestreaming.amazonaws.com",
+    ).prepare()
     with pytest.raises(CredentialsException):
         signer.sign(request, None)

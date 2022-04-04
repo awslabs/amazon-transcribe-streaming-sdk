@@ -102,7 +102,13 @@ class HeadersDict(MutableMapping):
 
 class Request:
     def __init__(
-        self, endpoint, path="/", method="GET", headers=None, body=None, params=None,
+        self,
+        endpoint,
+        path="/",
+        method="GET",
+        headers=None,
+        body=None,
+        params=None,
     ):
         self.endpoint: str = endpoint
         self.path: str = path

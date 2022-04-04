@@ -1,9 +1,8 @@
-import asyncio
 import unittest.mock as mock
 import pytest
 
 from io import BytesIO
-from awscrt import io, http
+from awscrt import http
 from concurrent.futures import Future
 from amazon_transcribe.exceptions import HTTPException
 from amazon_transcribe.httpsession import AwsCrtHttpSessionManager
@@ -61,8 +60,16 @@ def assert_request(connection, expected_request):
         ("https://example.com", {}, http.HttpRequest("GET", "/")),
         ("https://example.com:4242", {}, http.HttpRequest("GET", "/")),
         ("https://example.com/api", {}, http.HttpRequest("GET", "/api")),
-        ("https://example.com?foo=bar", {}, http.HttpRequest("GET", "/?foo=bar"),),
-        ("https://example.com", {"method": "PUT"}, http.HttpRequest("PUT", "/"),),
+        (
+            "https://example.com?foo=bar",
+            {},
+            http.HttpRequest("GET", "/?foo=bar"),
+        ),
+        (
+            "https://example.com",
+            {"method": "PUT"},
+            http.HttpRequest("PUT", "/"),
+        ),
         (
             "https://example.com/api?foo=bar",
             {},
@@ -81,20 +88,26 @@ def assert_request(connection, expected_request):
         (
             "https://example.com",
             {"headers": [("foo", "bar")]},
-            http.HttpRequest("GET", "/", headers=http.HttpHeaders([("foo", "bar")]),),
+            http.HttpRequest(
+                "GET",
+                "/",
+                headers=http.HttpHeaders([("foo", "bar")]),
+            ),
         ),
     ],
 )
 async def test_make_request(
     url, request_kwargs, expected_request, session_manager, mock_connection
 ):
-    response = await session_manager.make_request(url, **request_kwargs)
+    await session_manager.make_request(url, **request_kwargs)
     assert_request(mock_connection, expected_request)
 
 
 @pytest.mark.asyncio
 async def test_make_request_reuses_connections(
-    session_manager, mock_connection, mock_connection_cls,
+    session_manager,
+    mock_connection,
+    mock_connection_cls,
 ):
     await session_manager.make_request("https://example.com")
     await session_manager.make_request("https://example.com")
@@ -104,7 +117,9 @@ async def test_make_request_reuses_connections(
 
 @pytest.mark.asyncio
 async def test_make_request_pools_based_on_scheme(
-    session_manager, mock_connection, mock_connection_cls,
+    session_manager,
+    mock_connection,
+    mock_connection_cls,
 ):
     await session_manager.make_request("http://example.com")
     await session_manager.make_request("https://example.com")
@@ -114,7 +129,9 @@ async def test_make_request_pools_based_on_scheme(
 
 @pytest.mark.asyncio
 async def test_make_request_pools_based_on_port(
-    session_manager, mock_connection, mock_connection_cls,
+    session_manager,
+    mock_connection,
+    mock_connection_cls,
 ):
     await session_manager.make_request("https://example.com")
     await session_manager.make_request("https://example.com:4343")
@@ -139,7 +156,10 @@ async def test_make_request_invalid_hostname(session_manager):
     ],
 )
 async def test_make_request_port(
-    url, port, session_manager, mock_connection_cls,
+    url,
+    port,
+    session_manager,
+    mock_connection_cls,
 ):
     await session_manager.make_request(url)
     new_conn_kwargs = mock_connection_cls.new.call_args[1]
@@ -158,7 +178,11 @@ async def test_make_request_tls_options(session_manager, mock_connection_cls):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "version", [http.HttpVersion.Http1_0, http.HttpVersion.Http1_1,]
+    "version",
+    [
+        http.HttpVersion.Http1_0,
+        http.HttpVersion.Http1_1,
+    ],
 )
 async def test_make_request_refuses_http1(version, session_manager, mock_connection):
     mock_connection.version = version
@@ -180,7 +204,9 @@ async def test_response_headers(session_manager, mock_connection):
 
 @pytest.mark.asyncio
 async def test_response_get_chunk(
-    session_manager, mock_connection, mock_stream,
+    session_manager,
+    mock_connection,
+    mock_stream,
 ):
     response = await session_manager.make_request("https://example.com")
     # Simulate the CRT event loop responding

@@ -7,19 +7,14 @@ on:
         branches: develop
 
 jobs:
-  black-and-flake8:
-    runs-on: ubuntu-latest
+  lint:
+    runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v1
-      - name: Set Up Python 3.7
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - name: Install tox
-        run: |
-          python3.7 -m pip install tox
-      - name: Run linting
-        run: |
-            tox -e lint
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Run pre-commit
+      uses: pre-commit/action@v2.0.0

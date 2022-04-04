@@ -1,10 +1,8 @@
 import asyncio
-from unittest.mock import Mock
 
 import pytest
 
 from amazon_transcribe.client import TranscribeStreamingClient
-from amazon_transcribe.model import StartStreamTranscriptionEventStream
 from amazon_transcribe.handlers import TranscriptResultStreamHandler
 from tests.integration import TEST_WAV_PATH
 
@@ -36,7 +34,9 @@ class TestEventHandler:
         client = TranscribeStreamingClient(region="us-west-2")
 
         stream = await client.start_stream_transcription(
-            language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
+            language_code="en-US",
+            media_sample_rate_hz=16000,
+            media_encoding="pcm",
         )
 
         async def write_chunks():
@@ -53,7 +53,9 @@ class TestEventHandler:
         client = TranscribeStreamingClient(region="us-west-2")
 
         stream = await client.start_stream_transcription(
-            language_code="en-US", media_sample_rate_hz=16000, media_encoding="pcm",
+            language_code="en-US",
+            media_sample_rate_hz=16000,
+            media_encoding="pcm",
         )
 
         async def write_chunks():

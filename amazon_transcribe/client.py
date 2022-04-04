@@ -158,7 +158,8 @@ class TranscribeStreamingClient:
         endpoint = await self._endpoint_resolver.resolve(self.region)
 
         request = self._serializer.serialize_start_stream_transcription_request(
-            endpoint=endpoint, request_shape=transcribe_streaming_request,
+            endpoint=endpoint,
+            request_shape=transcribe_streaming_request,
         ).prepare()
 
         creds = await self._credential_resolver.get_credentials()
@@ -184,8 +185,11 @@ class TranscribeStreamingClient:
         elif status_code != 200:
             raise RuntimeError("Unexpected status code encountered: %s" % status_code)
 
-        parsed_response = self._response_parser.parse_start_stream_transcription_response(
-            resolved_response, response,
+        parsed_response = (
+            self._response_parser.parse_start_stream_transcription_response(
+                resolved_response,
+                response,
+            )
         )
 
         # The audio stream is returned as output because it requires

@@ -1,8 +1,4 @@
-black==19.10b0
-flake8<3.9
 mypy<1.0
-pre-commit>=2.15.0
 pytest<6.3
 pytest-asyncio<0.16.0
 pytest-cov<2.13
-tox>2.0

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class BufferableByteStream(BufferedIOBase):
-    """ BufferableByteStream will always be in non-blocking mode """
+    """BufferableByteStream will always be in non-blocking mode"""
 
     def __init__(self):
         self._byte_chunks: list = []

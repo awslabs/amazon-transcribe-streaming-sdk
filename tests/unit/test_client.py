@@ -12,5 +12,5 @@ class TestClientSetup:
 
     def test_client_setup_without_region(self):
         # The client must take a keyword `region`
-        with pytest.raises(TypeError) as e:
-            client = TranscribeStreamingClient()
+        with pytest.raises(TypeError):
+            TranscribeStreamingClient()

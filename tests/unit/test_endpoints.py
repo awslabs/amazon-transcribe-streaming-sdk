@@ -11,7 +11,7 @@ class TestBaseEndpointResolver:
     @pytest.mark.asyncio
     async def test_resolve(self):
         with pytest.raises(NotImplementedError):
-            endpoint = await BaseEndpointResolver().resolve("test-region")
+            await BaseEndpointResolver().resolve("test-region")
 
 
 class TestStaticEndpointResolver:
@@ -31,7 +31,8 @@ class TestStaticEndpointResolver:
 
 class TestTranscribeRegionEndpointResolver:
     @pytest.mark.parametrize(
-        "region", ["us-west-2", "eu-south-1", "af-south-1" "us-east-2"],
+        "region",
+        ["us-west-2", "eu-south-1", "af-south-1" "us-east-2"],
     )
     @pytest.mark.asyncio
     async def test_resolve(self, region):

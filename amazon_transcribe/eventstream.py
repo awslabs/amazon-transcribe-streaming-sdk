@@ -33,7 +33,7 @@ from amazon_transcribe.auth import Credentials
 _PRELUDE_LENGTH = 12
 _MAX_HEADERS_LENGTH = 128 * 1024  # 128 Kb
 _MAX_HEADER_VALUE_BYTE_LENGTH = 32 * 1024 - 1
-_MAX_PAYLOAD_LENGTH = 16 * 1024 ** 2  # 16 Mb
+_MAX_PAYLOAD_LENGTH = 16 * 1024**2  # 16 Mb
 
 HEADER_VALUE = Union[bool, bytes, int, str]
 
@@ -433,7 +433,7 @@ def _validate_checksum(data: bytes, checksum: int, crc=0):
 
 
 class MessagePrelude:
-    """Represents the prelude of an event stream message. """
+    """Represents the prelude of an event stream message."""
 
     def __init__(self, total_length: int, headers_length: int, crc: int):
         self.total_length = total_length
@@ -463,7 +463,7 @@ class MessagePrelude:
 
 
 class EventStreamMessage:
-    """Represents an event stream message. """
+    """Represents an event stream message."""
 
     def __init__(self, prelude, headers, payload, crc):
         self.prelude: MessagePrelude = prelude
@@ -483,7 +483,7 @@ class EventStreamMessage:
 
 
 class EventStreamHeaderParser:
-    """ Parses the event headers from an event stream message.
+    """Parses the event headers from an event stream message.
 
     Expects all of the header data upfront and creates a dictionary of headers
     to return. This object can be reused multiple times to parse the headers
@@ -683,7 +683,10 @@ class EventSigner:
     _NOW_TYPE = Optional[Callable[[], datetime.datetime]]
 
     def __init__(
-        self, signing_name: str, region: str, utc_now: _NOW_TYPE = None,
+        self,
+        signing_name: str,
+        region: str,
+        utc_now: _NOW_TYPE = None,
     ):
         self.signing_name = signing_name
         self.region = region

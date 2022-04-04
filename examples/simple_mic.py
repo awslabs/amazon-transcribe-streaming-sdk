@@ -1,4 +1,5 @@
 import asyncio
+
 # This example uses the sounddevice library to get an audio stream from the
 # microphone. It's not a dependency of the project but can be installed with
 # `pip install sounddevice`.
@@ -15,6 +16,8 @@ Here's an example of a custom event handler you can extend to
 process the returned transcription results as needed. This
 handler will simply print the text out to your interpreter.
 """
+
+
 class MyEventHandler(TranscriptResultStreamHandler):
     async def handle_transcript_event(self, transcript_event: TranscriptEvent):
         # This handler can be implemented to handle transcriptions as needed.
