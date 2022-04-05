@@ -40,6 +40,7 @@ def test_parse_start_stream_transcription_response_basic(parser):
             "x-amzn-transcribe-number-of-channels": "0",
             "x-amzn-transcribe-enable-partial-results-stabilization": "true",
             "x-amzn-transcribe-partial-results-stability": "high",
+            "x-amzn-transcribe-language-model-name": "foo_language_model_name",
         }
     )
     parsed = parser.parse_start_stream_transcription_response(response, None)
@@ -56,6 +57,7 @@ def test_parse_start_stream_transcription_response_basic(parser):
     assert parsed.number_of_channels == 0
     assert parsed.enable_partial_results_stabilization is True
     assert parsed.partial_results_stability == "high"
+    assert parsed.language_model_name == "foo_language_model_name"
 
 
 def test_parse_start_stream_transcription_response_missing_fields(parser):
@@ -74,6 +76,7 @@ def test_parse_start_stream_transcription_response_missing_fields(parser):
     assert parsed.number_of_channels is None
     assert parsed.enable_partial_results_stabilization is None
     assert parsed.partial_results_stability is None
+    assert parsed.language_model_name is None
 
 
 @pytest.mark.parametrize(

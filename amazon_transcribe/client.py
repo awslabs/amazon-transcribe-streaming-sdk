@@ -82,6 +82,7 @@ class TranscribeStreamingClient:
         number_of_channels: Optional[int] = None,
         enable_partial_results_stabilization: Optional[bool] = None,
         partial_results_stability: Optional[str] = None,
+        language_model_name: Optional[str] = None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -140,6 +141,8 @@ class TranscribeStreamingClient:
             results. A higher stability level means that the transcription results
             are less likely to change. Higher stability levels can come with lower
             overall transcription accuracy. Defaults to "high" if not set explicitly.
+        :param language_model_name
+            The name of the pre-existing language model to be used during transcription.
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -154,6 +157,7 @@ class TranscribeStreamingClient:
             number_of_channels,
             enable_partial_results_stabilization,
             partial_results_stability,
+            language_model_name,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
 

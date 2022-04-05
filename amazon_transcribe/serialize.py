@@ -123,6 +123,12 @@ class TranscribeStreamingSerializer:
                 request_shape.partial_results_stability,
             )
         )
+        headers.update(
+                self._serialize_str_header(
+                        "language-model-name",
+                        request_shape.language_model_name,
+                )
+        )
 
         _add_required_headers(endpoint, headers)
 
