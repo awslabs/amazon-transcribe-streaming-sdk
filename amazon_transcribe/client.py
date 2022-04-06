@@ -141,8 +141,8 @@ class TranscribeStreamingClient:
             results. A higher stability level means that the transcription results
             are less likely to change. Higher stability levels can come with lower
             overall transcription accuracy. Defaults to "high" if not set explicitly.
-        :param language_model_name
-            The name of the pre-existing language model to be used during transcription.
+        :param language_model_name:
+            The name of the language model you want to use.
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,

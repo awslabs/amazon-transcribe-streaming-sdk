@@ -96,7 +96,6 @@ class Item:
        If partial result stabilization has been enabled, indicates whether the
        word or phrase in the item is stable. If Stable is true,
        the result is stable.
-
     """
 
     def __init__(
@@ -225,8 +224,8 @@ class StartStreamTranscriptionRequest:
         results. A higher stability level means that the transcription results
         are less likely to change. Higher stability levels can come with lower
         overall transcription accuracy.
-    :param language_model_name
-        The name of the pre-existing language model to be used during transcription.
+    :param language_model_name:
+        The name of the language model you want to use.
     """
 
     def __init__(
@@ -313,8 +312,8 @@ class StartStreamTranscriptionResponse:
         If partial results stabilization has been enabled in the stream,
         shows the stability level.
 
-    :param language_model_name
-        The name of the pre-existing language model to be used during transcription
+    :param language_model_name:
+        The name of the custom language model used in the transcription.
     """
 
     def __init__(
