@@ -118,6 +118,7 @@ class TranscribeStreamingResponseParser:
         partial_results_stability = headers.get(
             "x-amzn-transcribe-partial-results-stability"
         )
+        language_model_name = headers.get("x-amzn-transcribe-language-model-name")
 
         transcript_result_stream = TranscriptResultStream(
             body_stream, TranscribeStreamingEventParser()
@@ -138,6 +139,7 @@ class TranscribeStreamingResponseParser:
             number_of_channels=number_of_channels,
             enable_partial_results_stabilization=enable_partial_results_stabilization,
             partial_results_stability=partial_results_stability,
+            language_model_name=language_model_name,
         )
         return parsed_response
 

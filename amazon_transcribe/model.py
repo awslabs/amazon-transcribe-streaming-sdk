@@ -224,6 +224,8 @@ class StartStreamTranscriptionRequest:
         results. A higher stability level means that the transcription results
         are less likely to change. Higher stability levels can come with lower
         overall transcription accuracy.
+    :param language_model_name:
+        The name of the language model you want to use.
     """
 
     def __init__(
@@ -240,6 +242,7 @@ class StartStreamTranscriptionRequest:
         number_of_channels=None,
         enable_partial_results_stabilization=None,
         partial_results_stability=None,
+        language_model_name=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -258,6 +261,7 @@ class StartStreamTranscriptionRequest:
             bool
         ] = enable_partial_results_stabilization
         self.partial_results_stability: Optional[str] = partial_results_stability
+        self.language_model_name: Optional[str] = language_model_name
 
 
 class StartStreamTranscriptionResponse:
@@ -307,6 +311,9 @@ class StartStreamTranscriptionResponse:
     :param partial_results_stability:
         If partial results stabilization has been enabled in the stream,
         shows the stability level.
+
+    :param language_model_name:
+        The name of the custom language model used in the transcription.
     """
 
     def __init__(
@@ -325,6 +332,7 @@ class StartStreamTranscriptionResponse:
         number_of_channels=None,
         enable_partial_results_stabilization=None,
         partial_results_stability=None,
+        language_model_name=None,
     ):
         self.request_id: Optional[str] = request_id
         self.language_code: Optional[str] = language_code
@@ -344,6 +352,7 @@ class StartStreamTranscriptionResponse:
             bool
         ] = enable_partial_results_stabilization
         self.partial_results_stability: Optional[str] = partial_results_stability
+        self.language_model_name: Optional[str] = language_model_name
 
 
 class Transcript:
