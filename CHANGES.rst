@@ -1,10 +1,14 @@
 Changes
 =======
 
-0.6.0 (2022-04-05)
+0.6.0 (2022-04-06)
 ------------------
 
-* Officially drop support for Python 3.6
+* Officially drop support for Python 3.6 (#69)
+
+* The required version of awscrt has been upgraded to ~=0.13.8 (#67)
+
+* Added support for `language_model_name` for both requests and responses. (#70)
 
 
 0.5.2 (2022-03-15)
