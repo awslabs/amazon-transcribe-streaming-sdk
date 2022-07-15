@@ -87,9 +87,13 @@ handler will simply print the text out to your interpreter.
 SAMPLE_RATE = 16000
 BYTES_PER_SAMPLE = 2
 CHANNEL_NUMS = 1
-CHUNK_SIZE = 1024 * 8
 
-AUDIO_PATH = "tests_integration_assets_test.wav"
+# An example file can be found at tests/integration/assets/test.wav
+# NOTE: For pre-recorded files longer than 5 minutes, the sent audio
+# chunks should be rate limited to match the realtime bitrate of the
+# audio stream to avoid signing issues.
+AUDIO_PATH = "../tests/integration/assets/test.wav"
+CHUNK_SIZE = 1024 * 8
 
 REGION = "us-west-2"
 
