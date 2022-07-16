@@ -92,7 +92,7 @@ CHANNEL_NUMS = 1
 # NOTE: For pre-recorded files longer than 5 minutes, the sent audio
 # chunks should be rate limited to match the realtime bitrate of the
 # audio stream to avoid signing issues.
-AUDIO_PATH = "../tests/integration/assets/test.wav"
+AUDIO_PATH = "test.wav"
 CHUNK_SIZE = 1024 * 8
 
 REGION = "us-west-2"
