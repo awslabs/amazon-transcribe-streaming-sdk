@@ -13,7 +13,7 @@
 
 
 from urllib.parse import urlsplit
-from typing import Dict
+from typing import AsyncIterable, Dict
 
 from amazon_transcribe import __version__ as version
 from amazon_transcribe.exceptions import ValidationException
@@ -21,7 +21,6 @@ from amazon_transcribe.model import AudioStream
 
 import asyncio
 import time
-import aiofile
 
 
 def _add_required_headers(endpoint: str, headers: Dict[str, str]):
@@ -44,13 +43,15 @@ def ensure_boolean(val):
     else:
         return val.lower() == "true"
 
+
 async def apply_realtime_delay(
     stream: AudioStream,
-    reader: aiofile.Reader,
+    reader: AsyncIterable,
     bytes_per_sample: int,
     sample_rate: float,
     channel_nums: int,
 ) -> None:
+    """Applies a delay when reading an audio file steam to simulate a real-time delay."""
     start_time = time.time()
     total_audio_sent = 0
     async for chunk in reader:
