@@ -17,7 +17,7 @@ from typing import AsyncIterable, Dict
 
 from amazon_transcribe import __version__ as version
 from amazon_transcribe.exceptions import ValidationException
-from amazon_transcribe.model import AudioStream
+from amazon_transcribe.model import StartStreamTranscriptionEventStream
 
 import asyncio
 import time
@@ -45,7 +45,7 @@ def ensure_boolean(val):
 
 
 async def apply_realtime_delay(
-    stream: AudioStream,
+    stream: StartStreamTranscriptionEventStream,
     reader: AsyncIterable,
     bytes_per_sample: int,
     sample_rate: float,
@@ -53,7 +53,7 @@ async def apply_realtime_delay(
 ) -> None:
     """Applies a delay when reading an audio file steam to simulate a real-time delay."""
     start_time = time.time()
-    total_audio_sent = 0
+    total_audio_sent = 0.0
     async for chunk in reader:
         await stream.input_stream.send_audio_event(audio_chunk=chunk)
         total_audio_sent += len(chunk) / (bytes_per_sample * sample_rate * channel_nums)
