@@ -66,7 +66,6 @@ documentation](https://docs.aws.amazon.com/transcribe/latest/dg/streaming.html).
 Here's an example app to get started:
 ```python
 import asyncio
-import time
 
 # This example uses aiofile for asynchronous file reads.
 # It's not a dependency of the project but can be installed

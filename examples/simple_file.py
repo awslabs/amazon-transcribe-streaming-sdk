@@ -1,5 +1,4 @@
 import asyncio
-import time
 
 # This example uses aiofile for asynchronous file reads.
 # It's not a dependency of the project but can be installed
