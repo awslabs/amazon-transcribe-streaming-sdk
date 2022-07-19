@@ -91,7 +91,6 @@ CHANNEL_NUMS = 1
 # An example file can be found at tests/integration/assets/test.wav
 AUDIO_PATH = "tests/integration/assets/test.wav"
 CHUNK_SIZE = 1024 * 8
-
 REGION = "us-west-2"
 
 
