@@ -17,6 +17,11 @@ from typing import Dict
 
 from amazon_transcribe import __version__ as version
 from amazon_transcribe.exceptions import ValidationException
+from amazon_transcribe.model import AudioStream
+
+import asyncio
+import time
+import aiofile
 
 
 def _add_required_headers(endpoint: str, headers: Dict[str, str]):
@@ -38,3 +43,19 @@ def ensure_boolean(val):
         return val
     else:
         return val.lower() == "true"
+
+async def apply_realtime_delay(
+    stream: AudioStream,
+    reader: aiofile.Reader,
+    bytes_per_sample: int,
+    sample_rate: float,
+    channel_nums: int,
+) -> None:
+    start_time = time.time()
+    total_audio_sent = 0
+    async for chunk in reader:
+        await stream.input_stream.send_audio_event(audio_chunk=chunk)
+        total_audio_sent += len(chunk) / (bytes_per_sample * sample_rate * channel_nums)
+        # sleep to simulate real-time streaming
+        wait_time = start_time + total_audio_sent - time.time()
+        await asyncio.sleep(wait_time)

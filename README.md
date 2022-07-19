@@ -76,6 +76,7 @@ import aiofile
 from amazon_transcribe.client import TranscribeStreamingClient
 from amazon_transcribe.handlers import TranscriptResultStreamHandler
 from amazon_transcribe.model import TranscriptEvent
+from amazon_transcribe.utils import apply_realtime_delay
 
 """
 Here's an example of a custom event handler you can extend to
@@ -89,10 +90,7 @@ BYTES_PER_SAMPLE = 2
 CHANNEL_NUMS = 1
 
 # An example file can be found at tests/integration/assets/test.wav
-# NOTE: For pre-recorded files longer than 5 minutes, the sent audio
-# chunks should be rate limited to match the realtime bitrate of the
-# audio stream to avoid signing issues.
-AUDIO_PATH = "test.wav"
+AUDIO_PATH = "tests/integration/assets/test.wav"
 CHUNK_SIZE = 1024 * 8
 
 REGION = "us-west-2"
@@ -120,23 +118,14 @@ async def basic_transcribe():
     )
 
     async def write_chunks():
-        # An example file can be found at tests/integration/assets/test.wav
         # NOTE: For pre-recorded files longer than 5 minutes, the sent audio
         # chunks should be rate limited to match the realtime bitrate of the
         # audio stream to avoid signing issues.
-        start_time = time.time()
-        total_audio_sent = 0
-
         async with aiofile.AIOFile(AUDIO_PATH, "rb") as afp:
             reader = aiofile.Reader(afp, chunk_size=CHUNK_SIZE)
-            async for chunk in reader:
-                await stream.input_stream.send_audio_event(audio_chunk=chunk)
-                total_audio_sent += len(chunk) / (
-                    BYTES_PER_SAMPLE * SAMPLE_RATE * CHANNEL_NUMS
-                )
-                # sleep to simulate real-time streaming
-                wait_time = start_time + total_audio_sent - time.time()
-                await asyncio.sleep(wait_time)
+            await apply_realtime_delay(
+                stream, reader, BYTES_PER_SAMPLE, SAMPLE_RATE, CHANNEL_NUMS
+            )
         await stream.input_stream.end_stream()
 
     # Instantiate our handler and start processing events
