@@ -66,6 +66,7 @@ class TranscribeStreamingClient:
         self._credential_resolver = credential_resolver
         self._response_parser = TranscribeStreamingResponseParser()
         self._serializer = TranscribeStreamingSerializer()
+        self._session_manager = AwsCrtHttpSessionManager(self._eventloop)
 
     async def start_stream_transcription(
         self,
@@ -170,9 +171,7 @@ class TranscribeStreamingClient:
         signer = SigV4RequestSigner("transcribe", self.region)
         signed_request = signer.sign(request, creds)
 
-        session = AwsCrtHttpSessionManager(self._eventloop)
-
-        response = await session.make_request(
+        response = await self._session_manager.make_request(
             signed_request.uri,
             method=signed_request.method,
             headers=signed_request.headers.as_list(),
