@@ -141,6 +141,10 @@ class AwsCrtHttpSessionManager:
             tls_connection_options=tls_connection_options,
         )
         connection = await asyncio.wrap_future(connect_future)
+        if not connection.is_open():
+            raise HTTPException(
+                "Couldn't open a connection to %s" % parsed_url.hostname
+            )
         if connection.version is not http.HttpVersion.Http2:
             connection.close()
             raise HTTPException(
@@ -161,11 +165,15 @@ class AwsCrtHttpSessionManager:
             parsed_url.port,
         )
         if connection_key in self._connections:
-            return self._connections[connection_key]
-        else:
-            connection = await self._create_connection(parsed_url)
-            self._connections[connection_key] = connection
-            return connection
+            cached_connection = self._connections[connection_key]
+            if cached_connection.is_open():
+                return cached_connection
+            else:
+                del self._connections[connection_key]
+
+        connection = await self._create_connection(parsed_url)
+        self._connections[connection_key] = connection
+        return connection
 
     def _get_path(self, parsed_url: ParseResult) -> str:
         path = parsed_url.path
