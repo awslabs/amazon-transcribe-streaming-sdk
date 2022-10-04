@@ -1,6 +1,21 @@
 Changes
 =======
 
+0.6.1 (2022-10-04)
+------------------
+
+* The required version of awscrt has been upgraded to ~=0.14.0 (#82)
+
+* Added helper function ``apply_realtime_delay`` to simulate realtime audio
+  rate (#72)
+
+* Optimized event loop creation when creating multiple sessions (#81)
+
+* Validate connections are still open before reusing (#79)
+
+* Cache HTTPSessionManager across streams (#80)
+
+
 0.6.0 (2022-04-06)
 ------------------
 
