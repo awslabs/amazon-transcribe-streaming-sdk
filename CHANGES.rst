@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.6.2 (2023-06-14)
+------------------
+
+* The required version of awscrt has been upgraded to ~=0.16.0 (#93)
+
+
 0.6.1 (2022-10-04)
 ------------------
 
