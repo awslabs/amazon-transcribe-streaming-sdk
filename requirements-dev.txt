@@ -1,3 +1,5 @@
+black==22.3.0
+flake8==3.9.2
 mypy<1.0
 pytest<6.3
 pytest-asyncio<0.16.0
