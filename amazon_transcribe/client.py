@@ -84,6 +84,8 @@ class TranscribeStreamingClient:
         enable_partial_results_stabilization: Optional[bool] = None,
         partial_results_stability: Optional[str] = None,
         language_model_name: Optional[str] = None,
+        identify_multiple_languages=False,
+        language_options=None
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -100,7 +102,8 @@ class TranscribeStreamingClient:
         than 5 minutes.
 
         :param language_code:
-            Indicates the source language used in the input audio stream.
+            Indicates the source language used in the input audio stream. Set to
+            None if identify_multiple_languages is set to True
         :param media_sample_rate_hz:
             The sample rate, in Hertz, of the input audio. We suggest that you
             use 8000 Hz for low quality audio and 16000 Hz for high quality audio.
@@ -144,6 +147,15 @@ class TranscribeStreamingClient:
             overall transcription accuracy. Defaults to "high" if not set explicitly.
         :param language_model_name:
             The name of the language model you want to use.
+        :param identify_multiple_languages:
+            If true, all languages spoken in the stream are identified. A multilingual
+            transcripts is created your transcript using each identified language.
+            You must also provide at least two language_options and set
+            language_code to None
+        :param language_options:
+            A list of possible language to use when identify_multiple_languages is
+            set to True. Note that not all languages supported by Transcribe are
+            supported for multiple language identification
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -159,6 +171,8 @@ class TranscribeStreamingClient:
             enable_partial_results_stabilization,
             partial_results_stability,
             language_model_name,
+            identify_multiple_languages,
+            language_options
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
 

@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-from typing import Any, Dict, Tuple, Optional
+from typing import Any, Dict, Tuple, Optional, List
 
 from amazon_transcribe.request import Request
 from amazon_transcribe.structures import BufferableByteStream
@@ -55,6 +55,12 @@ class TranscribeStreamingSerializer:
         self, header: str, value: Optional[bool]
     ) -> Dict[str, str]:
         return self._serialize_header(header, value)
+
+    def _serialize_list_header(
+        self, header: str, value: List[str]
+    ) -> Dict[str, str]:
+        languages = ",".join(value)
+        return self._serialize_str_header(header, languages)
 
     def serialize_start_stream_transcription_request(
         self, endpoint: str, request_shape: StartStreamTranscriptionRequest
@@ -127,6 +133,20 @@ class TranscribeStreamingSerializer:
             self._serialize_str_header(
                 "language-model-name",
                 request_shape.language_model_name,
+            )
+        )
+
+        headers.update(
+            self._serialize_bool_header(
+                "identify-multiple-languages",
+                request_shape.identify_multiple_languages,
+            )
+        )
+
+        headers.update(
+            self._serialize_list_header(
+                "language-options",
+                request_shape.language_options,
             )
         )
 
