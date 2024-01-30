@@ -84,8 +84,10 @@ class TranscribeStreamingClient:
         enable_partial_results_stabilization: Optional[bool] = None,
         partial_results_stability: Optional[str] = None,
         language_model_name: Optional[str] = None,
+        identify_language: Optional[bool] = False,
+        preferred_language: Optional[str] = None,
         identify_multiple_languages=False,
-        language_options=None
+        language_options=None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -147,6 +149,13 @@ class TranscribeStreamingClient:
             overall transcription accuracy. Defaults to "high" if not set explicitly.
         :param language_model_name:
             The name of the language model you want to use.
+        :param identify_language:
+            if True, the language of the stream will be automatically detected. Set
+            language_code to None and provide at least two language_options when
+            identify_language is True.
+        :param preferred_language:
+            Adding a preferred language can speed up the language identification
+            process, which is helpful for short audio clips.
         :param identify_multiple_languages:
             If true, all languages spoken in the stream are identified. A multilingual
             transcripts is created your transcript using each identified language.
@@ -171,8 +180,10 @@ class TranscribeStreamingClient:
             enable_partial_results_stabilization,
             partial_results_stability,
             language_model_name,
+            identify_language,
+            preferred_language,
             identify_multiple_languages,
-            language_options
+            language_options,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
 

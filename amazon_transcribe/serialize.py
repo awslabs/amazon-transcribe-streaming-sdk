@@ -56,9 +56,7 @@ class TranscribeStreamingSerializer:
     ) -> Dict[str, str]:
         return self._serialize_header(header, value)
 
-    def _serialize_list_header(
-        self, header: str, value: List[str]
-    ) -> Dict[str, str]:
+    def _serialize_list_header(self, header: str, value: List[str]) -> Dict[str, str]:
         languages = ",".join(value)
         return self._serialize_str_header(header, languages)
 
@@ -138,17 +136,33 @@ class TranscribeStreamingSerializer:
 
         headers.update(
             self._serialize_bool_header(
-                "identify-multiple-languages",
-                request_shape.identify_multiple_languages,
+                "identify-language",
+                request_shape.identify_language,
             )
         )
 
         headers.update(
-            self._serialize_list_header(
-                "language-options",
-                request_shape.language_options,
+            self._serialize_str_header(
+                "preferred_language",
+                request_shape.preferred_language,
             )
         )
+
+        if request_shape.identify_multiple_languages:
+            headers.update(
+                self._serialize_bool_header(
+                    "identify-multiple-languages",
+                    request_shape.identify_multiple_languages,
+                )
+            )
+
+        if request_shape.language_options:
+            headers.update(
+                self._serialize_list_header(
+                    "language-options",
+                    request_shape.language_options,
+                )
+            )
 
         _add_required_headers(endpoint, headers)
 

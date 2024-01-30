@@ -28,11 +28,12 @@ def multi_lid_request():
         media_sample_rate_hz=9000,
         media_encoding="pcm",
         identify_multiple_languages=True,
-        language_options=["en-US", "de-DE"]
+        language_options=["en-US", "de-DE"],
     )
 
 
 request_serializer = TranscribeStreamingSerializer()
+
 
 class TestStartStreamTransactionRequest:
     def test_serialization(self, request_shape):
@@ -55,7 +56,6 @@ class TestStartStreamTransactionRequest:
                 request_shape=request_shape,
             )
 
-
     def test_serialization_with_multi_lid(self, multi_lid_request):
         request = request_serializer.serialize_start_stream_transcription_request(
             endpoint="https://transcribe.aws.com",
@@ -65,7 +65,9 @@ class TestStartStreamTransactionRequest:
         assert "x-amzn-transcribe-language-code" not in request.headers
         assert request.headers["x-amzn-transcribe-sample-rate"] == "9000"
         assert request.headers["x-amzn-transcribe-media-encoding"] == "pcm"
-        assert request.headers["x-amzn-transcribe-identify-multiple-languages"] == "True"
+        assert (
+            request.headers["x-amzn-transcribe-identify-multiple-languages"] == "True"
+        )
         assert request.headers["x-amzn-transcribe-language-options"] == "en-US,de-DE"
 
 

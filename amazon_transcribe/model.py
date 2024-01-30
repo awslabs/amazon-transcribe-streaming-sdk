@@ -230,7 +230,7 @@ class StartStreamTranscriptionRequest:
     :param identify_multiple_languages:
         If true, all languages spoken in the stream are identified. A multilingual
             transcripts is created your transcript using each identified language.
-            You must also provided at least two language_options and set
+            You must also provide at least two language_options and set
             language_code to None
     : param language_options:
         A list of possible language to use when identify_multiple_languages is
@@ -253,8 +253,10 @@ class StartStreamTranscriptionRequest:
         enable_partial_results_stabilization=None,
         partial_results_stability=None,
         language_model_name=None,
+        identify_language=None,
+        preferred_language=None,
         identify_multiple_languages=False,
-        language_options=None
+        language_options=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -274,6 +276,8 @@ class StartStreamTranscriptionRequest:
         ] = enable_partial_results_stabilization
         self.partial_results_stability: Optional[str] = partial_results_stability
         self.language_model_name: Optional[str] = language_model_name
+        self.identify_language: Optional[bool] = identify_language
+        self.preferred_language: Optional[str] = preferred_language
         self.identify_multiple_languages: Optional[bool] = identify_multiple_languages
         self.language_options: Optional[List[str]] = language_options or []
 
