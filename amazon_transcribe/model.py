@@ -171,7 +171,8 @@ class StartStreamTranscriptionRequest:
     """Transcription Request
 
     :param language_code:
-        Indicates the source language used in the input audio stream.
+        Indicates the source language used in the input audio stream. Set to
+        None if identify_multiple_languages is set to True
 
     :param media_sample_rate_hz:
         The sample rate, in Hertz, of the input audio. We suggest that you
@@ -226,6 +227,15 @@ class StartStreamTranscriptionRequest:
         overall transcription accuracy.
     :param language_model_name:
         The name of the language model you want to use.
+    :param identify_multiple_languages:
+        If true, all languages spoken in the stream are identified. A multilingual
+            transcripts is created your transcript using each identified language.
+            You must also provide at least two language_options and set
+            language_code to None
+    : param language_options:
+        A list of possible language to use when identify_multiple_languages is
+        set to True. Note that not all languages supported by Transcribe are
+        supported for multiple language identification
     """
 
     def __init__(
@@ -243,6 +253,10 @@ class StartStreamTranscriptionRequest:
         enable_partial_results_stabilization=None,
         partial_results_stability=None,
         language_model_name=None,
+        identify_language=None,
+        preferred_language=None,
+        identify_multiple_languages=False,
+        language_options=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -262,6 +276,10 @@ class StartStreamTranscriptionRequest:
         ] = enable_partial_results_stabilization
         self.partial_results_stability: Optional[str] = partial_results_stability
         self.language_model_name: Optional[str] = language_model_name
+        self.identify_language: Optional[bool] = identify_language
+        self.preferred_language: Optional[str] = preferred_language
+        self.identify_multiple_languages: Optional[bool] = identify_multiple_languages
+        self.language_options: Optional[List[str]] = language_options or []
 
 
 class StartStreamTranscriptionResponse:
