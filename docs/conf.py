@@ -72,4 +72,4 @@ pygments_style = 'sphinx'
 #html_static_path = ['_static']
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.7', None),}
+    'python': ('https://docs.python.org/3.11', None),}
