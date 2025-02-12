@@ -246,6 +246,7 @@ class StartStreamTranscriptionRequest:
         media_sample_rate_hz=None,
         media_encoding=None,
         vocabulary_name=None,
+        vocabulary_names=None,
         session_id=None,
         vocab_filter_method=None,
         vocab_filter_name=None,
@@ -265,6 +266,7 @@ class StartStreamTranscriptionRequest:
         self.media_sample_rate_hz: Optional[int] = media_sample_rate_hz
         self.media_encoding: Optional[str] = media_encoding
         self.vocabulary_name: Optional[str] = vocabulary_name
+        self.vocabulary_names: Optional[List[str]] = vocabulary_names
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method
         self.vocab_filter_name: Optional[str] = vocab_filter_name
@@ -344,6 +346,7 @@ class StartStreamTranscriptionResponse:
         media_sample_rate_hz=None,
         media_encoding=None,
         vocabulary_name=None,
+        vocabulary_names=None,
         session_id=None,
         vocab_filter_name=None,
         vocab_filter_method=None,
@@ -359,6 +362,7 @@ class StartStreamTranscriptionResponse:
         self.media_sample_rate_hz: Optional[int] = media_sample_rate_hz
         self.media_encoding: Optional[str] = media_encoding
         self.vocabulary_name: Optional[str] = vocabulary_name
+        self.vocabulary_names: Optional[List[str]] = vocabulary_names
         self.session_id: Optional[str] = session_id
         self.transcript_result_stream: TranscriptResultStream = transcript_result_stream
         self.vocab_filter_name: Optional[str] = vocab_filter_name

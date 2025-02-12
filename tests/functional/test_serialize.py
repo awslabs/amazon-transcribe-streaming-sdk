@@ -28,6 +28,7 @@ def multi_lid_request():
         media_sample_rate_hz=9000,
         media_encoding="pcm",
         identify_multiple_languages=True,
+        vocabulary_names=["EnglishVoc", "GermanVoc"],
         language_options=["en-US", "de-DE"],
     )
 
@@ -69,6 +70,7 @@ class TestStartStreamTransactionRequest:
             request.headers["x-amzn-transcribe-identify-multiple-languages"] == "True"
         )
         assert request.headers["x-amzn-transcribe-language-options"] == "en-US,de-DE"
+        assert request.headers["x-amzn-transcribe-vocabulary-names"] == "EnglishVoc,GermanVoc"
 
 
 class TestAudioEventSerializer:

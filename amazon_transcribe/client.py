@@ -75,6 +75,7 @@ class TranscribeStreamingClient:
         media_sample_rate_hz: int,
         media_encoding: str,
         vocabulary_name: Optional[str] = None,
+        vocabulary_names: Optional[List[str]] = None,
         session_id: Optional[str] = None,
         vocab_filter_method: Optional[str] = None,
         vocab_filter_name: Optional[str] = None,
@@ -113,6 +114,9 @@ class TranscribeStreamingClient:
             The encoding used for the input audio.
         :param vocabulary_name:
             The name of the vocabulary to use when processing the transcription job.
+        :param vocabulary_names:
+            When using language identification, the name of the vocabulary to
+            use for each language option.
         :param session_id:
             A identifier for the transcription session. Use this parameter when you
             want to retry a session. If you don't provide a session ID,
@@ -171,6 +175,7 @@ class TranscribeStreamingClient:
             media_sample_rate_hz,
             media_encoding,
             vocabulary_name,
+            vocabulary_names,
             session_id,
             vocab_filter_method,
             vocab_filter_name,

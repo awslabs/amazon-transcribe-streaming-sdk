@@ -69,6 +69,8 @@ class TestClientStreaming:
             for result in results:
                 for alt in result.alternatives:
                     last_transcript = alt.transcript
+                if "identify_multiple_languages" in request_args:
+                    assert result.language_code in request_args["language_options"]
         # Assert that we got some words back as the service may change its response
         assert len(last_transcript.split(" ")) != 0
 

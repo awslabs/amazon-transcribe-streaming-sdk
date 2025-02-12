@@ -82,6 +82,14 @@ class TranscribeStreamingSerializer:
         headers.update(
             self._serialize_str_header("vocabulary-name", request_shape.vocabulary_name)
         )
+
+        if request_shape.vocabulary_names:
+            headers.update(
+                self._serialize_list_header(
+                    "vocabulary-names",
+                    request_shape.vocabulary_names,
+                )
+            )
         headers.update(
             self._serialize_str_header("session-id", request_shape.session_id)
         )
