@@ -70,10 +70,8 @@ class TestStartStreamTransactionRequest:
             request.headers["x-amzn-transcribe-identify-multiple-languages"] == "True"
         )
         assert request.headers["x-amzn-transcribe-language-options"] == "en-US,de-DE"
-        assert (
-            request.headers["x-amzn-transcribe-vocabulary-names"]
-            == "EnglishVoc,GermanVoc"
-        )
+        cv_header = "x-amzn-transcribe-vocabulary-names"
+        assert request.headers[cv_header] == "EnglishVoc,GermanVoc"
 
 
 class TestAudioEventSerializer:
