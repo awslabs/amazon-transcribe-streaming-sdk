@@ -29,6 +29,7 @@ def multi_lid_request():
         media_encoding="pcm",
         identify_multiple_languages=True,
         vocabulary_names=["EnglishVoc", "GermanVoc"],
+        vocab_filter_names=["EVF", "GVF"],
         language_options=["en-US", "de-DE"],
     )
 
@@ -72,6 +73,7 @@ class TestStartStreamTransactionRequest:
         assert request.headers["x-amzn-transcribe-language-options"] == "en-US,de-DE"
         cv_header = "x-amzn-transcribe-vocabulary-names"
         assert request.headers[cv_header] == "EnglishVoc,GermanVoc"
+        assert request.headers["x-amzn-transcribe-vocabulary-filter-names"] == "EVF,GVF"
 
 
 class TestAudioEventSerializer:

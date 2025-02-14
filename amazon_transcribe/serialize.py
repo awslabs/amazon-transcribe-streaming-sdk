@@ -106,6 +106,19 @@ class TranscribeStreamingSerializer:
             )
         )
         headers.update(
+            self._serialize_list_header(
+                "vocabulary-filter-names",
+                request_shape.vocab_filter_names,
+            )
+        )
+        if request_shape.vocab_filter_names:
+            headers.update(
+                self._serialize_list_header(
+                    "vocabulary-filter-names",
+                    request_shape.vocab_filter_names,
+                )
+            )
+        headers.update(
             self._serialize_bool_header(
                 "show-speaker-label",
                 request_shape.show_speaker_label,

@@ -24,6 +24,7 @@ request_options = [
         "language_code": None,
         "identify_multiple_languages": True,
         "language_options": ["en-US", "de-DE"],
+        "vocab_filter_names": ["english", "german"],
     },
 ]
 

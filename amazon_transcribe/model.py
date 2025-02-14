@@ -234,7 +234,7 @@ class StartStreamTranscriptionRequest:
             transcripts is created your transcript using each identified language.
             You must also provide at least two language_options and set
             language_code to None
-    : param language_options:
+    :param language_options:
         A list of possible language to use when identify_multiple_languages is
         set to True. Note that not all languages supported by Transcribe are
         supported for multiple language identification
@@ -250,6 +250,7 @@ class StartStreamTranscriptionRequest:
         session_id=None,
         vocab_filter_method=None,
         vocab_filter_name=None,
+        vocab_filter_names=None,
         show_speaker_label=None,
         enable_channel_identification=None,
         number_of_channels=None,
@@ -270,6 +271,7 @@ class StartStreamTranscriptionRequest:
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method
         self.vocab_filter_name: Optional[str] = vocab_filter_name
+        self.vocab_filter_names: Optional[List[str]] = vocab_filter_names
         self.show_speaker_label: Optional[bool] = show_speaker_label
         self.enable_channel_identification: Optional[
             bool
