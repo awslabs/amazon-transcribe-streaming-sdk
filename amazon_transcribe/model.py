@@ -158,6 +158,7 @@ class Result:
         is_partial: Optional[bool] = None,
         alternatives: Optional[List[Alternative]] = None,
         channel_id: Optional[str] = None,
+        language_code: Optional[str] = None,
     ):
         self.result_id = result_id
         self.start_time = start_time
@@ -165,13 +166,15 @@ class Result:
         self.is_partial = is_partial
         self.alternatives = alternatives
         self.channel_id = channel_id
+        self.language_code = language_code
 
 
 class StartStreamTranscriptionRequest:
     """Transcription Request
 
     :param language_code:
-        Indicates the source language used in the input audio stream.
+        Indicates the source language used in the input audio stream. Set to
+        None if identify_multiple_languages is set to True
 
     :param media_sample_rate_hz:
         The sample rate, in Hertz, of the input audio. We suggest that you
@@ -226,6 +229,15 @@ class StartStreamTranscriptionRequest:
         overall transcription accuracy.
     :param language_model_name:
         The name of the language model you want to use.
+    :param identify_multiple_languages:
+        If true, all languages spoken in the stream are identified. A multilingual
+            transcripts is created your transcript using each identified language.
+            You must also provide at least two language_options and set
+            language_code to None
+    :param language_options:
+        A list of possible language to use when identify_multiple_languages is
+        set to True. Note that not all languages supported by Transcribe are
+        supported for multiple language identification
     """
 
     def __init__(
@@ -234,24 +246,32 @@ class StartStreamTranscriptionRequest:
         media_sample_rate_hz=None,
         media_encoding=None,
         vocabulary_name=None,
+        vocabulary_names=None,
         session_id=None,
         vocab_filter_method=None,
         vocab_filter_name=None,
+        vocab_filter_names=None,
         show_speaker_label=None,
         enable_channel_identification=None,
         number_of_channels=None,
         enable_partial_results_stabilization=None,
         partial_results_stability=None,
         language_model_name=None,
+        identify_language=None,
+        preferred_language=None,
+        identify_multiple_languages=False,
+        language_options=None,
     ):
 
         self.language_code: Optional[str] = language_code
         self.media_sample_rate_hz: Optional[int] = media_sample_rate_hz
         self.media_encoding: Optional[str] = media_encoding
         self.vocabulary_name: Optional[str] = vocabulary_name
+        self.vocabulary_names: Optional[List[str]] = vocabulary_names
         self.session_id: Optional[str] = session_id
         self.vocab_filter_method: Optional[str] = vocab_filter_method
         self.vocab_filter_name: Optional[str] = vocab_filter_name
+        self.vocab_filter_names: Optional[List[str]] = vocab_filter_names
         self.show_speaker_label: Optional[bool] = show_speaker_label
         self.enable_channel_identification: Optional[
             bool
@@ -262,6 +282,10 @@ class StartStreamTranscriptionRequest:
         ] = enable_partial_results_stabilization
         self.partial_results_stability: Optional[str] = partial_results_stability
         self.language_model_name: Optional[str] = language_model_name
+        self.identify_language: Optional[bool] = identify_language
+        self.preferred_language: Optional[str] = preferred_language
+        self.identify_multiple_languages: Optional[bool] = identify_multiple_languages
+        self.language_options: Optional[List[str]] = language_options or []
 
 
 class StartStreamTranscriptionResponse:
@@ -324,6 +348,7 @@ class StartStreamTranscriptionResponse:
         media_sample_rate_hz=None,
         media_encoding=None,
         vocabulary_name=None,
+        vocabulary_names=None,
         session_id=None,
         vocab_filter_name=None,
         vocab_filter_method=None,
@@ -339,6 +364,7 @@ class StartStreamTranscriptionResponse:
         self.media_sample_rate_hz: Optional[int] = media_sample_rate_hz
         self.media_encoding: Optional[str] = media_encoding
         self.vocabulary_name: Optional[str] = vocabulary_name
+        self.vocabulary_names: Optional[List[str]] = vocabulary_names
         self.session_id: Optional[str] = session_id
         self.transcript_result_stream: TranscriptResultStream = transcript_result_stream
         self.vocab_filter_name: Optional[str] = vocab_filter_name

@@ -187,6 +187,7 @@ class TranscribeStreamingEventParser:
             is_partial=current_node.get("IsPartial"),
             alternatives=alternatives,
             channel_id=current_node.get("ChannelId"),
+            language_code=current_node.get("LanguageCode"),
         )
 
     def _parse_alternative_list(self, current_node: Any) -> List[Alternative]:

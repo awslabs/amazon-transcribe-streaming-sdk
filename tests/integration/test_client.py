@@ -9,6 +9,25 @@ from amazon_transcribe.exceptions import (
 )
 from tests.integration import TEST_WAV_PATH
 
+request_options = [
+    # plain request with a known language
+    {"language_code": "en-US"},
+    # language identification
+    {
+        "language_code": None,
+        "identify_language": True,
+        "language_options": ["en-US", "de-DE"],
+        "preferred_language": "en-US",
+    },
+    # multiple language identification
+    {
+        "language_code": None,
+        "identify_multiple_languages": True,
+        "language_options": ["en-US", "de-DE"],
+        "vocab_filter_names": ["english", "german"],
+    },
+]
+
 
 class TestClientStreaming:
     @pytest.fixture
@@ -31,11 +50,12 @@ class TestClientStreaming:
         return byte_generator
 
     @pytest.mark.asyncio
-    async def test_client_start_transcribe_stream(self, client, wav_bytes):
+    @pytest.mark.parametrize("request_args", request_options)
+    async def test_client_start_transcribe_stream(
+        self, client, wav_bytes, request_args
+    ):
         stream = await client.start_stream_transcription(
-            language_code="en-US",
-            media_sample_rate_hz=16000,
-            media_encoding="pcm",
+            media_sample_rate_hz=16000, media_encoding="pcm", **request_args
         )
 
         async for chunk in wav_bytes():
@@ -50,6 +70,8 @@ class TestClientStreaming:
             for result in results:
                 for alt in result.alternatives:
                     last_transcript = alt.transcript
+                if "identify_multiple_languages" in request_args:
+                    assert result.language_code in request_args["language_options"]
         # Assert that we got some words back as the service may change its response
         assert len(last_transcript.split(" ")) != 0
 

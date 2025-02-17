@@ -14,7 +14,7 @@
 
 import re
 from binascii import unhexlify
-from typing import Optional
+from typing import Optional, List
 
 from amazon_transcribe import AWSCRTEventLoop
 from amazon_transcribe.auth import AwsCrtCredentialResolver, CredentialResolver
@@ -75,15 +75,21 @@ class TranscribeStreamingClient:
         media_sample_rate_hz: int,
         media_encoding: str,
         vocabulary_name: Optional[str] = None,
+        vocabulary_names: Optional[List[str]] = None,
         session_id: Optional[str] = None,
         vocab_filter_method: Optional[str] = None,
         vocab_filter_name: Optional[str] = None,
+        vocab_filter_names: Optional[List[str]] = None,
         show_speaker_label: Optional[bool] = None,
         enable_channel_identification: Optional[bool] = None,
         number_of_channels: Optional[int] = None,
         enable_partial_results_stabilization: Optional[bool] = None,
         partial_results_stability: Optional[str] = None,
         language_model_name: Optional[str] = None,
+        identify_language: Optional[bool] = None,
+        preferred_language: Optional[str] = None,
+        identify_multiple_languages: Optional[bool] = None,
+        language_options: Optional[List[str]] = None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -100,7 +106,8 @@ class TranscribeStreamingClient:
         than 5 minutes.
 
         :param language_code:
-            Indicates the source language used in the input audio stream.
+            Indicates the source language used in the input audio stream. Set to
+            None if identify_languages or identify_multiple_languages is set to True
         :param media_sample_rate_hz:
             The sample rate, in Hertz, of the input audio. We suggest that you
             use 8000 Hz for low quality audio and 16000 Hz for high quality audio.
@@ -108,6 +115,9 @@ class TranscribeStreamingClient:
             The encoding used for the input audio.
         :param vocabulary_name:
             The name of the vocabulary to use when processing the transcription job.
+        :param vocabulary_names:
+            When using language identification, the name of the vocabulary to
+            use for each language option.
         :param session_id:
             A identifier for the transcription session. Use this parameter when you
             want to retry a session. If you don't provide a session ID,
@@ -118,7 +128,11 @@ class TranscribeStreamingClient:
         :param vocab_filter_name:
             The name of the vocabulary filter you've created that is unique to
             your AWS account. Provide the name in this field to successfully
-            use it in a stream.
+            use it in a stream. Use only when identify_languages and
+            identify_multiple_languages are set to None
+        :param vocab_filter_names:
+            The name of the vocabulary filters to use for each language option. To be
+            used in conjunction with identify_languages and identify_multiple_languages
         :param show_speaker_label:
             When true, enables speaker identification in your real-time stream.
         :param enable_channel_identification:
@@ -144,21 +158,43 @@ class TranscribeStreamingClient:
             overall transcription accuracy. Defaults to "high" if not set explicitly.
         :param language_model_name:
             The name of the language model you want to use.
+        :param identify_language:
+            if True, the language of the stream will be automatically detected. Set
+            language_code to None and provide at least two language_options when
+            identify_language is True.
+        :param preferred_language:
+            Adding a preferred language can speed up the language identification
+            process, which is helpful for short audio clips.
+        :param identify_multiple_languages:
+            If true, all languages spoken in the stream are identified. A multilingual
+            transcripts is created your transcript using each identified language.
+            You must also provide at least two language_options and set
+            language_code to None
+        :param language_options:
+            A list of possible language to use when identify_language or
+            identify_multiple_languages is set to True. Note that not all languages
+             supported by Transcribe are supported for multiple language identification
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
             media_sample_rate_hz,
             media_encoding,
             vocabulary_name,
+            vocabulary_names,
             session_id,
             vocab_filter_method,
             vocab_filter_name,
+            vocab_filter_names,
             show_speaker_label,
             enable_channel_identification,
             number_of_channels,
             enable_partial_results_stabilization,
             partial_results_stability,
             language_model_name,
+            identify_language,
+            preferred_language,
+            identify_multiple_languages,
+            language_options,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
 
