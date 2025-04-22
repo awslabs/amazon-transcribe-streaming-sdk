@@ -34,7 +34,7 @@ class StaticEndpointResolver(BaseEndpointResolver):
 class _TranscribeRegionEndpointResolver(BaseEndpointResolver):
     async def resolve(self, region: str) -> str:
         """Apply region to transcribe uri template."""
-        if region.startswith('cn'):
+        if region.startswith("cn"):
             return f"https://transcribestreaming.{region}.amazonaws.com.cn"
         else:
             return f"https://transcribestreaming.{region}.amazonaws.com"
