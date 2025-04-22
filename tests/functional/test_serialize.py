@@ -34,6 +34,17 @@ def multi_lid_request():
     )
 
 
+@pytest.fixture
+def pii_request():
+    return StartStreamTranscriptionRequest(
+        language_code="en-US",
+        media_sample_rate_hz=9000,
+        media_encoding="pcm",
+        pii_entity_types=["ALL"],
+        content_redaction_type="PII",
+    )
+
+
 request_serializer = TranscribeStreamingSerializer()
 
 
@@ -74,6 +85,18 @@ class TestStartStreamTransactionRequest:
         cv_header = "x-amzn-transcribe-vocabulary-names"
         assert request.headers[cv_header] == "EnglishVoc,GermanVoc"
         assert request.headers["x-amzn-transcribe-vocabulary-filter-names"] == "EVF,GVF"
+
+    def test_serialization_with_pii(self, pii_request):
+        request = request_serializer.serialize_start_stream_transcription_request(
+            endpoint="https://transcribe.aws.com",
+            request_shape=pii_request,
+        ).prepare()
+
+        assert request.headers["x-amzn-transcribe-language-code"] == "en-US"
+        assert request.headers["x-amzn-transcribe-sample-rate"] == "9000"
+        assert request.headers["x-amzn-transcribe-media-encoding"] == "pcm"
+        assert request.headers["x-amzn-transcribe-content-redaction-type"] == "PII"
+        assert request.headers["x-amzn-transcribe-pii-entity-types"] == "ALL"
 
 
 class TestAudioEventSerializer:

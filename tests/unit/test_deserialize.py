@@ -77,6 +77,9 @@ def test_parse_start_stream_transcription_response_missing_fields(parser):
     assert parsed.enable_partial_results_stabilization is None
     assert parsed.partial_results_stability is None
     assert parsed.language_model_name is None
+    assert parsed.pii_entity_types is None
+    assert parsed.content_redaction_type is None
+    assert parsed.content_identification_type is None
 
 
 @pytest.mark.parametrize(
@@ -187,6 +190,16 @@ def test_parses_transcript_event(event_parser):
                                     "Stable": True,
                                 },
                             ],
+                            "Entities": [
+                                {
+                                    "Category": "PII",
+                                    "Confidence": 0.99,
+                                    "Content": "Steven",
+                                    "EndTime": 1.486,
+                                    "StartTime": 0.996,
+                                    "Type": "NAME",
+                                }
+                            ],
                             "Transcript": "Wanted Chief",
                         }
                     ],
@@ -225,6 +238,14 @@ def test_parses_transcript_event(event_parser):
     assert item_two.vocabulary_filter_match is False
     assert item_two.confidence == 0.9
     assert item_two.stable is True
+
+    entity_one = result.alternatives[0].entities[0]
+    assert entity_one.content == "Steven"
+    assert entity_one.category == "PII"
+    assert entity_one.confidence == 0.99
+    assert entity_one.start_time == 0.996
+    assert entity_one.end_time == 1.486
+    assert entity_one.entity_type == "NAME"
 
 
 def test_parses_known_exception(event_parser):

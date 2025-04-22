@@ -178,6 +178,27 @@ class TranscribeStreamingSerializer:
                     request_shape.language_options,
                 )
             )
+        if request_shape.pii_entity_types:
+            headers.update(
+                self._serialize_list_header(
+                    "pii-entity-types",
+                    request_shape.pii_entity_types,
+                )
+            )
+        if request_shape.content_identification_type:
+            headers.update(
+                self._serialize_str_header(
+                    "content-identification-type",
+                    request_shape.content_identification_type,
+                )
+            )
+        if request_shape.content_redaction_type:
+            headers.update(
+                self._serialize_str_header(
+                    "content-redaction-type",
+                    request_shape.content_redaction_type,
+                )
+            )
 
         _add_required_headers(endpoint, headers)
 
