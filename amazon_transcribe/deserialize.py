@@ -164,7 +164,7 @@ class TranscribeStreamingResponseParser:
             return ensure_boolean(value)
         return None
 
-    def _raw_value_to_list(self, value: Optional[str]) -> Optional[bool]:
+    def _raw_value_to_list(self, value: Optional[str]) -> Optional[List[str]]:
         if value is not None:
             return value.split(",")
         return None
