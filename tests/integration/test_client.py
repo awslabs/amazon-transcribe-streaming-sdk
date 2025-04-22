@@ -10,34 +10,34 @@ from amazon_transcribe.exceptions import (
 from tests.integration import TEST_WAV_PATH, TEST_WAV_PII_PATH
 
 request_options = [
-    # # plain request with a known language
-    # {"language_code": "en-US"},
-    # # language identification
-    # {
-    #     "language_code": None,
-    #     "identify_language": True,
-    #     "language_options": ["en-US", "de-DE"],
-    #     "preferred_language": "en-US",
-    # },
-    # # multiple language identification
-    # {
-    #     "language_code": None,
-    #     "identify_multiple_languages": True,
-    #     "language_options": ["en-US", "de-DE"],
-    #     "vocab_filter_names": ["english", "german"],
-    # },
-    # # PII identification
+    # plain request with a known language
+    {"language_code": "en-US"},
+    # language identification
+    {
+        "language_code": None,
+        "identify_language": True,
+        "language_options": ["en-US", "de-DE"],
+        "preferred_language": "en-US",
+    },
+    # multiple language identification
+    {
+        "language_code": None,
+        "identify_multiple_languages": True,
+        "language_options": ["en-US", "de-DE"],
+        "vocab_filter_names": ["english", "german"],
+    },
+    # PII identification
     {
         "language_code": "en-US",
         "pii_entity_types": ["NAME", "ADDRESS"],
         "content_identification_type": "PII",
     },
     # PII redaction
-    # {
-    #     "language_code": "en-US",
-    #     "pii_entity_types": ["ALL"], # - all is the default on the server side
-    #     "content_redaction_type": "PII"
-    # },
+    {
+        "language_code": "en-US",
+        "pii_entity_types": ["ALL"], # - all is the default on the server side
+        "content_redaction_type": "PII"
+    },
 ]
 
 
