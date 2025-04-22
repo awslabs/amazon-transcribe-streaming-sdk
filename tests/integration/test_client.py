@@ -35,8 +35,8 @@ request_options = [
     # PII redaction
     {
         "language_code": "en-US",
-        "pii_entity_types": ["ALL"], # - all is the default on the server side
-        "content_redaction_type": "PII"
+        "pii_entity_types": ["ALL"],
+        "content_redaction_type": "PII",
     },
 ]
 
@@ -75,6 +75,9 @@ class TestClientStreaming:
         await stream.input_stream.end_stream()
 
         last_transcript = ""
+        is_pii_identification = "content_identification_type" in request_args
+        is_pii_redaction = "content_redaction_type" in request_args
+        is_pii = is_pii_identification or is_pii_redaction
         entities = []
         async for event in stream.output_stream:
             if not isinstance(event, TranscriptEvent):
@@ -84,10 +87,7 @@ class TestClientStreaming:
                 for alt in result.alternatives:
                     print(alt.transcript)
                     last_transcript = alt.transcript
-                    if (
-                        "content_identification_type" in request_args
-                        and audio_path == TEST_WAV_PII_PATH
-                    ):
+                    if is_pii:
                         if alt.entities:
                             entities.append(alt.entities)
                     else:
@@ -96,13 +96,12 @@ class TestClientStreaming:
                     assert result.language_code in request_args["language_options"]
         # Assert that we got some words back as the service may change its response
         assert len(last_transcript.split(" ")) != 0
-        if "content_redaction_type" in request_args and audio_path == TEST_WAV_PII_PATH:
-            assert "[NAME]" in last_transcript
-        if (
-            "content_identification_type" in request_args
-            and audio_path == TEST_WAV_PII_PATH
-        ):
+        if is_pii and audio_path == TEST_WAV_PII_PATH:
             assert entities  # at least one entity was found
+            if is_pii_redaction:
+                assert "[NAME]" in last_transcript  # then entity is redacted
+            if is_pii_identification:
+                assert "Steven" in last_transcript  # then entity is NOT redacted
 
     @pytest.mark.asyncio
     async def test_client_start_transcribe_stream_bad_request(self, client):

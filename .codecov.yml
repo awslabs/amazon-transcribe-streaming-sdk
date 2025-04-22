@@ -1,6 +1,6 @@
 coverage:
     ignore:
-        - "tests/*"
+        - "tests/**"
     status:
         patch:
             default:
