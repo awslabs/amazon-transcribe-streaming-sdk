@@ -12,7 +12,7 @@
 # language governing permissions and limitations under the License.
 
 
-__version__ = "0.6.2"
+__version__ = "0.6.3"
 
 from awscrt.io import ClientBootstrap
 
