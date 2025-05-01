@@ -23,9 +23,10 @@ class Alternative:
     :param items: One or more alternative interpretations of the input audio.
     """
 
-    def __init__(self, transcript, items):
+    def __init__(self, transcript, items, entities):
         self.transcript: str = transcript
         self.items: List[Item] = items
+        self.entities: Optional[List[Entity]] = entities
 
 
 class AudioEvent(BaseEvent):
@@ -117,6 +118,42 @@ class Item:
         self.speaker = speaker
         self.confidence = confidence
         self.stable = stable
+
+
+class Entity:
+    def __init__(
+        self, start_time, end_time, category, content, confidence, entity_type
+    ):
+        """
+        A piece of personally identifiable information that was detected in the transcript,
+        eg a person's name, bank account number, etc. For a full list or entity types, see
+        https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction-stream.html
+
+        :param start_time:
+        The offset from the beginning of the audio stream to the beginning
+        of the audio that resulted in the item.
+
+        :param end_time:
+            The offset from the beginning of the audio stream to the end of
+            the audio that resulted in the item.
+
+        :param entity_type: The type of the entity, eg NAME, EMAIL, etc.
+
+        :param category: The category of the entity. Currently PII is the only possible value.
+
+        :param content:
+            The word or punctuation that was recognized in the input audio.
+
+        :param confidence:
+            A value between 0 and 1 for an item that is a confidence score that
+            Amazon Transcribe assigns to each word or phrase that it transcribes.
+        """
+        self.start_time = start_time
+        self.end_time = end_time
+        self.category = category
+        self.confidence = confidence
+        self.content = content
+        self.entity_type = entity_type
 
 
 class Result:
@@ -238,6 +275,19 @@ class StartStreamTranscriptionRequest:
         A list of possible language to use when identify_multiple_languages is
         set to True. Note that not all languages supported by Transcribe are
         supported for multiple language identification
+    :param pii_entity_types: what entity types to identify or redact when using either
+        content_redaction_type or content_identification_type. This includes names, bank
+        account details, etc. See https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction-stream.html
+        for a full list. When this is not explicitly set, the default is "ALL"
+    :param content_redaction_type: What kinds of content to redact. Currently, the
+        only supported value is "PII". When set, personally identifiable information
+        in the transcript will be redacted and replaced by "[PII]". This cannot be
+        set together with content_identification_type
+    :param content_identification_type: What kinds of content to identify. Currently, the
+        only supported value is "PII". When set, personally identifiable information
+        in the transcript will be detected and an additional "entities" field will be
+        returned in the transcript object. This cannot be set together with
+        content_redaction_type
     """
 
     def __init__(
@@ -261,6 +311,9 @@ class StartStreamTranscriptionRequest:
         preferred_language=None,
         identify_multiple_languages=False,
         language_options=None,
+        pii_entity_types=None,
+        content_redaction_type=None,
+        content_identification_type=None,
     ):
 
         self.language_code: Optional[str] = language_code
@@ -286,6 +339,9 @@ class StartStreamTranscriptionRequest:
         self.preferred_language: Optional[str] = preferred_language
         self.identify_multiple_languages: Optional[bool] = identify_multiple_languages
         self.language_options: Optional[List[str]] = language_options or []
+        self.pii_entity_types = pii_entity_types
+        self.content_redaction_type = content_redaction_type
+        self.content_identification_type = content_identification_type
 
 
 class StartStreamTranscriptionResponse:
@@ -338,6 +394,22 @@ class StartStreamTranscriptionResponse:
 
     :param language_model_name:
         The name of the custom language model used in the transcription.
+
+    :param pii_entity_types: what entity types to identify or redact when using either
+        content_redaction_type or content_identification_type. This includes names, bank
+        account details, etc. See https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction-stream.html
+        for a full list. When this is not explicitly set, the default is "ALL"
+
+    :param content_redaction_type: What kinds of content to redact. Currently, the
+        only supported value is "PII". When set, personally identifiable information
+        in the transcript will be redacted and replaced by "[PII]". This cannot be
+        set together with content_identification_type
+
+    :param content_identification_type: What kinds of content to identify. Currently, the
+        only supported value is "PII". When set, personally identifiable information
+        in the transcript will be detected and an additional "entities" field will be
+        returned in the transcript object. This cannot be set together with
+        content_redaction_type
     """
 
     def __init__(
@@ -358,6 +430,9 @@ class StartStreamTranscriptionResponse:
         enable_partial_results_stabilization=None,
         partial_results_stability=None,
         language_model_name=None,
+        pii_entity_types=None,
+        content_redaction_type=None,
+        content_identification_type=None,
     ):
         self.request_id: Optional[str] = request_id
         self.language_code: Optional[str] = language_code
@@ -379,6 +454,9 @@ class StartStreamTranscriptionResponse:
         ] = enable_partial_results_stabilization
         self.partial_results_stability: Optional[str] = partial_results_stability
         self.language_model_name: Optional[str] = language_model_name
+        self.pii_entity_types = pii_entity_types
+        self.content_redaction_type = content_redaction_type
+        self.content_identification_type = content_identification_type
 
 
 class Transcript:

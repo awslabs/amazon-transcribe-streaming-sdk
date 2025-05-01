@@ -90,6 +90,9 @@ class TranscribeStreamingClient:
         preferred_language: Optional[str] = None,
         identify_multiple_languages: Optional[bool] = None,
         language_options: Optional[List[str]] = None,
+        pii_entity_types=None,
+        content_redaction_type=None,
+        content_identification_type=None,
     ) -> StartStreamTranscriptionEventStream:
         """Coordinate transcription settings and start stream.
 
@@ -174,6 +177,19 @@ class TranscribeStreamingClient:
             A list of possible language to use when identify_language or
             identify_multiple_languages is set to True. Note that not all languages
              supported by Transcribe are supported for multiple language identification
+        :param pii_entity_types: what entity types to identify or redact when using either
+        content_redaction_type or content_identification_type. This includes names, bank
+        account details, etc. See https://docs.aws.amazon.com/transcribe/latest/dg/pii-redaction-stream.html
+        for a full list. When this is not explicitly set, the default is "ALL"
+        :param content_redaction_type: What kinds of content to redact. Currently, the
+            only supported value is "PII". When set, personally identifiable information
+            in the transcript will be redacted and replaced by "[PII]". This cannot be
+            set together with content_identification_type
+        :param content_identification_type: What kinds of content to identify. Currently, the
+            only supported value is "PII". When set, personally identifiable information
+            in the transcript will be detected and an additional "entities" field will be
+            returned in the transcript object. This cannot be set together with
+            content_redaction_type
         """
         transcribe_streaming_request = StartStreamTranscriptionRequest(
             language_code,
@@ -195,6 +211,9 @@ class TranscribeStreamingClient:
             preferred_language,
             identify_multiple_languages,
             language_options,
+            pii_entity_types,
+            content_redaction_type,
+            content_identification_type,
         )
         endpoint = await self._endpoint_resolver.resolve(self.region)
 

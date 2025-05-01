@@ -23,6 +23,7 @@ from amazon_transcribe.model import (
     Result,
     Alternative,
     Item,
+    Entity,
 )
 from amazon_transcribe.response import Response
 from amazon_transcribe.exceptions import (
@@ -119,6 +120,13 @@ class TranscribeStreamingResponseParser:
             "x-amzn-transcribe-partial-results-stability"
         )
         language_model_name = headers.get("x-amzn-transcribe-language-model-name")
+        content_redaction_type = headers.get("x-amzn-transcribe-content-redaction-type")
+        content_identification_type = headers.get(
+            "x-amzn-transcribe-content-identification-type"
+        )
+        pii_entity_types = self._raw_value_to_list(
+            headers.get("x-amzn-transcribe-pii-entity-types")
+        )
 
         transcript_result_stream = TranscriptResultStream(
             body_stream, TranscribeStreamingEventParser()
@@ -140,6 +148,9 @@ class TranscribeStreamingResponseParser:
             enable_partial_results_stabilization=enable_partial_results_stabilization,
             partial_results_stability=partial_results_stability,
             language_model_name=language_model_name,
+            pii_entity_types=pii_entity_types,
+            content_redaction_type=content_redaction_type,
+            content_identification_type=content_identification_type,
         )
         return parsed_response
 
@@ -151,6 +162,11 @@ class TranscribeStreamingResponseParser:
     def _raw_value_to_bool(self, value: Optional[str]) -> Optional[bool]:
         if value is not None:
             return ensure_boolean(value)
+        return None
+
+    def _raw_value_to_list(self, value: Optional[str]) -> Optional[List[str]]:
+        if value is not None:
+            return value.split(",")
         return None
 
 
@@ -194,13 +210,18 @@ class TranscribeStreamingEventParser:
         return [self._parse_alternative(e) for e in current_node]
 
     def _parse_alternative(self, current_node: Any) -> Alternative:
+        entities = current_node.get("Entities")
         return Alternative(
             transcript=current_node.get("Transcript"),
             items=self._parse_item_list(current_node.get("Items")),
+            entities=self._parse_entity_list(entities) if entities else None,
         )
 
     def _parse_item_list(self, current_node: Any) -> List[Item]:
         return [self._parse_item(e) for e in current_node]
+
+    def _parse_entity_list(self, current_node: Any) -> List[Entity]:
+        return [self._parse_entity(e) for e in current_node]
 
     def _parse_item(self, current_node: Any) -> Item:
         return Item(
@@ -212,6 +233,16 @@ class TranscribeStreamingEventParser:
             speaker=current_node.get("Speaker"),
             confidence=current_node.get("Confidence"),
             stable=current_node.get("Stable"),
+        )
+
+    def _parse_entity(self, current_node: Any) -> Entity:
+        return Entity(
+            start_time=current_node.get("StartTime"),
+            end_time=current_node.get("EndTime"),
+            category=current_node.get("Category"),
+            content=current_node.get("Content"),
+            confidence=current_node.get("Confidence"),
+            entity_type=current_node.get("Type"),
         )
 
     def _parse_event_exception(self, raw_event) -> ServiceException:
