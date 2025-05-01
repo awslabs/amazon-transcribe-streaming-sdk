@@ -1,6 +1,16 @@
 Changes
 =======
 
+
+0.6.3 (2025-04-24)
+------------------
+
+* The required version of awscrt has been upgraded to ~=0.26.1 (#114)
+* Support for language identification and multiple language identification (#99)
+* Fix endpoint address for cn-north-1 and cn-northwest-1 (#96)
+* Remove support for Python 3.7
+
+
 0.6.2 (2023-06-14)
 ------------------
 
