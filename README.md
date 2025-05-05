@@ -12,7 +12,7 @@ amazon-transcribe at the latest version when installed in the same environment.
 
 > [!NOTE]  
 > This project was launched as a proof of concept and is no longer actively developed. It is not
-> an official AWS product and is provided as-is, without a support commitment. This package can, 
+> an official AWS product and is provided as-is, without a support commitment. This package can,
 > in rare cases, suffer from high CPU issues (#109, #84).
 
 ## Installation
