@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.6.4 (2025-05-05)
+------------------
+
+* Support for PII detection and redaction (#113)
+* Update dev dependencies
+
 
 0.6.3 (2025-04-24)
 ------------------
