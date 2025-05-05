@@ -5,12 +5,15 @@ the Amazon Transcribe Streaming service and their Python programs. The goal of
 the project is to enable users to integrate directly with Amazon Transcribe
 without needing anything more than a stream of audio bytes and a basic handler.
 
-This project is still in early alpha so the interface is still subject to change
-and may see rapid iteration. It's highly advised to pin to strict dependencies
+It's highly advised to pin to strict dependencies
 if using this outside of local testing. Please note awscrt is a dependency shared
 with botocore (the core module of AWS CLI and boto3). You may need to keep
 amazon-transcribe at the latest version when installed in the same environment.
 
+> [!NOTE]
+> This project was launched as a proof of concept and is no longer actively developed. It is not
+> an official AWS product and is provided as-is, without a support commitment. This package can,
+> in rare cases, suffer from high CPU issues (#109, #84).
 
 ## Installation
 
