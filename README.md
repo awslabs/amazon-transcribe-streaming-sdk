@@ -10,7 +10,7 @@ if using this outside of local testing. Please note awscrt is a dependency share
 with botocore (the core module of AWS CLI and boto3). You may need to keep
 amazon-transcribe at the latest version when installed in the same environment.
 
-> [!NOTE]  
+> [!NOTE]
 > This project was launched as a proof of concept and is no longer actively developed. It is not
 > an official AWS product and is provided as-is, without a support commitment. This package can,
 > in rare cases, suffer from high CPU issues (#109, #84).
