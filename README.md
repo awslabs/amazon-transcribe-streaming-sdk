@@ -1,5 +1,11 @@
 ## Amazon Transcribe Streaming SDK
 
+> [!IMPORTANT]
+> **This SDK is deprecated.** Please use the new official SDK instead:
+> **[aws-sdk-transcribe-streaming](https://github.com/awslabs/aws-sdk-python/tree/develop/clients/aws-sdk-transcribe-streaming)**
+>
+> This experimental SDK is being replaced and is no longer recommended for new projects.
+
 The Amazon Transcribe Streaming SDK allows users to directly interface with
 the Amazon Transcribe Streaming service and their Python programs. The goal of
 the project is to enable users to integrate directly with Amazon Transcribe
