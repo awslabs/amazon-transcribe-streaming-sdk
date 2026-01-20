@@ -25,7 +25,7 @@ class TranscriptResultStreamHandler:
         """
         async for event in self._transcript_result_stream:
             if isinstance(event, TranscriptEvent):
-                await self.handle_transcript_event(event)
+                return await self.handle_transcript_event(event)
 
     async def handle_transcript_event(self, transcript_event: TranscriptEvent):
         """Specific handling for TranscriptionEvent responses from Amazon Transcribe.
