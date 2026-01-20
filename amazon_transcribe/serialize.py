@@ -54,7 +54,10 @@ class TranscribeStreamingSerializer:
     def _serialize_bool_header(
         self, header: str, value: Optional[bool]
     ) -> Dict[str, str]:
-        return self._serialize_header(header, value)
+        if value:
+            return self._serialize_header(header, 'true')
+        else:
+            return self._serialize_header(header, 'false')
 
     def _serialize_list_header(self, header: str, value: List[str]) -> Dict[str, str]:
         languages = ",".join(value)
